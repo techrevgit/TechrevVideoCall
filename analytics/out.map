@@ -1,0 +1,13 @@
+# compiler: R8
+# compiler_version: 3.0.73
+# pg_map_id: 7ca374c
+# common_typos_disable
+com.techrev.analytics.Analytics -> com.techrev.analytics.Analytics:
+# {"id":"sourceFile","fileName":"Analytics.kt"}
+    1:1:void <init>():3:3 -> <init>
+com.techrev.analytics.Analytics$Companion -> com.techrev.analytics.Analytics$Companion:
+# {"id":"sourceFile","fileName":"Analytics.kt"}
+    1:1:void <init>():5:5 -> <init>
+    1:2:java.lang.String authenticateUser(java.lang.String):7:8 -> authenticateUser
+com.techrev.analytics.BuildConfig -> com.techrev.analytics.BuildConfig:
+    1:1:void <init>():6:6 -> <init>
