@@ -1,6 +1,8 @@
 package com.techrev.analytics;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
 public class TechrevVideoCallManager {
@@ -9,8 +11,8 @@ public class TechrevVideoCallManager {
                                      String passcode, int memberType, String userMeetingIdentifier, String maxImageCaptureLimit,
                                      String requestID, int isRecordingEnabled, String endDate, String startDate, String duration,
                                      String userId, boolean isCoSigner, String userDetails, String requestParticipantId, String clientId) {
-        Toast.makeText(context, "You are now connected to room successfully!", Toast.LENGTH_SHORT).show();
-        /*Intent intent = new Intent(context, MainActivity.class);
+        //Toast.makeText(context, "You are now connected to room successfully!", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(context, MainActivity.class);
         Log.d("===Args","baseURL:"+baseURL);
         Log.d("===Args","token:"+token);
         Log.d("===Args","roomName:"+roomName);
@@ -53,7 +55,7 @@ public class TechrevVideoCallManager {
         intent.putExtra("USER_DETAILS",userDetails);
         intent.putExtra("REQUEST_PARTICIPANT_ID",requestParticipantId);
 
-        context.startActivity(intent);*/
+        context.startActivity(intent);
     }
 
 }
