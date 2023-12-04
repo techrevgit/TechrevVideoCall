@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.techrev.analytics">
 
     <supports-screens
@@ -117,7 +118,8 @@
             android:name="APictureCapturingService"
             android:enabled="true"
             android:exported="true"
-            tools:targetApi="q" />
+            tools:targetApi="q"
+            tools:ignore="Instantiatable" />
         <activity
             android:name=".CameraActivity"
             android:exported="false"
