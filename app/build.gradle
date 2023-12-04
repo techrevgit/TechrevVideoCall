@@ -40,4 +40,59 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation fileTree(dir: 'libs', include: '*.jar, *.aar')
+    //implementation "androidx.appcompat:appcompat:${cordovaConfig.ANDROIDX_APP_COMPAT_VERSION}"
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10"
+    // SUB-PROJECT DEPENDENCIES START
+    implementation "androidx.core:core:1.6.+"
+    implementation "androidx.appcompat:appcompat:1.0.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.20"
+    implementation "org.greenrobot:eventbus:3.2.0"
+    implementation "com.google.code.gson:gson:2.8.6"
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    implementation "com.squareup.retrofit2:converter-scalars:2.9.0"
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
+    implementation "androidx.cardview:cardview:1.0.0"
+    implementation "com.github.bumptech.glide:glide:4.11.0"
+    implementation "com.github.bumptech.glide:compiler:4.11.0"
+    implementation "com.google.android.gms:play-services-location:17.0.0"
+    implementation "com.withpersona.sdk2:inquiry:2.2.27"
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.2'
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.1"
+    implementation "com.getkeepsafe.relinker:relinker:1.4.3"
+    implementation "com.twilio:audioswitch:1.1.2"
+    implementation "com.twilio:video-android:5.14.0"
+    implementation "com.google.android.material:material:1.1.0"
+    implementation "com.github.barteksc:android-pdf-viewer:2.8.2"
+    implementation "com.crowdfire.cfalertdialog:cfalertdialog:1.1.0"
+    implementation "androidx.appcompat:appcompat:1.3.1"
+    // To preview pdf
+    implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
+    // SUB-PROJECT DEPENDENCIES END
+    /*To import the sqlite jar files from local library*/ // Added By Rupesh
+    implementation files('libs/sqlite-connector.jar')
+    implementation files('libs/sqlite-native-driver.jar')
+    /*To import the sqlite jar files from local library*/ // Added By Rupesh
+    /*To import the whiteboard module to the app*/ // Added by Rupesh
+    implementation files('libs/drawingboard.aar')
+    /*To import the whiteboard module to the app*/ // Added by Rupesh
+    /*Added by Rupesh*/ // To use custom dialog in app
+    //implementation 'io.github.tutorialsandroid:kalertdialog:20.3.6'
+    //implementation 'com.github.TutorialsAndroid:progressx:v6.0.19' //required for kalertdialog lib
+    /*Added by Rupesh*/ // To use custom dialog in app
+
 }
+
+/*
+repositories {
+    google()
+    jcenter()
+    maven {
+        url 'https://sdk.withpersona.com/android/releases'
+    }
+}*/

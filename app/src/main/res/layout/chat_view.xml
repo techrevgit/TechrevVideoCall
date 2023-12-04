@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="5dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    >
+
+    <LinearLayout
+        android:id="@+id/chat_from"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/white_background"
+        android:elevation="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="10dp"
+        android:layout_alignParentLeft="true"
+        android:visibility="visible"
+        >
+
+        <TextView
+            android:id="@+id/chat_from_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:textColor="#000000"
+            android:padding="10dp"
+            android:textSize="14sp"
+            android:text=""
+            android:visibility="visible"
+            />
+
+        <LinearLayout
+            android:id="@+id/chat_from_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:elevation="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="5dp"
+            android:paddingRight="10dp"
+            android:layout_alignParentLeft="true"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/file_download"
+                android:layout_gravity="center_vertical"
+                />
+
+            <TextView
+                android:id="@+id/file_from_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:textColor="#000000"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:maxLength="20"
+                android:layout_gravity="center_vertical"
+                />
+
+            <ImageView
+                android:id="@+id/file_from_download"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/download"
+                android:layout_gravity="center_vertical"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/chat_from_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="11sp"
+            android:maxLines="1"
+            />
+
+        <TextView
+            android:id="@+id/chat_from_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="10sp"
+            android:layout_marginBottom="10dp"
+            android:maxLines="1"
+            />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/chat_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@layout/sky_background"
+        android:elevation="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="5dp"
+        android:layout_alignParentRight="true"
+        android:visibility="visible"
+        android:gravity="right"
+        >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/chat_to_text"
+            >
+
+            <TextView
+                android:id="@+id/chat_to_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:textColor="#000000"
+                android:padding="10dp"
+                android:textSize="14sp"
+                android:gravity="end"
+                android:visibility="visible"
+                />
+
+            <LinearLayout
+                android:id="@+id/chat_to_file"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:elevation="10dp"
+                android:paddingTop="5dp"
+                android:paddingRight="5dp"
+                android:layout_alignParentRight="true"
+                android:visibility="gone"
+                >
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/file"
+                    android:layout_gravity="center_vertical"
+                    />
+
+                <TextView
+                    android:id="@+id/file_to_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif"
+                    android:textColor="#000000"
+                    android:padding="10dp"
+                    android:textSize="14sp"
+                    android:maxLength="20"
+                    android:layout_gravity="center_vertical"
+                    />
+
+                <ImageView
+                    android:id="@+id/file_to_download"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/download"
+                    android:layout_gravity="center_vertical"
+                    />
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/chat_option"
+                android:layout_width="12dp"
+                android:layout_height="20dp"
+                android:src="@drawable/menu"
+                android:layout_gravity="center_vertical"
+                android:paddingTop="3dp"
+                />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/chat_to_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="5dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="11sp"
+            android:gravity="end"
+            android:maxLines="1"
+            />
+
+        <TextView
+            android:id="@+id/chat_to_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="5dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="10sp"
+            android:layout_marginBottom="10dp"
+            android:gravity="end"
+            android:maxLines="1"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    >
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/custom_toolbar" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/chat_list_view"
+        android:layout_below="@id/toolbar"
+        android:scrollbars="none"
+        android:divider="#ffffff"
+        android:dividerHeight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="60dp"
+        />
+
+    <TextView
+        android:id="@+id/no_data"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No history found"
+        android:fontFamily="sans-serif"
+        android:textSize="15sp"
+        android:layout_centerInParent="true"
+        />
+
+    <LinearLayout
+        android:id="@+id/compose_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:paddingTop="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        >
+
+        <ImageButton
+            android:id="@+id/attachment_action_fab"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:src="@drawable/attachment"
+            android:layout_margin="3dp"
+            android:scaleType="fitXY"
+            android:background="@null"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"
+            />
+
+        <EditText
+            android:id="@+id/message"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Type message"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:background="@drawable/white_background"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            />
+
+        <ImageButton
+            android:id="@+id/send_action_fab"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/send"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="5dp"
+            android:scaleType="fitXY"
+            android:background="@null"
+            android:layout_gravity="center_vertical"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>
