@@ -4,13 +4,15 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
+        // This is added for maven to access the private repository
         maven {
-            url 'https://sdk.withpersona.com/android/releases'
+            url "https://jitpack.io"
             credentials {
                 username = "techrevgit"
                 password = "Techrev@2023"
             }
         }
+        maven { url 'https://sdk.withpersona.com/android/releases' }
     }
 }
 rootProject.name = "TechRevAnalytics"
