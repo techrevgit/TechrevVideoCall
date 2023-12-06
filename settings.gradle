@@ -6,6 +6,10 @@ dependencyResolutionManagement {
         jcenter() // Warning: this repository is going to shut down soon
         maven {
             url 'https://sdk.withpersona.com/android/releases'
+            credentials {
+                username = "techrevgit"
+                password = "Techrev@2023"
+            }
         }
     }
 }
