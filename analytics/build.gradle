@@ -49,8 +49,8 @@ afterEvaluate {
             release (MavenPublication){
                 from components.release
 
-                groupId = 'com.github.rupeshjena'
-                artifactId = 'techrev-analytics'
+                groupId = 'com.github.techrevgit'
+                artifactId = 'techrev-videocall'
                 version = '1.0.0'
 
             }
