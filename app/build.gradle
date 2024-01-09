@@ -37,11 +37,12 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation project(':analytics')
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
-    implementation fileTree(dir: 'libs', include: '*.jar, *.aar')
+    /*implementation fileTree(dir: 'libs', include: '*.jar, *.aar')
     //implementation "androidx.appcompat:appcompat:${cordovaConfig.ANDROIDX_APP_COMPAT_VERSION}"
     //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10"
     // SUB-PROJECT DEPENDENCIES START
@@ -74,16 +75,16 @@ dependencies {
     // To preview pdf
     implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
     // SUB-PROJECT DEPENDENCIES END
-    /*To import the sqlite jar files from local library*/ // Added By Rupesh
+    *//*To import the sqlite jar files from local library*//* // Added By Rupesh
     implementation files('libs/sqlite-connector.jar')
     implementation files('libs/sqlite-native-driver.jar')
-    /*To import the sqlite jar files from local library*/ // Added By Rupesh
-    /*To import the whiteboard module to the app*/ // Added by Rupesh
+    *//*To import the sqlite jar files from local library*//* // Added By Rupesh
+    *//*To import the whiteboard module to the app*//* // Added by Rupesh
     implementation files('libs/drawingboard.aar')
-    /*To import the whiteboard module to the app*/ // Added by Rupesh
-    /*Added by Rupesh*/ // To use custom dialog in app
+    *//*To import the whiteboard module to the app*//* // Added by Rupesh
+    *//*Added by Rupesh*//* // To use custom dialog in app
     //implementation 'io.github.tutorialsandroid:kalertdialog:20.3.6'
     //implementation 'com.github.TutorialsAndroid:progressx:v6.0.19' //required for kalertdialog lib
-    /*Added by Rupesh*/ // To use custom dialog in app
+    *//*Added by Rupesh*//* // To use custom dialog in app*/
 
 }

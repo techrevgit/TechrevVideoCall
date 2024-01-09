@@ -3,65 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.techrev.analytics">
 
-    <supports-screens
-        android:anyDensity="true"
-        android:largeScreens="true"
-        android:normalScreens="true"
-        android:resizeable="true"
-        android:smallScreens="true"
-        android:xlargeScreens="true" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <queries>
-        <intent>
-            <action android:name="android.media.action.IMAGE_CAPTURE" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.GET_CONTENT" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.PICK" />
-        </intent>
-        <intent>
-            <action android:name="com.android.camera.action.CROP" />
-
-            <data
-                android:mimeType="image/*"
-                android:scheme="content" />
-        </intent>
-    </queries>
-
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
-    <uses-feature
-        android:name="android.hardware.location.gps"
-        android:required="true" />
-
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="true" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
-
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <!--<uses-permission android:name="android.permission.BLUETOOTH"
-                     android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
-                     android:maxSdkVersion="30" />-->
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -69,120 +10,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TechRevAnalytics">
-        <!--<activity
+        <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>-->
-
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
-
-        <activity
-            android:name=".PermissionActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="PermissionActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".VideoActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="VideoActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".NoInternetActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="NoInternetActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".AddCoSignerActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="AddCoSignerActivity"
-            android:screenOrientation="portrait" />
-
-        <service xmlns:tools="http://schemas.android.com/tools"
-            android:name="ScreenCapturerService"
-            android:enabled="true"
-            android:foregroundServiceType="mediaProjection"
-            tools:targetApi="q" />
-        <service xmlns:tools="http://schemas.android.com/tools"
-            android:name="VideoCallService"
-            android:enabled="true"
-            android:exported="true"
-            tools:targetApi="q" />
-        <service xmlns:tools="http://schemas.android.com/tools"
-            android:name="APictureCapturingService"
-            android:enabled="true"
-            android:exported="true"
-            tools:targetApi="q"
-            tools:ignore="Instantiatable" />
-        <activity
-            android:name=".CameraActivity"
-            android:exported="false"
-            />
-        <activity
-            android:name=".WhiteBoardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PreviewRequestDocumentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MyCurrentUploadedDocumentsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MyAllUploadedDocumentsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".IDVerificationActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
-            android:exported="true"
-            android:label="@string/activity_name"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter android:label="@string/launcher_name">
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/camera_provider_paths" />
-        </provider>
-        <!--<provider
-                android:name="androidx.core.content.FileProvider"
-                android:authorities="${applicationId}.provider"
-                android:exported="false"
-                android:grantUriPermissions="true">
-            <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/documentviewer_file_paths" />
-        </provider>
-        <provider
-                android:name="androidx.core.content.FileProvider"
-                android:authorities="com.example.captureimage.fileprovider"
-                android:exported="false"
-                android:grantUriPermissions="true">
-            <meta-data
-                    android:name="android.support.FILE_PROVIDER_PATHS"
-                    android:resource="@xml/file_paths" />
-        </provider>-->
-
     </application>
 
 </manifest>
