@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import com.github.barteksc.pdfviewer.PDFView;
 
 
 import java.io.BufferedInputStream;
@@ -25,7 +24,7 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
 
     private static final String TAG = "PreviewRequestDocument";
     private ImageView iv_back;
-    private PDFView pdf_viewer;
+    //private PDFView pdf_viewer;
     private String docID;
     public static String BASE_URL_VAL = "https://apias.digitalnotarize.com/api/";
     private String pdfurl = BASE_URL_VAL + "downloadDewFile?DocId=";
@@ -47,7 +46,7 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
                 finish();
             }
         });
-        pdf_viewer = findViewById(R.id.idPDFView);
+        //pdf_viewer = findViewById(R.id.idPDFView);
         if (getIntent() != null) {
             docID = getIntent().getStringExtra("DOC_ID");
             pdfurl = pdfurl+docID;
@@ -88,7 +87,7 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
         protected void onPostExecute(InputStream inputStream) {
             // after the execution of our async
             // task we are loading our pdf in our pdf view.
-            pdf_viewer.fromStream(inputStream).load();
+            //pdf_viewer.fromStream(inputStream).load();
         }
     }
 
