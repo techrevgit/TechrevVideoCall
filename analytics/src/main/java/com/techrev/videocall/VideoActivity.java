@@ -94,7 +94,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
-import com.crowdfire.cfalertdialog.CFAlertDialog;
 
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -4861,7 +4860,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void showDocumentAccessDialog(String title, String message){
-        CFAlertDialog.Builder builder = new CFAlertDialog.Builder(this)
+        /*CFAlertDialog.Builder builder = new CFAlertDialog.Builder(this)
                 .setDialogStyle(CFAlertDialog.CFAlertStyle.ALERT)
                 .setTitle(title)
                 .setMessage(message)
@@ -4898,11 +4897,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         });
 
-        builder.show();
+        builder.show();*/
     }
 
     private void showDocumentAccessConfirmationDialog(String title, Spanned message){
-        CFAlertDialog.Builder builder = new CFAlertDialog.Builder(this)
+        /*CFAlertDialog.Builder builder = new CFAlertDialog.Builder(this)
                 .setDialogStyle(CFAlertDialog.CFAlertStyle.ALERT)
                 .setTitle(title)
                 .setMessage(message)
@@ -4940,7 +4939,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         });
 
-        builder.show();
+        builder.show();*/
     }
 
     private void updateNewMessageInChat(DataModel dModel) throws JSONException {
