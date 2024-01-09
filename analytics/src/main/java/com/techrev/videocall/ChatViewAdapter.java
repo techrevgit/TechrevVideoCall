@@ -34,7 +34,6 @@ import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
-import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -84,7 +83,7 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
     int downloadedSize = 0;
     int totalSize = 0;
 
-    private PDFView pdfPreview;
+    //private PDFView pdfPreview;
     private ImageView imagePreview;
     private AlertDialog previewAttachmentAlertDialog;
     private AlertDialog.Builder builder;
@@ -284,7 +283,7 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
         previewAttachmentAlertDialog = builder.create();
         previewAttachmentAlertDialog.setView(mView);
 
-        pdfPreview = mView.findViewById(R.id.pdf_preview);
+        //pdfPreview = mView.findViewById(R.id.pdf_preview);
         imagePreview = mView.findViewById(R.id.image_preview);
         ImageView iv_cross = mView.findViewById(R.id.cross_btn);
 
@@ -298,13 +297,13 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
 
         if(extension.equalsIgnoreCase("pdf")){
             imagePreview.setVisibility(View.GONE);
-            pdfPreview.setVisibility(View.VISIBLE);
+            //pdfPreview.setVisibility(View.VISIBLE);
 
             new RetrivePDFfromUrl().execute(attachment_download_url);
 
         }else {
             imagePreview.setVisibility(View.VISIBLE);
-            pdfPreview.setVisibility(View.GONE);
+            //pdfPreview.setVisibility(View.GONE);
 
             GlideUrl glideUrl=new GlideUrl(BASE_URL_VAL+"api/downloadDewFile?DocId="+docID+"."+extension, new Headers() {
                 @Override
@@ -407,7 +406,7 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
         protected void onPostExecute(InputStream inputStream) {
             // after the execution of our async
             // task we are loading our pdf in our pdf view.
-            pdfPreview.fromStream(inputStream).load();
+            //pdfPreview.fromStream(inputStream).load();
             previewAttachmentAlertDialog.show();
             progressDialog.dismiss();
         }
