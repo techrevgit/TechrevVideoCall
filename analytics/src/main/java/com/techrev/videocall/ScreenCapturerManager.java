@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
-
 @TargetApi(29)
 public class ScreenCapturerManager {
     private ScreenCapturerService mService;

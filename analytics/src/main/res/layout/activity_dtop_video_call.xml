@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="eNotary"
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tv_expire_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/title"
+                android:layout_centerInParent="true"
+                android:background="#656464"
+                android:gravity="center"
+                android:padding="5dp"
+                android:textColor="#ffffff"
+                android:textSize="13sp"
+                tools:text="Meeting expires in 00:00:00" />
+
+            <ImageView
+                android:id="@+id/imgRecording"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/recording"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <FrameLayout
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/participantsview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/participants_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="horizontal" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/participant_initial"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="#000000"
+        android:textSize="50sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="PS"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/nootherparticipant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/noparticipant_bg" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-50dp"
+            android:gravity="center"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:text="You are the only person on this call.
+Please wait for participant(s) to join."
+            android:textColor="#000000"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/reconnecting_progress_bar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_thumbnailView"
+        android:layout_width="130dp"
+        android:layout_height="200dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="80dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        card_view:cardBackgroundColor="#ffffff"
+        card_view:cardCornerRadius="2dp"
+        card_view:cardElevation="2dp"
+        card_view:cardUseCompatPadding="true">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.twilio.video.VideoView
+                android:id="@+id/thumbnail_video_view"
+                android:layout_width="120dp"
+                android:layout_height="188dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="2dp"
+                android:visibility="gone"
+                app:tviMirror="true"
+                app:tviOverlaySurface="false" />
+
+        </FrameLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/llTest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginBottom="10dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/share_screen_action_fab"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/audio_refresh"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <ImageButton
+            android:id="@+id/view_participant_list"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/add_icon" />
+
+        <ImageButton
+            android:id="@+id/view_meeting_action_fab"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/viewmeetingdetails" />
+
+
+        <ImageButton
+            android:id="@+id/audio_refresh"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/audio_refresh"
+            android:visibility="gone" />
+
+
+        <ImageButton
+            android:id="@+id/meeting_share_details"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/meeting_share_details"
+            android:visibility="gone" />
+
+
+        <ImageButton
+            android:id="@+id/location_sharing"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/location_sharing"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+
+        <ImageButton
+            android:id="@+id/expand_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/expand_right"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/capture_action_fab"
+            android:layout_width="45dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:layout_marginBottom="10dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/capture" />
+
+        <ImageButton
+            android:id="@+id/switch_camera_action_fab"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/camera_flip" />
+
+        <ImageButton
+            android:id="@+id/local_video_action_fab"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/camera_on" />
+
+        <ImageButton
+            android:id="@+id/mute_action_fab"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mic_on" />
+
+        <ImageButton
+            android:id="@+id/connect_action_fab"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="2dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/call_end" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

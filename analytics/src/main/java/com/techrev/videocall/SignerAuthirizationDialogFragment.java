@@ -3,6 +3,7 @@ package com.techrev.videocall;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
-
 
 
 public class SignerAuthirizationDialogFragment extends DialogFragment {
@@ -64,10 +64,14 @@ public class SignerAuthirizationDialogFragment extends DialogFragment {
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
                     tv_yes.setBackground(mActivity.getDrawable(R.drawable.primary_colored_round_corner_background));
-                    tv_yes.setTextColor(mActivity.getColor(R.color.white));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        tv_yes.setTextColor(mActivity.getColor(R.color.white));
+                    }
                 } else {
                     tv_yes.setBackground(mActivity.getDrawable(R.drawable.gray_colored_round_corner_background));
-                    tv_yes.setTextColor(mActivity.getColor(R.color.black));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        tv_yes.setTextColor(mActivity.getColor(R.color.black));
+                    }
                 }
             }
         });

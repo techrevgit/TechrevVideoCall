@@ -6,7 +6,15 @@ import com.google.gson.annotations.SerializedName;
 public class AttachedFileUploadResponseModel {
 
     @Expose
-    @SerializedName("remoteFileName")
+    @SerializedName("success")
+    private String success;
+
+    @Expose
+    @SerializedName("message")
+    private String message;
+
+    @Expose
+    @SerializedName("docId")
     private String docId;
 
     public String getDocId() {
@@ -15,5 +23,21 @@ public class AttachedFileUploadResponseModel {
 
     public void setDocId(String docId) {
         this.docId = docId;
+    }
+
+    public String getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(String success) {
+        this.success = success;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

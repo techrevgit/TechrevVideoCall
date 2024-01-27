@@ -1,11 +1,10 @@
 package com.techrev.videocall;
 
 import android.content.*;
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
+
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -21,7 +20,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -35,17 +33,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 
 import org.json.JSONException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -76,9 +71,11 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
     File directory;
     File mypath;
     private static String userId = "";
-    List<JsonObject> selectedDocIdList = new ArrayList<>();
+    List<String> selectedDocIdList = new ArrayList<>();
     private MyAllDocListAdapter adapter = null;
     LocalBroadcastManager mLocalBroadcastManager;
+    private String pathDoc="";
+    private Uri uri;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
@@ -122,19 +119,44 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            getMyAllUploadedDocuments();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MyAllDocListAdapter.isSelectAll = false;
+        if (adapter != null) {
+            adapter.clearSelectedDocIdList();
+        }
         selectedDocIdList.clear();
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && data != null) {
+            Uri uri = data.getData();
+            String uriString = uri.toString();
+            Log.d(TAG, "onActivityResult: Selected File: " + uriString);
+
+            // Resolve the actual file path from the Uri
+            String path = getPathFromUri(uri);
+            Log.d(TAG, "onActivityResult: Selected File Real Path: " + path);
+
+            try {
+                if (path != null) {
+                    uploadAttachedFile(path);
+                } else {
+                    Log.e(TAG, "File path is null");
+                    // Handle case where file path is null
+                    // Display an error message or take appropriate action
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
 
     private void initViews() {
         if (getIntent() != null) {
@@ -158,13 +180,8 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         cb_selectAll.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    MyAllDocListAdapter.isSelectAll = true;
-                } else {
-                    MyAllDocListAdapter.isSelectAll = false;
-                }
                 if (adapter != null){
-                    adapter.notifyDataSetChanged();
+                    adapter.isAllDocsSelected(b);
                 }
             }
         });
@@ -174,7 +191,11 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "onClick: Add Document selected items size: "+selectedDocIdList.size());
                 try {
-                    updateExistingRequestDocument();
+                    if (selectedDocIdList.size() > 0) {
+                        updateExistingRequestDocument();
+                    } else {
+                        Toast.makeText(MyAllUploadedDocumentsActivity.this, "Please select any document to add.", Toast.LENGTH_SHORT).show();
+                    }
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -182,7 +203,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         });
 
         // Initialize result launcher
-        resultLauncher = registerForActivityResult(
+        /*resultLauncher = registerForActivityResult(
                 new ActivityResultContracts
                         .StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -192,44 +213,25 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                     {
                         // Initialize result data
                         Intent data = result.getData();
-                        // check condition
-                        if (data != null) {
-                            // When data is not equal to empty
-                            // Get PDf uri
-                            Uri uri = data.getData();
-                            String src = uri.getPath();
-                            Bitmap bitmap = null;
-                            try {
-                                bitmap = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), uri);
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                        Log.d(TAG , "Chosen file data in onActivityResult: "+new Gson().toJson(data));
+                        if(data != null){
+                            pathDoc=data.getStringExtra("path");
+                            Log.d(TAG , "Selected document path: "+pathDoc);
+                            if (pathDoc != null) {
+                                uri=Uri.fromFile(new File(pathDoc));
+                                File file = new File(uri.getPath());
+                                *//*View myView = getLayoutInflater().inflate(R.layout.fragment_file_chooser, null);
+                                TextView tv_file_name = myView.findViewById(R.id.file_name);
+                                tv_file_name.setText(name);*//*
+                                try {
+                                    uploadAttachedFile(file);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
-
-                            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-                            cursor.moveToFirst();
-
-                            String name = cursor.getString(nameIndex);
-                            String size = Long.toString(cursor.getLong(sizeIndex));
-                            String mime_type = getMimeType(uri);
-
-                            //Toast.makeText(this, "Chosen file path: "+src, Toast.LENGTH_SHORT).show();
-                            Log.e(TAG , "Chosen file path: "+src);
-                            Log.e(TAG , "Chosen file name: "+name);
-                            Log.e(TAG , "Chosen File Mime Type: "+getMimeType(uri));
-                            View myView = getLayoutInflater().inflate(R.layout.fragment_file_chooser, null);
-                            TextView tv_file_name = myView.findViewById(R.id.file_name);
-                            tv_file_name.setText(name);
-                            try {
-                                uploadAttachedFile(bitmap , name , mime_type);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-
                         }
                     }
-                });
+                });*/
 
         ll_upload_Section.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,6 +260,12 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
             }
         });
 
+        try {
+            getMyAllUploadedDocuments();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public String getMimeType(Uri uri) {
@@ -274,84 +282,101 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         return mimeType;
     }
 
-    public void uploadAttachedFile(Bitmap bitmap , String file_name , String mime_type) throws IOException {
+    private String getPathFromUri(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA, MediaStore.Images.Media.DISPLAY_NAME};
+        Cursor cursor = null;
+        try {
+            ContentResolver resolver = getContentResolver();
+            cursor = resolver.query(uri, projection, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+                String fileName = cursor.getString(nameIndex);
+
+                if (fileName != null) {
+                    InputStream inputStream = resolver.openInputStream(uri);
+
+                    if (inputStream != null) {
+                        File tempFile = new File(getCacheDir(), fileName);
+                        FileOutputStream outputStream = new FileOutputStream(tempFile);
+
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = inputStream.read(buffer)) > 0) {
+                            outputStream.write(buffer, 0, length);
+                        }
+
+                        outputStream.close();
+                        inputStream.close();
+
+                        return tempFile.getAbsolutePath();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+
+        return null;
+    }
+
+
+
+    public void uploadAttachedFile(String fileUri) throws IOException {
 
         ProgressDialog dialog = new ProgressDialog(this);
         dialog.setMessage("Please wait");
         dialog.setCancelable(false);
         dialog.show();
 
-        String pathDetails = saveToInternalStorageFotAttachment(bitmap , file_name);
-        String name = mypath.getName().replace("pdf",mime_type.split("/")[1]);
-        Log.e("===pathDetails", "" + pathDetails);
-        Log.e("===pathDetails", "Image Path:" + mypath);
-        Log.e("===pathDetails", "Image Name:" + name);
-        Log.e("===pathDetails", "Image Mime Type: "+mime_type);
-        String extension = mypath.getName().split("\\.")[1];
-
         DateFormat dateFormat = new SimpleDateFormat("E MMM dd yyyy HH:mm:ss 'GMT'Z (zzzz)");
         Calendar cal = Calendar.getInstance();
         String dateAndTime = dateFormat.format(cal.getTime());
-        /*Converting bitmap to file*/
-        File f = new File(getCacheDir(), name);
-        f.createNewFile();
+        // Resolve the actual file path from the Uri
+        Log.d(TAG , "Selected File: "+fileUri);
+        File file = new File(fileUri);
+        // Create RequestBody for file
+        RequestBody fileRequestBody = RequestBody.create(MediaType.parse("application/pdf"), file);
+        // Create MultipartBody.Part from file
+        MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", file.getName(), fileRequestBody);
+        RequestBody rb_userType = RequestBody.create(MediaType.parse("text/plain"), "1");
+        //RequestBody rb_RequestId = RequestBody.create(MediaType.parse("text/plain"), requestID);
+        RequestBody rb_documentName = RequestBody.create(MediaType.parse("text/plain"), file.getName().replace(".pdf",""));
+        RequestBody rb_userId = RequestBody.create(MediaType.parse("text/plain"), userId);
+        //RequestBody rb_isTempRequest = RequestBody.create(MediaType.parse("text/plain"), "true");
+        RequestBody rb_dateTime = RequestBody.create(MediaType.parse("text/plain"), dateAndTime);
+        //RequestBody rb_tempRequestId = RequestBody.create(MediaType.parse("text/plain"), "");
+        RequestBody rb_isDewDoc = RequestBody.create(MediaType.parse("text/plain"), "false");
+        RequestBody rb_uploadedBy = RequestBody.create(MediaType.parse("text/plain"), userId);
 
-        //Convert bitmap to byte array
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-       // bitmap.compress(CompressFormat.JPEG, 0 /*ignored for PNG*/, bos);
-        byte[] bitmapdata = bos.toByteArray();
-
-        //write the bytes in file
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(f);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            fos.write(bitmapdata);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG , "File Location: "+f);
-        /*Converting bitmap to file*/
-
-        // Parsing any Media type file
-        RequestBody requestBody1 = RequestBody.create(MediaType.parse(mime_type), f);
-        MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("file", name , requestBody1);
-        RequestBody filename = RequestBody.create(MediaType.parse("text/plain"), name);
-        UploadRequesterDocumentRequestModel model = new UploadRequesterDocumentRequestModel(
-                                                                                "3",
-                                                                                requestID,
-                                                                                filename,
-                                                                                userId,
-                                                                                false,
-                                                                                dateAndTime,
-                                                                                "" ,
-                                                                                false);
         Call<AttachedFileUploadResponseModel> call = serviceLocal.uploadRequesterDocument(
-                                                                    authToken,
-                                                                    fileToUpload,
-                                                                    "3",
-                                                                    requestID,
-                                                                    name,
-                                                                    userId,
-                                                                    false,
-                                                                    dateAndTime,
-                                                                    "" ,
-                                                                    false);
+                authToken,
+                filePart,
+                rb_userType,
+                rb_documentName,
+                rb_userId,
+                rb_dateTime,
+                rb_isDewDoc,
+                rb_uploadedBy);
         call.enqueue(new Callback<AttachedFileUploadResponseModel>() {
             @Override
             public void onResponse(Call<AttachedFileUploadResponseModel> call, Response<AttachedFileUploadResponseModel> response) {
                 dialog.dismiss();
                 Log.d("====Inside1", "Success");
                 Log.d("====Inside1", "Response:" + response.code());
-                if (response.code() == 200) {
+                if (response.isSuccessful()) {
                     if (response.body() != null) {
                         Log.d(TAG, "UPLOADED DOC ID:" + response.body().getDocId());
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "File uploaded successfully!", Toast.LENGTH_SHORT).show();
+                        try {
+                            getMyAllUploadedDocuments();
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }
@@ -378,12 +403,25 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         JsonObject object = new JsonObject();
         object.addProperty("requestId" , requestID);
         object.addProperty("DocIds" , new Gson().toJson(selectedDocIdList));
-        Call<CommonModel> responseBodyCall = serviceLocal.updateExistingRequestDocument(authToken, object.toString());
+        Log.d(TAG, "updateExistingRequestDocument: requestId: "+requestID);
+        Log.d(TAG, "updateExistingRequestDocument: DocIds: "+new Gson().toJson(selectedDocIdList));
+
+        List<RequesterDocumentModel.DocIdObject> docIdObjects = new ArrayList<>();
+        for (String docId : selectedDocIdList) {
+            docIdObjects.add(new RequesterDocumentModel.DocIdObject(docId));
+        }
+
+        RequesterDocumentModel request = new RequesterDocumentModel(requestID, docIdObjects);
+
+        Call<CommonModel> responseBodyCall = serviceLocal.updateExistingRequestDocument(authToken, request);
         responseBodyCall.enqueue(new Callback<CommonModel>() {
             @Override
             public void onResponse(Call<CommonModel> call, Response<CommonModel> response) {
                 if(dialog!=null){
                     dialog.dismiss();
+                }
+                if (adapter != null) {
+                    adapter.clearSelectedDocIdList();
                 }
                 selectedDocIdList.clear();
                 if(response != null){
@@ -393,7 +431,9 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Something went wrong, please try again later!", Toast.LENGTH_SHORT).show();
                     }
-                    MyAllDocListAdapter.isSelectAll = false;
+                    if (adapter != null) {
+                        adapter.clearSelectedDocIdList();
+                    }
                     selectedDocIdList.clear();
                     finish();
                 }
@@ -410,39 +450,15 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
 
     }
 
-    private String saveToInternalStorageFotAttachment(Bitmap bitmapImage , String file_name) {
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
-        directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        mypath = new File(directory, file_name);
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return directory.getAbsolutePath();
-    }
-
     private void selectPDF()
     {
         // Initialize intent
-        Intent intent
-                = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         // set type
         intent.setType("application/pdf");
         // Launch intent
-        resultLauncher.launch(intent);
+        //resultLauncher.launch(intent);
+        startActivityForResult(intent , 1001);
     }
 
     @Override
@@ -484,10 +500,10 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
 
                 if(response != null){
                     Log.d(TAG , "My Uploaded Documents Data: \n"+new Gson().toJson(response.body()));
-                    adapter = new MyAllDocListAdapter(MyAllUploadedDocumentsActivity.this,
+                    adapter = new MyAllDocListAdapter(MyAllUploadedDocumentsActivity.this, authToken,
                             response.body().getAllDocs(), new MyAllDocListAdapter.OnDocsSelected() {
                         @Override
-                        public void onDocumentsSelected(List<JsonObject> docIdList) {
+                        public void onDocumentsSelected(List<String> docIdList) {
                             selectedDocIdList = docIdList;
                             Log.d(TAG, "onDocumentsSelected: selected item size: "+selectedDocIdList.size());
                             Log.d(TAG , "Selected Doc IDs List Data: "+new Gson().toJson(selectedDocIdList));

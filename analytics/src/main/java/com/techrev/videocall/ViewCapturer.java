@@ -1,6 +1,6 @@
 package com.techrev.videocall;
 
-import android.graphics.Bitmap;
+        import android.graphics.Bitmap;
         import android.graphics.Canvas;
         import android.os.Handler;
         import android.os.Looper;

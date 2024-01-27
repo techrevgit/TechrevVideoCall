@@ -4,20 +4,29 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,24 +43,37 @@ import com.bumptech.glide.load.model.Headers;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
+import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.net.ssl.HttpsURLConnection;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -83,7 +105,7 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
     int downloadedSize = 0;
     int totalSize = 0;
 
-    //private PDFView pdfPreview;
+    private PDFView pdfPreview;
     private ImageView imagePreview;
     private AlertDialog previewAttachmentAlertDialog;
     private AlertDialog.Builder builder;
@@ -283,7 +305,7 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
         previewAttachmentAlertDialog = builder.create();
         previewAttachmentAlertDialog.setView(mView);
 
-        //pdfPreview = mView.findViewById(R.id.pdf_preview);
+        pdfPreview = mView.findViewById(R.id.pdf_preview);
         imagePreview = mView.findViewById(R.id.image_preview);
         ImageView iv_cross = mView.findViewById(R.id.cross_btn);
 
@@ -297,13 +319,13 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
 
         if(extension.equalsIgnoreCase("pdf")){
             imagePreview.setVisibility(View.GONE);
-            //pdfPreview.setVisibility(View.VISIBLE);
+            pdfPreview.setVisibility(View.VISIBLE);
 
             new RetrivePDFfromUrl().execute(attachment_download_url);
 
         }else {
             imagePreview.setVisibility(View.VISIBLE);
-            //pdfPreview.setVisibility(View.GONE);
+            pdfPreview.setVisibility(View.GONE);
 
             GlideUrl glideUrl=new GlideUrl(BASE_URL_VAL+"api/downloadDewFile?DocId="+docID+"."+extension, new Headers() {
                 @Override
@@ -406,7 +428,7 @@ public class ChatViewAdapter extends ArrayAdapter implements ActivityCompat.OnRe
         protected void onPostExecute(InputStream inputStream) {
             // after the execution of our async
             // task we are loading our pdf in our pdf view.
-            //pdfPreview.fromStream(inputStream).load();
+            pdfPreview.fromStream(inputStream).load();
             previewAttachmentAlertDialog.show();
             progressDialog.dismiss();
         }

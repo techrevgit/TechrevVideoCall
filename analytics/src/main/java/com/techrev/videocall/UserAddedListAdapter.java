@@ -1,7 +1,5 @@
 package com.techrev.videocall;
 
-
-
 import static com.techrev.videocall.VideoActivity.BASE_URL_VAL;
 
 import android.content.Context;

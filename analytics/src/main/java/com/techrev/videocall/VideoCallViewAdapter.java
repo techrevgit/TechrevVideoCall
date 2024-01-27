@@ -9,8 +9,6 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-
-
 public class VideoCallViewAdapter extends BaseAdapter {
 
     private String[] call_views;

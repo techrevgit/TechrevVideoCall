@@ -61,3 +61,6 @@
 # -keep public class mypackage.MyClass
 # -keep public interface mypackage.MyInterface
 # -keep public class * implements mypackage.MyInterface
+
+# For com.github.barteksc:android-pdf-viewer library
+-keep class com.shockwave.**

@@ -6,8 +6,13 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -18,7 +23,6 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.suyati.telvin.drawingboard.DrawingBoard;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,6 +31,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -56,6 +61,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
     private String isSignature = "";
     private String userMeetingIdentifier = "";
     private VideoCallModel videoCallModel;
+    private byte[] imageInBytes;
 
 
     public interface OnCapturedDrawing {
@@ -107,7 +113,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
         tv_save = findViewById(R.id.tv_save);
 
         drawingBoard.setCanvasColor(android.R.color.white);
-        drawingBoard.setPenColor(R.color.colorPrimary);
+        drawingBoard.setPenColor(R.color.color_primary);
         drawingBoard.setPenWidth(6f);
 
         iv_cross.setOnClickListener(new View.OnClickListener() {
@@ -164,33 +170,14 @@ public class WhiteBoardActivity extends AppCompatActivity {
     public void removeImageBackgroundAndAutoCrop(Bitmap bitMapSignature) throws JSONException, IOException {
 
         /*Preparing file to send to server*/
-        //create a file to write bitmap data
-        File f = new File(getCacheDir(), "SignerSignature");
-        f.createNewFile();
-        //Convert bitmap to byte array
-        Bitmap bitmap = bitMapSignature;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 0 /*ignored for PNG*/, bos);
-        byte[] bitmapdata = bos.toByteArray();
-
-        //write the bytes in file
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(f);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            fos.write(bitmapdata);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), f);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", f.getName(), reqFile);
-
+        Bitmap resizedImage=getResizedBitmap(bitMapSignature,500);
+        /*Converting bitmap to byte array*/
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        resizedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        imageInBytes = stream.toByteArray();
+        /*Converting bitmap to byte array*/
+        RequestBody rFile = RequestBody.create(MediaType.parse("image/jpeg"), imageInBytes);
+        MultipartBody.Part file = MultipartBody.Part.createFormData("file", Calendar.getInstance().getTimeInMillis()+"_image.jpg", rFile);
         /*Preparing file to send to server*/
 
         ProgressDialog dialog = new ProgressDialog(this);
@@ -203,21 +190,22 @@ public class WhiteBoardActivity extends AppCompatActivity {
          NetworkInterface serviceLocalTemp = retrofitLocalTemp.create(NetworkInterface.class);
         /*Preparing retrofit for empty base URL*/
 
-        Call<ResponseBody> responseBodyCall = serviceLocalTemp.removeImageBackgroundAndAutoCrop(authToken, body);
+        Call<ResponseBody> responseBodyCall = serviceLocalTemp.removeImageBackgroundAndAutoCrop(authToken, file);
         responseBodyCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(dialog!=null){
                     dialog.dismiss();
                 }
-                if (response.body() != null){
+                if (response.isSuccessful() && response.body() != null){
                     Log.d(TAG , "Response data:\n"+new Gson().toJson(response.body()));
                     Log.d(TAG , "Processed image data:\n"+response.body().byteStream());
-                }
-                try {
-                    uploadNotarizationImage();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                    Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                    try {
+                        uploadNotarizationImage(bitmap);
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
 
@@ -229,6 +217,21 @@ public class WhiteBoardActivity extends AppCompatActivity {
                 Log.d("====onResponse", "Failure" + t.toString());
             }
         });
+    }
+
+    public Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float)width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
     }
 
     /*public void uploadAttachedFile(Bitmap bitmap , String file_name , String mime_type) {
@@ -281,21 +284,41 @@ public class WhiteBoardActivity extends AppCompatActivity {
 
     }*/
 
-    public void uploadNotarizationImage() throws JSONException {
+    public void uploadNotarizationImage(Bitmap bitmap) throws JSONException {
         ProgressDialog dialog = new ProgressDialog(this);
         dialog.setMessage("Please wait");
         dialog.setCancelable(false);
         dialog.show();
-        JSONObject obj = new JSONObject();
+
+        /*Preparing file to send to server*/
+        Bitmap resizedImage=getResizedBitmap(bitmap,500);
+        /*Converting bitmap to byte array*/
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        resizedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        imageInBytes = stream.toByteArray();
+        RequestBody rFile = RequestBody.create(MediaType.parse("image/jpeg"), imageInBytes);
+        MultipartBody.Part file = MultipartBody.Part.createFormData("file", Calendar.getInstance().getTimeInMillis()+"_image.jpg", rFile);
+        /*Preparing file to send to server*/
+
+        /*JSONObject obj = new JSONObject();
         obj.put("isDewDoc" , false );
-        obj.put("signatureUploadld" , "");
+        obj.put("signatureUploadId" , "");
         obj.put("isSignature" , isSignature);
         obj.put("isEditedlmage" , 0);
         obj.put("guid" , "");
         obj.put("requestId" , requestID);
         obj.put("userid" , userId);
-        String data = obj.toString();
-        Call<ResponseBody> responseBodyCall = serviceLocal.uploadCustomerImages(authToken, data);
+        String data = obj.toString();*/
+        RequestBody rb_isDewDoc = RequestBody.create(MediaType.parse("text/plain"), "false");
+        RequestBody rb_signatureUploadld = RequestBody.create(MediaType.parse("text/plain"), "");
+        RequestBody rb_isSignature = RequestBody.create(MediaType.parse("text/plain"), isSignature);
+        RequestBody rb_isEditedlmage = RequestBody.create(MediaType.parse("text/plain"), "0");
+        RequestBody rb_guid = RequestBody.create(MediaType.parse("text/plain"), "");
+        RequestBody rb_requestId = RequestBody.create(MediaType.parse("text/plain"), requestID);
+        RequestBody rb_userid = RequestBody.create(MediaType.parse("text/plain"), userId);
+
+        Call<ResponseBody> responseBodyCall = serviceLocal.uploadCustomerImages(authToken,file, rb_isDewDoc, rb_signatureUploadld,
+                rb_isSignature, rb_isEditedlmage, rb_guid, rb_requestId, rb_userid);
         responseBodyCall.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

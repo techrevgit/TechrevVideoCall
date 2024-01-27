@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ public class VideoCallManager {
     private String roomName=null;
     private String userMeetingIdentifier=null;
     private Intent intent;
+    private final Object lock = new Object();
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection connection = new ServiceConnection() {
 
@@ -60,14 +62,33 @@ public class VideoCallManager {
     }
 
     private void bindService(String token,String room,String userMeetingIdentifier) {
-        Intent intent = new Intent(mContext, VideoCallService.class);
-        this.token=token;
-        this.roomName=room;
-        this.userMeetingIdentifier=userMeetingIdentifier;
-        intent.putExtra("token",token);
-        intent.putExtra("room",room);
-        intent.putExtra("userMeetingIdentifier",userMeetingIdentifier);
-        mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        synchronized (lock) {
+            this.token = token;
+            this.roomName = room;
+            this.userMeetingIdentifier = userMeetingIdentifier;
+        }
+
+        new BindServiceAsyncTask().execute(token, room, userMeetingIdentifier);
+    }
+
+    // AsyncTask to perform binding in the background
+    private class BindServiceAsyncTask extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String... params) {
+            // Access params[0] (token), params[1] (room), params[2] (userMeetingIdentifier) safely
+            String token = params[0];
+            String room = params[1];
+            String userMeetingIdentifier = params[2];
+
+            Intent intent = new Intent(mContext, VideoCallService.class);
+            intent.putExtra("token", token);
+            intent.putExtra("room", room);
+            intent.putExtra("userMeetingIdentifier", userMeetingIdentifier);
+            mContext.startService(intent);
+            mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+            return null;
+        }
     }
 
     public void startForeground() {
@@ -84,7 +105,7 @@ public class VideoCallManager {
     }
 
     public void appInBackground() {
-        if(mService != null) {
+        if(mService != null){
             mService.appInBackground();
         }
 
@@ -106,9 +127,11 @@ public class VideoCallManager {
     }
 
     public void unbindService() {
-        mContext.stopService(intent);
-        mContext.unbindService(connection);
-        currentState = State.UNBIND_SERVICE;
+        if (currentState != State.UNBIND_SERVICE) {
+            mContext.stopService(intent);
+            mContext.unbindService(connection);
+            currentState = State.UNBIND_SERVICE;
+        }
     }
 
     /*Added By Rupesh*/

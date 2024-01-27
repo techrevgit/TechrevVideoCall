@@ -1,6 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.techrev.videocall">
+
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+
+    <meta-data
+        android:name="firebase_crashlytics_collection_enabled"
+        android:value="false" />
+    <!-- Bluetooth -->
+    <!-- Request legacy Bluetooth permissions on older devices. -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <!--
+ Needed only if your app looks for Bluetooth devices.
+         If your app doesn't use Bluetooth scan results to derive physical
+         location information, you can strongly assert that your app
+         doesn't derive physical location.
+    -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <!--
+ Needed only if your app makes the device discoverable to Bluetooth
+         devices.
+    -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+
+
+    <!-- Needed only if your app communicates with already-paired Bluetooth
+         devices. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- Needed only if your app uses Bluetooth scan results to derive physical location. -->
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+    <uses-feature android:name="android.software.companion_device_setup" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+    <!-- Added By Rupesh for AppAutoUpdateFeature -->
+    <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <supports-screens
         android:anyDensity="true"
@@ -56,6 +111,11 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <!--<uses-permission android:name="android.permission.BLUETOOTH"
                      android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
@@ -67,7 +127,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TechRevAnalytics">
+        android:theme="@style/Theme.TechrevVideoCallPlugin">
         <!--<activity
             android:name=".MainActivity"
             android:exported="true">
@@ -86,21 +146,27 @@
             android:name=".PermissionActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="PermissionActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
+            />
         <activity
             android:name=".VideoActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="VideoActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
+            />
         <activity
             android:name=".NoInternetActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="NoInternetActivity"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:screenOrientation="portrait" />
         <activity
             android:name=".AddCoSignerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="AddCoSignerActivity"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:screenOrientation="portrait" />
 
         <service xmlns:tools="http://schemas.android.com/tools"
@@ -122,26 +188,32 @@
         <activity
             android:name=".CameraActivity"
             android:exported="false"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             />
         <activity
             android:name=".WhiteBoardActivity"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
         <activity
             android:name=".PreviewRequestDocumentActivity"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
         <activity
             android:name=".MyCurrentUploadedDocumentsActivity"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
         <activity
             android:name=".MyAllUploadedDocumentsActivity"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:exported="true"
             android:label="@string/activity_name"
             android:launchMode="singleTop"
-            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:windowSoftInputMode="adjustResize">
             <!--<intent-filter android:label="@string/launcher_name">
                 <action android:name="android.intent.action.MAIN" />

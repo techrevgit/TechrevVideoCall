@@ -9,10 +9,12 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.Camera;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -66,6 +68,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import tvi.webrtc.voiceengine.WebRtcAudioUtils;
 
@@ -129,6 +133,13 @@ public class VideoCallService extends Service {
 
     private MySharedPreference sharedPreference;
 
+    /*Added by Rupesh*/
+    // Introduce an executor for background tasks
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    // Use a Handler to post tasks to the main thread
+    private Handler mainHandler = new Handler(Looper.getMainLooper());
+    /*Added by Rupesh*/
 
     /**
      * Class used for the client Binder.  We know this service always
@@ -148,19 +159,27 @@ public class VideoCallService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.hasExtra("token")) {
-            token = intent.getStringExtra("token");
-        }
-        if (intent.hasExtra("room")) {
-            roomName = intent.getStringExtra("room");
-        }
-        if (intent.hasExtra("userMeetingIdentifier")) {
-            userMeetingIdentifier = intent.getStringExtra("userMeetingIdentifier");
-        }
+        // Start tasks on a background thread
+        executorService.execute(() -> {
+            // Perform background tasks
+            if (intent.hasExtra("token")) {
+                token = intent.getStringExtra("token");
+            }
+            if (intent.hasExtra("room")) {
+                roomName = intent.getStringExtra("room");
+            }
+            if (intent.hasExtra("userMeetingIdentifier")) {
+                userMeetingIdentifier = intent.getStringExtra("userMeetingIdentifier");
+            }
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        startForeground();
-        sharedPreference = new MySharedPreference(this);
+            // Use mainHandler to post tasks to the main thread if needed
+            mainHandler.post(() -> {
+                preferences = PreferenceManager.getDefaultSharedPreferences(this);
+                startForeground();
+                sharedPreference = new MySharedPreference(this);
+            });
+        });
+
         return START_NOT_STICKY;
     }
 
@@ -227,48 +246,46 @@ public class VideoCallService extends Service {
 
     private void createAudioAndVideoTracks() {
         if(token!=null && roomName!=null) {
+            if (dataTrackMessageThread == null || !dataTrackMessageThread.isAlive()) {
+                // Create the local data track
+                if(videoCallModel!=null) {
+                    videoCallModel.setLocalDataTrack(LocalDataTrack.create(this));
+
+                    // Start the thread where data messages are received
+                    dataTrackMessageThread.start();
+                    dataTrackMessageThreadHandler = new Handler(dataTrackMessageThread.getLooper());
+                    // Share your microphone
+
+                    videoCallModel.setLocalAudioTrack(LocalAudioTrack.create(this, true, LOCAL_AUDIO_TRACK_NAME));
+
+                    // Share your camera
+                    videoCallModel.setCameraCapturerCompat(new CameraCapturerCompat(this, getAvailableCameraSource()));
+                    videoCallModel.setLocalVideoTrack(LocalVideoTrack.create(this,
+                            true,
+                            videoCallModel.getCameraCapturerCompat().getVideoCapturer(),
+                            LOCAL_VIDEO_TRACK_NAME));
+                    CameraCapturer.CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
+                    videoCallModel.setCameraSource(cameraSource);
+                    /*
+                     * Update preferred audio and video codec in case changed in settings
+                     */
+
+                    audioCodec = getAudioCodecPreference("audio_codec",
+                            OpusCodec.NAME);
+                    videoCodec = getVideoCodecPreference("video_codec",
+                            Vp8Codec.NAME);
+                    enableAutomaticSubscription = getAutomaticSubscriptionPreference("enable_automatic_subscription",
+                            true);
 
 
+                    /*
+                     * Get latest encoding parameters
+                     */
+                    final EncodingParameters newEncodingParameters = getEncodingParameters();
 
-            // Create the local data track
-            if(videoCallModel!=null) {
-                videoCallModel.setLocalDataTrack(LocalDataTrack.create(this));
-
-                // Start the thread where data messages are received
-                dataTrackMessageThread.start();
-                dataTrackMessageThreadHandler = new Handler(dataTrackMessageThread.getLooper());
-                // Share your microphone
-
-                videoCallModel.setLocalAudioTrack(LocalAudioTrack.create(this, true, LOCAL_AUDIO_TRACK_NAME));
-
-                // Share your camera
-                videoCallModel.setCameraCapturerCompat(new CameraCapturerCompat(this, getAvailableCameraSource()));
-                videoCallModel.setLocalVideoTrack(LocalVideoTrack.create(this,
-                        true,
-                        videoCallModel.getCameraCapturerCompat().getVideoCapturer(),
-                        LOCAL_VIDEO_TRACK_NAME));
-                CameraCapturer.CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
-                videoCallModel.setCameraSource(cameraSource);
-                /*
-                 * Update preferred audio and video codec in case changed in settings
-                 */
-
-                audioCodec = getAudioCodecPreference("audio_codec",
-                        OpusCodec.NAME);
-                videoCodec = getVideoCodecPreference("video_codec",
-                        Vp8Codec.NAME);
-                enableAutomaticSubscription = getAutomaticSubscriptionPreference("enable_automatic_subscription",
-                        true);
-
-
-                /*
-                 * Get latest encoding parameters
-                 */
-                final EncodingParameters newEncodingParameters = getEncodingParameters();
-
-                /*
-                 * If the local video track was released when the app was put in the background, recreate.
-                 */
+                    /*
+                     * If the local video track was released when the app was put in the background, recreate.
+                     */
 //            if (localVideoTrack == null ) {
 //                localVideoTrack = LocalVideoTrack.create(this,
 //                        true,
@@ -291,10 +308,11 @@ public class VideoCallService extends Service {
 //                }
 //            }
 
-                /*
-                 * Update encoding parameters
-                 */
-                encodingParameters = newEncodingParameters;
+                    /*
+                     * Update encoding parameters
+                     */
+                    encodingParameters = newEncodingParameters;
+                }
             }
 
             /*
@@ -306,7 +324,7 @@ public class VideoCallService extends Service {
 //                    View.VISIBLE);
             } else {
                 Log.d("===Handler", "Called");
-                final Handler handler = new Handler();
+                final Handler handler = new Handler(Looper.getMainLooper());
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -464,7 +482,7 @@ public class VideoCallService extends Service {
 
 
 
-                if(APP_STATUS== Constants.APP_STATUS_FOREGROUND) {
+                if(APP_STATUS==Constants.APP_STATUS_FOREGROUND) {
                     EventBus.getDefault().post(new EventModel(null, null, Constants.EVENTTYPE_RECONNECTING));
                 }
             }
@@ -1037,7 +1055,7 @@ public class VideoCallService extends Service {
             public void onAudioTrackEnabled(RemoteParticipant remoteParticipant,
                                             RemoteAudioTrackPublication remoteAudioTrackPublication) {
                 //Toast.makeText(VideoActivity.this,"onAudioTrackEnabled",Toast.LENGTH_SHORT).show();
-                sendDataModel(remoteParticipant, Constants.EVENTTYPE_AUDIO_ENABLED);
+                sendDataModel(remoteParticipant,Constants.EVENTTYPE_AUDIO_ENABLED);
 
             }
 
@@ -1045,7 +1063,7 @@ public class VideoCallService extends Service {
             public void onAudioTrackDisabled(RemoteParticipant remoteParticipant,
                                              RemoteAudioTrackPublication remoteAudioTrackPublication) {
                 // Toast.makeText(VideoActivity.this,"onAudioTrackDisabled",Toast.LENGTH_SHORT).show();
-                sendDataModel(remoteParticipant, Constants.EVENTTYPE_AUDIO_DISABLED);
+                sendDataModel(remoteParticipant,Constants.EVENTTYPE_AUDIO_DISABLED);
 
             }
 
@@ -1053,7 +1071,7 @@ public class VideoCallService extends Service {
             public void onVideoTrackEnabled(RemoteParticipant remoteParticipant,
                                             RemoteVideoTrackPublication remoteVideoTrackPublication) {
                 //Toast.makeText(VideoActivity.this,"onVideoTrackEnabled",Toast.LENGTH_SHORT).show();
-                sendDataModel(remoteParticipant, Constants.EVENTTYPE_VIDEO_ENABLED);
+                sendDataModel(remoteParticipant,Constants.EVENTTYPE_VIDEO_ENABLED);
 
             }
 
@@ -1061,7 +1079,7 @@ public class VideoCallService extends Service {
             public void onVideoTrackDisabled(RemoteParticipant remoteParticipant,
                                              RemoteVideoTrackPublication remoteVideoTrackPublication) {
                 //Toast.makeText(VideoActivity.this,"onVideoTrackDisabled",Toast.LENGTH_SHORT).show();
-                sendDataModel(remoteParticipant, Constants.EVENTTYPE_VIDEO_DISABLED);
+                sendDataModel(remoteParticipant,Constants.EVENTTYPE_VIDEO_DISABLED);
 
             }
         };
@@ -1077,19 +1095,19 @@ public class VideoCallService extends Service {
             dModel.setContent("");
             dModel.setMessageType("");
 
-            if(ActionType== Constants.EVENTTYPE_VIDEO_DISABLED)
+            if(ActionType==Constants.EVENTTYPE_VIDEO_DISABLED)
             {
                 dModel.setMessageType("CameraOff");
             }
-            else if(ActionType== Constants.EVENTTYPE_VIDEO_ENABLED)
+            else if(ActionType==Constants.EVENTTYPE_VIDEO_ENABLED)
             {
                 dModel.setMessageType("CameraOn");
             }
-            else if(ActionType== Constants.EVENTTYPE_AUDIO_DISABLED)
+            else if(ActionType==Constants.EVENTTYPE_AUDIO_DISABLED)
             {
                 dModel.setMessageType("AudioMuted");
             }
-            else if(ActionType== Constants.EVENTTYPE_AUDIO_ENABLED)
+            else if(ActionType==Constants.EVENTTYPE_AUDIO_ENABLED)
             {
                 dModel.setMessageType("AudioUnMuted");
             }
@@ -1101,19 +1119,19 @@ public class VideoCallService extends Service {
             for (int i = 0; i < remoteParticipantList.size(); i++) {
                 if (remoteParticipant != null && (remoteParticipant.getIdentity().equalsIgnoreCase(remoteParticipantList.get(i).getRemoteParticipant().getIdentity()))) {
 
-                    if(ActionType== Constants.EVENTTYPE_VIDEO_DISABLED)
+                    if(ActionType==Constants.EVENTTYPE_VIDEO_DISABLED)
                     {
                         remoteParticipantList.get(i).setTechRevVideoEnable(false);
                     }
-                    else if(ActionType== Constants.EVENTTYPE_VIDEO_ENABLED)
+                    else if(ActionType==Constants.EVENTTYPE_VIDEO_ENABLED)
                     {
                         remoteParticipantList.get(i).setTechRevVideoEnable(true);
                     }
-                    else if(ActionType== Constants.EVENTTYPE_AUDIO_DISABLED)
+                    else if(ActionType==Constants.EVENTTYPE_AUDIO_DISABLED)
                     {
                         remoteParticipantList.get(i).setTechRevAudioEnable(false);
                     }
-                    else if(ActionType== Constants.EVENTTYPE_AUDIO_ENABLED)
+                    else if(ActionType==Constants.EVENTTYPE_AUDIO_ENABLED)
                     {
                         remoteParticipantList.get(i).setTechRevAudioEnable(true);
                     }
@@ -1311,7 +1329,13 @@ public class VideoCallService extends Service {
         startForeground(notificationId, notification);
         //EventBus.getDefault().register(this);
         APP_STATUS= Constants.APP_STATUS_FOREGROUND;
-        createAudioAndVideoTracks();
+        executorService.execute(() -> {
+            createAudioAndVideoTracks();
+            // Use mainHandler to post tasks to the main thread if needed
+            mainHandler.post(() -> {
+                // Update UI or perform tasks on the main thread
+            });
+        });
 
     }
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -1433,5 +1457,16 @@ public class VideoCallService extends Service {
         }
     }
     /*Added By Rupesh*/
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Release resources, disconnect from the room, etc.
+
+        // Stop the executor service
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
+    }
 
 }

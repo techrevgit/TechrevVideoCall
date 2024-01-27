@@ -1,6 +1,5 @@
 package com.techrev.videocall;
 
-
 import static com.techrev.videocall.VideoActivity.BASE_URL_VAL;
 
 import android.app.ProgressDialog;
@@ -22,7 +21,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.google.gson.Gson;
-
 
 import java.util.ArrayList;
 import java.util.List;

@@ -6,7 +6,6 @@ import android.hardware.camera2.CameraManager;
 import android.util.SparseIntArray;
 import android.view.Surface;
 
-
 public abstract class APictureCapturingService {
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 

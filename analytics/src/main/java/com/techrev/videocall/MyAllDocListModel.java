@@ -49,6 +49,8 @@ public class MyAllDocListModel {
         @SerializedName("message")
         private String message;
 
+        private boolean isSelected;
+
         public String getDocumentName() {
             return DocumentName;
         }
@@ -103,6 +105,14 @@ public class MyAllDocListModel {
 
         public void setMessage(String message) {
             this.message = message;
+        }
+
+        public boolean isSelected() {
+            return isSelected;
+        }
+
+        public void setSelected(boolean selected) {
+            isSelected = selected;
         }
     }
 

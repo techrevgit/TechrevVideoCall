@@ -1,10 +1,11 @@
 //package cordova_plugin_techrev_videoconference.TechRevVideoConferenceWrapper;
 package com.techrev.videocall;
-
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
@@ -18,73 +19,54 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class RetrofitNetworkClass {
 
+    private static final String TAG = "RetrofitNetworkClass";
     public static Retrofit networkCall;
+    private static boolean isInitialized = false;
+    private static final Object lock = new Object();
     //For Live Production
 //    public static final String BASE_URL = "https://app.eNotary.net/api/";
     //String BASE_URL_VAL = "https://apias.digitalnotarize.com/api/";
     // For Testing
     String BASE_URL_VAL = Constants.API_BASE_URL + "api/";
+    //String BUSINESS_API_URL_VAL = "https://businessdevapi.digitalnotarize.com/api/";
     String BUSINESS_API_URL_VAL = "https://businessapi.digitalnotarize.com/api/";
 
     // Basic Retrofit Calling
     public Retrofit callingURL() {
-        //Start
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient okClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.MINUTES)
-                .readTimeout(5, TimeUnit.MINUTES)
-                .writeTimeout(5, TimeUnit.MINUTES)
-                /*.addInterceptor(new Interceptor() {
-                    public Response intercept(Chain chain) throws IOException {
-                        Request request = chain.request().newBuilder()
-                                *//*.header("Cache-Control", "public, only-if-cached," +
-                                        "max-stale=" + 60 * 60 * 24)*//*
-                                .build();
-
-                        return chain.proceed(request);
-                    }
-                })*/
-                .addInterceptor(logging)
-                .build();
-        networkCall = new Retrofit.Builder()
-                .baseUrl(BASE_URL_VAL)
-                .client(okClient)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return networkCall;
+        return createRetrofitInBackground(BASE_URL_VAL);
     }
 
     public Retrofit businessApiCallingURL() {
-        //Start
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient okClient = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.MINUTES)
-                .readTimeout(5, TimeUnit.MINUTES)
-                .writeTimeout(5, TimeUnit.MINUTES)
-                /*.addInterceptor(new Interceptor() {
-                    public Response intercept(Chain chain) throws IOException {
-                        Request request = chain.request().newBuilder()
-                                *//*.header("Cache-Control", "public, only-if-cached," +
-                                        "max-stale=" + 60 * 60 * 24)*//*
-                                .build();
-
-                        return chain.proceed(request);
-                    }
-                })*/
-                .addInterceptor(logging)
-                .build();
-        networkCall = new Retrofit.Builder()
-                .baseUrl(BUSINESS_API_URL_VAL)
-                .client(okClient)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return networkCall;
+        return createRetrofitInBackground(BUSINESS_API_URL_VAL);
     }
 
+    private Retrofit createRetrofitInBackground(String baseUrl) {
+        synchronized (lock) {
+            if (isInitialized) {
+                return networkCall;
+            }
+
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            OkHttpClient okClient = new OkHttpClient.Builder()
+                    .connectTimeout(5, TimeUnit.MINUTES)
+                    .readTimeout(5, TimeUnit.MINUTES)
+                    .writeTimeout(5, TimeUnit.MINUTES)
+                    .addInterceptor(logging)
+                    .build();
+
+            networkCall = new Retrofit.Builder()
+                    .baseUrl(baseUrl)
+                    .client(okClient)
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            isInitialized = true;
+            return networkCall;
+        }
+    }
 
     // To check Online Connection
     public static boolean isOnline(Context context) {

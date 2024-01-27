@@ -1,14 +1,15 @@
 package com.techrev.videocall;
 
+
 import com.google.gson.JsonObject;
+
+import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -17,6 +18,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
+import retrofit2.http.Url;
 
 public interface NetworkInterface
 {
@@ -50,20 +52,20 @@ public interface NetworkInterface
     @Multipart
     @POST("insertRequestImages")
     Call<UploadImageModel> uploadFile(@Header("Authorization") String token,
-                                      @Part MultipartBody.Part file,
-                                      @Part("file") RequestBody name,
-                                      @Part("documentName") String docName,
-                                      @Part("isDewDoc") Boolean isDewDocName,
-                                      @Part("requestId") String requestId);
+                                                                             @Part MultipartBody.Part file,
+                                                                             @Part("file") RequestBody name,
+                                                                             @Part("documentName") String docName,
+                                                                             @Part("isDewDoc") Boolean isDewDocName,
+                                                                             @Part("requestId") String requestId);
 
     @Multipart
     @POST("uploadAttachmentFile")
     Call<AttachedFileUploadResponseModel> uploadAttachedFile(@Header("Authorization") String token,
-                                                                                   @Part MultipartBody.Part file,
-                                                                                   @Part("file") RequestBody name,
-                                                                                   @Part("documentName") String docName,
-                                                                                   @Part("isDewDoc") Boolean isDewDocName,
-                                                                                   @Part("uploadedBy") String requestId);
+                                                                             @Part MultipartBody.Part file,
+                                                                             @Part("file") RequestBody name,
+                                                                             @Part("documentName") String docName,
+                                                                             @Part("isDewDoc") Boolean isDewDocName,
+                                                                             @Part("uploadedBy") String requestId);
 
 
     @Headers("Content-Type: application/json")
@@ -160,20 +162,17 @@ public interface NetworkInterface
     @Multipart
     @POST("uploadRequesterDocument")
     Call<AttachedFileUploadResponseModel> uploadRequesterDocument(@Header("Authorization") String token,
-                                                                  @Part MultipartBody.Part file,
-                                                                  @Part("userType") String userType,
-                                                                  @Part("RequestId") String RequestId,
-                                                                  @Part("documentName") String documentName,
-                                                                  @Part("userId") String userId,
-                                                                  @Part("isTempRequest") Boolean isTempRequest,
-                                                                  @Part("dateTime") String dateTime,
-                                                                  @Part("tempRequestId") String tempRequestId,
-                                                                  @Part("isDewDoc") Boolean isDewDoc);
+                                                             @Part MultipartBody.Part file,
+                                                             @Part("userType") RequestBody userType,
+                                                             @Part("documentName") RequestBody documentName,
+                                                             @Part("userId") RequestBody userId,
+                                                             @Part("dateTime") RequestBody dateTime,
+                                                             @Part("isDewDoc") RequestBody isDewDoc,
+                                                             @Part("uploadedBy") RequestBody uploadedBy);
 
-    @Headers("Content-Type: application/json")
     @POST("updateExistingRequestDocument")
     Call<CommonModel> updateExistingRequestDocument(@Header("Authorization") String token,
-                                                                          @Body String data);
+                                                    @Body RequesterDocumentModel model);
 
     @Headers("Content-Type: application/json")
     @POST("getRequestParticipantByReqIdAndUserId")
@@ -188,8 +187,21 @@ public interface NetworkInterface
     Call<ResponseBody> removeImageBackgroundAndAutoCrop(@Header("Authorization") String token,
                                                         @Part MultipartBody.Part image);
 
-    @Headers("Content-Type: application/json")
+    @Multipart
     @POST("uploadCustomerImages")
-    Call<ResponseBody> uploadCustomerImages(@Header("Authorization") String token, @Body String body);
+    Call<ResponseBody> uploadCustomerImages(@Header("Authorization") String token,
+                                            @Part MultipartBody.Part image,
+                                            @Part("isDewDoc") RequestBody ImageType,
+                                            @Part("signatureUploadId") RequestBody signatureUploadld,
+                                            @Part("isSignature") RequestBody isSignature,
+                                            @Part("isEditedlmage") RequestBody isEditedlmage,
+                                            @Part("guid") RequestBody guid,
+                                            @Part("requestId") RequestBody requestId,
+                                            @Part("userId") RequestBody userid
+                                            );
+
+    @GET("downloadDewFile")
+    @Streaming // Use Streaming to download large files
+    Call<ResponseBody> downloadPdf(@Query("DocId") String docID);
 
 }

@@ -5,7 +5,7 @@ public class Constants {
     public static int member_type_banker = 1;
     public static int member_type_participant = 2;
     public static  boolean isLocationEnable = true;
-    public static  boolean isCaptureImageEnable = true;
+    public static  boolean isCaptureImageEnable = false; // temporarily made false
     public static  boolean isTimerEnable = true;
     public static  boolean isHostDisable = true;
 

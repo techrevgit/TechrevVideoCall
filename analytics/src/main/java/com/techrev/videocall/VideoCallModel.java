@@ -7,6 +7,8 @@ import com.twilio.video.LocalDataTrackPublication;
 import com.twilio.video.LocalParticipant;
 import com.twilio.video.LocalVideoTrack;
 
+import java.io.Serializable;
+
 public class VideoCallModel {
     private LocalAudioTrack localAudioTrack;
     private LocalVideoTrack localVideoTrack;

@@ -8,9 +8,11 @@ dependencyResolutionManagement {
         maven {
             url "https://jitpack.io"
             credentials {
-                /*username = "techrevgit"
-                password = "Techrev@2023"*/
+                username = "techrevgit"
+                password = "Techrev@2023"
+                // For private repo
                 credentials { username authToken }
+                // For private repo
             }
         }
         maven { url 'https://sdk.withpersona.com/android/releases' }

@@ -11,9 +11,6 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         Intent it = getIntent();
-        if (it != null && it.hasExtra("API_BASE_URL")) {
-            Constants.API_BASE_URL = it.getStringExtra("API_BASE_URL");
-        }
         Intent intent = new Intent(this , PermissionActivity.class);
         intent.putExtras(it);
         startActivity(intent);

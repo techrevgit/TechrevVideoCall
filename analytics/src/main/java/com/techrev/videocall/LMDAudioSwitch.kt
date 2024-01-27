@@ -1,4 +1,4 @@
-package com.techrev.videocall;
+package com.techrev.videocall
 
 import android.content.Context
 import android.media.AudioManager

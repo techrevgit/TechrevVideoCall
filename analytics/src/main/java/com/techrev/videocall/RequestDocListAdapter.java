@@ -12,16 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,13 +105,13 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
             public void onClick(View view) {
                 bottomSheetDialog.cancel();
                 Intent it = new Intent(mActivity , PreviewRequestDocumentActivity.class);
-                it.putExtra("DOC_ID" , mList.get(position).getDocId());
+                it.putExtra("AUTH_TOKEN" , authToken);
+                it.putExtra("DOC_ID" , mList.get(position).getUploadedDocId());
                 mActivity.startActivity(it);
             }
         });
 
         tv_delete_document.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View view) {
                 bottomSheetDialog.cancel();
@@ -131,7 +130,6 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     private void showDocumentDeleteConfirmationDialog(int position) {
 
         DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -158,8 +156,10 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
                 .setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener)
                 .show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+        }
 
     }
 
