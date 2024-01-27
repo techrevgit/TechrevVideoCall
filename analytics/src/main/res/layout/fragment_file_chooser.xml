@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:background="@layout/sky_background"
+        android:background="@drawable/sky_background"
         android:padding="10dp"
         android:gravity="center"
         >
@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:background="@layout/sky_background"
+        android:background="@drawable/sky_background"
         android:padding="10dp"
         android:gravity="center"
         android:visibility="gone"

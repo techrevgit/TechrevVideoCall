@@ -236,7 +236,7 @@
         android:textSize="15sp"
         android:padding="10dp"
         android:gravity="center"
-        android:background="@layout/sky_background"
+        android:background="@drawable/sky_background"
         android:layout_margin="30dp"
         />
 
