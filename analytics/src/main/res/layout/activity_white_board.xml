@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="cordova_plugin_techrev_videoconference.WhiteBoardActivity">
+    tools:context=".WhiteBoardActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"

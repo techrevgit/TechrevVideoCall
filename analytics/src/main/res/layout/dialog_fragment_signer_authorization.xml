@@ -9,7 +9,7 @@
     app:cardElevation="1dp"
     android:layout_marginLeft="15dp"
     android:layout_marginRight="15dp"
-    tools:context="cordova_plugin_techrev_videoconference.SignerAuthirizationDialogFragment">
+    tools:context=".SignerAuthirizationDialogFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

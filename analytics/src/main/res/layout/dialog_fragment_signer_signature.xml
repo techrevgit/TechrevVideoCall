@@ -7,7 +7,7 @@
         app:cardCornerRadius="10dp"
         app:cardElevation="10dp"
         app:cardBackgroundColor="@color/white"
-        tools:context="cordova_plugin_techrev_videoconference.CaptureSignerSignatureDialogFragment">
+        tools:context=".CaptureSignerSignatureDialogFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -157,7 +157,7 @@
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
                 android:textSize="16sp"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/color_primary"
                 />
 
         </LinearLayout>

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
     android:orientation="vertical"
-    tools:context="cordova_plugin_techrev_videoconference.MyAllUploadedDocumentsActivity">
+    tools:context=".MyAllUploadedDocumentsActivity">
 
     <LinearLayout
         android:id="@+id/header_section"

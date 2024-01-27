@@ -1,4 +1,4 @@
-//package cordova_plugin_techrev_videoconference.TechRevVideoConferenceWrapper;
+//package .TechRevVideoConferenceWrapper;
 package com.techrev.videocall;
 import android.content.Context;
 import android.net.ConnectivityManager;

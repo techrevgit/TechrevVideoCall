@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="cordova_plugin_techrev_videoconference.PreviewRequestDocumentActivity">
+    tools:context=".PreviewRequestDocumentActivity">
 
     <LinearLayout
         android:id="@+id/header_section"

@@ -51,10 +51,10 @@
         <param name="onload" value="true" />
     </feature>
     <feature name="TechRevIdVerificationWrapper">
-        <param name="android-package" value="cordova_plugin_techrev_idverification.TechRevIdVerificationWrapper" />
+        <param name="android-package" value=".TechRevIdVerificationWrapper" />
     </feature>
     <feature name="TechRevVideoConferenceWrapper">
-        <param name="android-package" value="cordova_plugin_techrev_videoconference.TechRevVideoConferenceWrapper" />
+        <param name="android-package" value=".TechRevVideoConferenceWrapper" />
     </feature>
     <feature name="SQLitePlugin">
         <param name="android-package" value="io.sqlc.SQLitePlugin" />
