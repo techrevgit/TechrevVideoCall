@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".WhiteBoardActivity">
+    tools:context=".ui.whiteboard.WhiteBoardActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -143,72 +143,72 @@
             android:resource="@mipmap/ic_launcher" />
 
         <activity
-            android:name=".PermissionActivity"
+            android:name=".ui.permission.PermissionActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="PermissionActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             />
         <activity
-            android:name=".VideoActivity"
+            android:name=".ui.videocallroom.VideoActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="VideoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             />
         <activity
-            android:name=".NoInternetActivity"
+            android:name=".ui.internet.NoInternetActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="NoInternetActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".AddCoSignerActivity"
+            android:name=".ui.cosigner.AddCoSignerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="AddCoSignerActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:screenOrientation="portrait" />
 
         <service xmlns:tools="http://schemas.android.com/tools"
-            android:name="ScreenCapturerService"
+            android:name=".services.ScreenCapturerService"
             android:enabled="true"
             android:foregroundServiceType="mediaProjection"
             tools:targetApi="q" />
         <service xmlns:tools="http://schemas.android.com/tools"
-            android:name="VideoCallService"
+            android:name=".ui.videocallroom.VideoCallService"
             android:enabled="true"
             android:exported="true"
             tools:targetApi="q" />
         <service xmlns:tools="http://schemas.android.com/tools"
-            android:name="APictureCapturingService"
+            android:name=".services.APictureCapturingService"
             android:enabled="true"
             android:exported="true"
             tools:targetApi="q"
             tools:ignore="Instantiatable" />
         <activity
-            android:name=".CameraActivity"
+            android:name=".ui.camera.CameraActivity"
             android:exported="false"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             />
         <activity
-            android:name=".WhiteBoardActivity"
+            android:name=".ui.whiteboard.WhiteBoardActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
         <activity
-            android:name=".PreviewRequestDocumentActivity"
+            android:name=".ui.mydocuments.PreviewRequestDocumentActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
         <activity
-            android:name=".MyCurrentUploadedDocumentsActivity"
+            android:name=".ui.mydocuments.MyCurrentUploadedDocumentsActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
         <activity
-            android:name=".MyAllUploadedDocumentsActivity"
+            android:name=".ui.mydocuments.MyAllUploadedDocumentsActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
             android:exported="true"
             android:label="@string/activity_name"

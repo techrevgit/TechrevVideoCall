@@ -18,11 +18,18 @@
         android:layout_below="@id/toolbar"
         />
 
-    <com.github.barteksc.pdfviewer.PDFView
+    <!--<com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/pdf_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
+        />-->
+
+    <WebView
+        android:id="@+id/pdfWebview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
         />
 
 </RelativeLayout>

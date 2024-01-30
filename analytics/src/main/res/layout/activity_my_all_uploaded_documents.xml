@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
     android:orientation="vertical"
-    tools:context=".MyAllUploadedDocumentsActivity">
+    tools:context=".ui.mydocuments.MyAllUploadedDocumentsActivity">
 
     <LinearLayout
         android:id="@+id/header_section"

@@ -7,7 +7,7 @@
         app:cardCornerRadius="10dp"
         app:cardElevation="10dp"
         app:cardBackgroundColor="@color/white"
-        tools:context=".CaptureSignerSignatureDialogFragment">
+        tools:context=".dialogfragments.CaptureSignerSignatureDialogFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
