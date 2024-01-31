@@ -75,12 +75,10 @@ dependencies {
     //implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
     // SUB-PROJECT DEPENDENCIES END
     /*To import the sqlite jar files from local library*/ // Added By Rupesh
-    /*implementation files('libs/sqlite-connector.jar')
-    implementation files('libs/sqlite-native-driver.jar')*/
     /*To import the sqlite jar files from local library*/ // Added By Rupesh
     /*To import the whiteboard module to the app*/ // Added by Rupesh
     //implementation files('libs/drawingboard.aar')
-    implementation files('libs/drawingboard.aar')
+    compileOnly files('libs/drawingboard.aar')
     /*To import the whiteboard module to the app*/ // Added by Rupesh
     /*Added by Rupesh*/ // To use custom dialog in app
     //implementation 'io.github.tutorialsandroid:kalertdialog:20.3.6'
