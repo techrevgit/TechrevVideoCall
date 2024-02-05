@@ -4261,9 +4261,15 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private void getAllMessagesByMeetingId(String meeting_id, String req_type) {
         chatBadge.setVisibility(View.GONE);
         ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
+
         Log.e(TAG, "Meeting ID: " + meeting_id);
         JSONObject obj = new JSONObject();
         try {
@@ -4289,9 +4295,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                 @Override
                 protected void onPostExecute(ChatDataModel response) {
-                    if (dialog != null) {
-                        dialog.dismiss();
-                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (dialog != null) {
+                                dialog.dismiss();
+                            }
+                        }
+                    });
                     chatList = new ArrayList<>();
 
                     if (response != null) {
@@ -5126,9 +5137,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @SuppressLint("StaticFieldLeak")
     public void uploadAttachedFile(Bitmap bitmap, String file_name, String mime_type) {
         ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
 
         new AsyncTask<Object, Void, Void>() {
 
@@ -5150,7 +5166,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 call.enqueue(new Callback<AttachedFileUploadResponseModel>() {
                     @Override
                     public void onResponse(Call<AttachedFileUploadResponseModel> call, Response<AttachedFileUploadResponseModel> response) {
-                        dialog.dismiss();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (dialog != null) {
+                                    dialog.dismiss();
+                                }
+                            }
+                        });
                         Log.d("====Inside1", "Success");
                         Log.d("====Inside1", "Response:" + response.code());
                         if (response.code() == 200) {
@@ -9889,9 +9912,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @SuppressLint("StaticFieldLeak")
     private void checkIfUserAllowedNotaryToCaptureSignatureAndInitial(String meetingId, String userId) throws JSONException {
         ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        // dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
         Log.e(TAG, "Meeting ID: " + meetingId);
         JSONObject obj = new JSONObject();
         obj.put("RequestId", meetingId);
@@ -9916,9 +9944,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             @Override
             protected void onPostExecute(SignerSignatureInitialAuthorizationModel result) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
 
                 if (result != null) {
                     Log.d(TAG, "Signer Signature/Initial Allow Data: \n" + new Gson().toJson(result));
@@ -9943,7 +9976,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 ft.remove(prev);
                             }
                             ft.addToBackStack(null);
-                            authorizationDialogFragment.show(ft, "dialog");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    authorizationDialogFragment.show(ft, "dialog");
+                                }
+                            });
                         }
                     }
                 }
@@ -10011,9 +10049,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @SuppressLint("StaticFieldLeak")
     private void updateRequestParticipantCapture(String meetingId, String userId) throws JSONException {
         ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
         Log.e(TAG, "Meeting ID: " + meetingId);
         JSONObject obj = new JSONObject();
         obj.put("requestId", meetingId);
@@ -10039,9 +10082,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             @Override
             protected void onPostExecute(CommonModel result) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
 
                 if (result != null) {
                     Log.e(TAG, "Signer Signature/Initial Authorization Update Response Data: \n" + new Gson().toJson(result));
