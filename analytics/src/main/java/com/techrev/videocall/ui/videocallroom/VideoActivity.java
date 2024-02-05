@@ -368,8 +368,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         public void onScreenCaptureError(String errorDescription) {
             Log.e(TAG, "Screen capturer error: " + errorDescription);
             stopScreenCapture();
-            Toast.makeText(VideoActivity.this, "screen_capture_error",
-                    Toast.LENGTH_LONG).show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(VideoActivity.this, "screen_capture_error",
+                            Toast.LENGTH_LONG).show();
+                }
+            });
         }
 
         @Override
@@ -946,8 +951,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         // do we have a camera?
         if (!getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            Toast.makeText(this, "No camera on this device", Toast.LENGTH_LONG)
-                    .show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(VideoActivity.this, "No camera on this device", Toast.LENGTH_LONG)
+                            .show();
+                }
+            });
         }
         else {
             if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -955,8 +965,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }else {
                 cameraId = findFrontFacingCamera();
                 if (cameraId < 0) {
-                    Toast.makeText(this, "No front facing camera found.",
-                            Toast.LENGTH_LONG).show();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(VideoActivity.this, "No front facing camera found.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
                 } else {
                     releaseCameraAndPreview();
                     SurfaceView surfaceView = new SurfaceView(this);
@@ -1536,7 +1551,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     throw new RuntimeException(e);
                 }
             }
-            Toast.makeText(VideoActivity.this, participantName+" Left", Toast.LENGTH_SHORT).show();
+            String finalParticipantName = participantName;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(VideoActivity.this, finalParticipantName +" Left", Toast.LENGTH_SHORT).show();
+                }
+            });
             reconnectingProgressBar.setVisibility(View.GONE);
             removeRemoteParticipant(eventModel.getTechrevRemoteParticipant().remoteParticipant);
             if (name.contains("hoster-")){
@@ -1610,7 +1631,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     throw new RuntimeException(e);
                 }
             }
-            Toast.makeText(VideoActivity.this, participantName+" Joined", Toast.LENGTH_SHORT).show();
+            String finalParticipantName = participantName;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(VideoActivity.this, finalParticipantName +" Joined", Toast.LENGTH_SHORT).show();
+                }
+            });
             reconnectingProgressBar.setVisibility(View.GONE);
             remoteParticipantList.add(eventModel.getTechrevRemoteParticipant());
             addRemoteParticipant(eventModel.getTechrevRemoteParticipant());
@@ -1677,7 +1704,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     throw new RuntimeException(e);
                 }
             }
-            Toast.makeText(VideoActivity.this, participantName+" Left", Toast.LENGTH_SHORT).show();
+            String finalParticipantName = participantName;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(VideoActivity.this, finalParticipantName +" Left", Toast.LENGTH_SHORT).show();
+                }
+            });
             isRemovingParticipant=true;
             removeRemoteParticipant(eventModel.getTechrevRemoteParticipant().remoteParticipant);
             isRemovingParticipant=false;
@@ -4323,7 +4356,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         iv_send_message.setOnClickListener(view -> {
                             try {
                                 if (et_message.getText().toString().isEmpty()) {
-                                    Toast.makeText(mActivity, "Please enter a message", Toast.LENGTH_SHORT).show();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(mActivity, "Please enter a message", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                                 } else {
                                     saveNewMessage(meeting_id, et_message.getText().toString(), userId, "Message");
                                 }
@@ -5635,7 +5673,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     // Perform any additional processing or UI updates here
                     activity.uploadImageFile(resizedBitmap);
                 } else {
-                    Toast.makeText(activity, "take_picture_failed", Toast.LENGTH_LONG).show();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(activity, "take_picture_failed", Toast.LENGTH_LONG).show();
+                        }
+                    });
                     alertDialog1.dismiss();
                 }
             }
@@ -5799,10 +5842,15 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 // Call your method to upload the image file
                                 uploadImageFile(finBitmap);
                             } else {
-                                Toast.makeText(VideoActivity.this,
-                                        "take_picture_failed",
-                                        Toast.LENGTH_LONG).show();
-                                alertDialog1.dismiss();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(VideoActivity.this,
+                                                "take_picture_failed",
+                                                Toast.LENGTH_LONG).show();
+                                        alertDialog1.dismiss();
+                                    }
+                                });
                             }
                         }
                     }.execute(bytes);
@@ -6954,7 +7002,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @SuppressLint("StaticFieldLeak")
     private void sendUpdateToServer() {
-        Toast.makeText(VideoActivity.this, "Sending update to server...", Toast.LENGTH_SHORT).show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(VideoActivity.this, "Sending update to server...", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -7289,7 +7342,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(VideoActivity.this, "We are unable to cancel your request. Please contact support team.", Toast.LENGTH_LONG).show();
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(VideoActivity.this, "We are unable to cancel your request. Please contact support team.", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
                                     }
                                 });
                             }
@@ -7379,7 +7437,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(VideoActivity.this, "Your notarization request has been cancelled by you.", Toast.LENGTH_LONG).show();
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(VideoActivity.this, "Your notarization request has been cancelled by you.", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
                                         exitFromTheRoom();
                                     }
                                 });
@@ -7387,7 +7450,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(VideoActivity.this, "Sorry, the request is already cancelled.", Toast.LENGTH_LONG).show();
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(VideoActivity.this, "Sorry, the request is already cancelled.", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
                                         exitFromTheRoom();
                                     }
                                 });
@@ -7395,7 +7463,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(VideoActivity.this, "Sorry, the request is already notarized.", Toast.LENGTH_LONG).show();
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(VideoActivity.this, "Sorry, the request is already notarized.", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
                                         exitFromTheRoom();
                                     }
                                 });
@@ -7403,7 +7476,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(VideoActivity.this, "Sorry, the request is already cancelled by notary.", Toast.LENGTH_LONG).show();
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Toast.makeText(VideoActivity.this, "Sorry, the request is already cancelled by notary.", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
                                         exitFromTheRoom();
                                     }
                                 });
@@ -7507,7 +7585,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         protected void onPostExecute(Void result) {
                             // Update UI or perform post-processing tasks on the main thread
                             // For example, show a Toast message
-                            Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }.execute();
                 }
@@ -8621,7 +8704,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         Log.d("====Inside", "Success");
                         Log.d("====Inside", "response:" + response.code());
-                        Toast.makeText(VideoActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(VideoActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         dialogImage.dismiss();
                     }
 
@@ -8813,7 +8901,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             }
                         }.execute();
                     } else {
-                        Toast.makeText(VideoActivity.this, "Enter custom document name", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(VideoActivity.this, "Enter custom document name", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         etCustomName.requestFocus();
                     }
                 } else {
@@ -9272,7 +9365,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         Log.d("====jsonString2", "Response:" + response.code());
                         sharedPreference.setString("LastLocationSharedTime", finalCurrentDateAndTime);
                         sharedPreference.setString("LastLocationSharedRequestID", requestID);
-                        Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         Log.d(TAG, "LOCATION SHARED SUCCESSFULLY!");
                     }
 
@@ -10230,7 +10328,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         Log.d("====onResponse", "Success");
                         Log.d("====onResponse", "Response:" + response.code());
-                        Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
 
                     @Override
@@ -10304,7 +10407,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         Log.d("====onResponse", "Success");
                         Log.d("====onResponse", "Response:" + response.code());
-                        Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
 
                     @Override
