@@ -1748,11 +1748,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
 
             if (!isCoSigner) {
-                try {
+                // Commented by Rupesh for temp period for videocall testing
+                /*try {
                     checkIfUserAllowedNotaryToCaptureSignatureAndInitial(requestID , userId);
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
             }
 
         }
@@ -4299,8 +4300,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             public void run() {
                 dialog.setMessage("Please wait");
                 dialog.setCancelable(false);
-                // Commented by Rupesh for temp period for videocall testing
-                /*dialog.show();*/
+                dialog.show();
             }
         });
 
@@ -4333,8 +4333,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         @Override
                         public void run() {
                             if (dialog != null) {
-                                // Commented by Rupesh for temp period for videocall testing
-                                /*dialog.dismiss();*/
+                                dialog.dismiss();
                             }
                         }
                     });
@@ -5182,8 +5181,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             public void run() {
                 dialog.setMessage("Please wait");
                 dialog.setCancelable(false);
-                // Commented by Rupesh for temp period for videocall testing
-                /*dialog.show();*/
+                dialog.show();
             }
         });
 
@@ -5211,8 +5209,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             public void run() {
                                 if (dialog != null) {
-                                    // Commented by Rupesh for temp period for videocall testing
-                                    /*dialog.dismiss();*/
+                                    dialog.dismiss();
                                 }
                             }
                         });
@@ -10019,8 +10016,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             public void run() {
                 dialog.setMessage("Please wait");
                 dialog.setCancelable(false);
-                // Commented by Rupesh for temp period for videocall testing
-                /*dialog.show();*/
+                dialog.show();
             }
         });
         Log.e(TAG, "Meeting ID: " + meetingId);
@@ -10051,8 +10047,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     @Override
                     public void run() {
                         if (dialog != null) {
-                            // Commented by Rupesh for temp period for videocall testing
-                            /*dialog.dismiss();*/
+                            dialog.dismiss();
                         }
                     }
                 });
@@ -10083,8 +10078,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    // Commented by Rupesh for temp period for videocall testing
-                                    /*authorizationDialogFragment.show(ft, "dialog");*/
+                                    authorizationDialogFragment.show(ft, "dialog");
                                 }
                             });
                         }
@@ -10159,8 +10153,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             public void run() {
                 dialog.setMessage("Please wait");
                 dialog.setCancelable(false);
-                // Commented by Rupesh for temp period for videocall testing
-                /*dialog.show();*/
+                dialog.show();
             }
         });
         Log.e(TAG, "Meeting ID: " + meetingId);
@@ -10192,8 +10185,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     @Override
                     public void run() {
                         if (dialog != null) {
-                            // Commented by Rupesh for temp period for videocall testing
-                            /*dialog.dismiss();*/
+                            dialog.dismiss();
                         }
                     }
                 });
