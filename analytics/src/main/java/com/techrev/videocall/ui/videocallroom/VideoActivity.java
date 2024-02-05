@@ -1751,7 +1751,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 // Commented by Rupesh for temp period for videocall testing
                 /*try {
                     checkIfUserAllowedNotaryToCaptureSignatureAndInitial(requestID , userId);
-                } catch (JSONException e) {
+                } catch  (JSONException e) {
                     throw new RuntimeException(e);
                 }*/
             }

@@ -414,8 +414,13 @@ public class VideoCallService extends Service {
              * Rooms. Toggling the flag in a P2P room does not modify subscription behavior.
              */
             connectOptionsBuilder.enableAutomaticSubscription(enableAutomaticSubscription);
-
-            room = Video.connect(this, connectOptionsBuilder.build(), roomListener());
+            Log.d(TAG , "Before Video.connect()");
+            if (room != null) {
+                Log.d(TAG , "room = null");
+                room = Video.connect(this, connectOptionsBuilder.build(), roomListener());
+            } else {
+                Log.d(TAG , "room != null");
+            }
 
 
 
