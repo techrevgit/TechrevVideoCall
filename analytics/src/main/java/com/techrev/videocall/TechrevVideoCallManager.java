@@ -14,6 +14,7 @@ public class TechrevVideoCallManager {
                                      String userId, boolean isCoSigner, String userDetails, String requestParticipantId, String clientId) {
         //Toast.makeText(context, "You are now connected to room successfully!", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(context, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Log.d("===Args","baseURL:"+baseURL);
         Log.d("===Args","token:"+token);
         Log.d("===Args","roomName:"+roomName);
