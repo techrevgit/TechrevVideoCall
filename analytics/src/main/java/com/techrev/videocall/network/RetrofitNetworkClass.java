@@ -39,9 +39,9 @@ public class RetrofitNetworkClass {
 
     private Retrofit createRetrofitInBackground(String baseUrl) {
         synchronized (lock) {
-            if (isInitialized) {
+            /*if (isInitialized) {
                 return networkCall;
-            }
+            }*/
 
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);

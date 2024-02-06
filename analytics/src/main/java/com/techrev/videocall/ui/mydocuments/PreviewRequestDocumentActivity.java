@@ -47,7 +47,7 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         /*Added By Rupesh*/
         requestWindowFeature(Window.FEATURE_NO_TITLE); //will hide the title
-        getSupportActionBar().hide(); // hide the title bar
+        //getSupportActionBar().hide(); // hide the title bar
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //enable full screen
         /*Added By Rupesh*/

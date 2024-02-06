@@ -415,7 +415,7 @@ public class VideoCallService extends Service {
              */
             connectOptionsBuilder.enableAutomaticSubscription(enableAutomaticSubscription);
             Log.d(TAG , "Before Video.connect()");
-            if (room != null) {
+            if (room == null) {
                 Log.d(TAG , "room = null");
                 room = Video.connect(this, connectOptionsBuilder.build(), roomListener());
             } else {

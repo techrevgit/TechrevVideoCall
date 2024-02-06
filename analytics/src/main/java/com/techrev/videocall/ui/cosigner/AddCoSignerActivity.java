@@ -325,7 +325,7 @@ public class AddCoSignerActivity extends Activity {
                     dialog.dismiss();
                 }
 
-                if(response != null){
+                if(response != null && response.body() != null){
                     cosignerCount = response.body().getCosigners().size();
                     if (cosignerCount > 0){
                         Log.d(TAG , "Co-Signer Details: "+new Gson().toJson(response.body().getCosigners().get(0)));

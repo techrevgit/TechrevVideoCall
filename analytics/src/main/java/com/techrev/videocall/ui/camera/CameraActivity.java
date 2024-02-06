@@ -83,7 +83,7 @@ public class CameraActivity extends AppCompatActivity {
         /*Added By Ruepesh*/
         try
         {
-            this.getSupportActionBar().hide();
+            //this.getSupportActionBar().hide();
         }
         catch (NullPointerException e){}
         setContentView(R.layout.activity_camera);

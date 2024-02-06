@@ -107,7 +107,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 
 
+import com.techrev.videocall.dialogfragments.CaptureSignerInitialDialogFragment;
+import com.techrev.videocall.dialogfragments.CaptureSignerSignatureDialogFragment;
 import com.techrev.videocall.services.APictureCapturingService;
+import com.techrev.videocall.ui.camera.CameraActivity;
 import com.techrev.videocall.ui.cosigner.AddCoSignerActivity;
 import com.techrev.videocall.models.AttachedFileUploadResponseModel;
 import com.techrev.videocall.ui.camera.CameraCapturerCompat;
@@ -120,6 +123,7 @@ import com.techrev.videocall.models.DeleteMessageResponseModel;
 import com.techrev.videocall.models.EventModel;
 import com.techrev.videocall.models.MeetingDetailsModel;
 import com.techrev.videocall.ui.internet.NoInternetActivity;
+import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
 import com.techrev.videocall.utils.PictureCapturingListener;
 import com.techrev.videocall.services.PictureCapturingServiceImpl;
 import com.techrev.videocall.R;
@@ -718,11 +722,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void initViews() {
+        Log.d(TAG , "Thread Name in initViews: "+Thread.currentThread().getName());
         new InitViewsTask(this).execute();
     }
 
     private void initViewsInBackground() {
-
+        Log.d(TAG , "Thread Name in initViewsInBackground: "+Thread.currentThread().getName());
         Bundle extras = getIntent().getExtras();
         if (extras == null) {
             TWILIO_ACCESS_TOKEN = "";
@@ -792,12 +797,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             captureActionFab.setVisibility(View.GONE);
                             viewMeetingActionFab.setVisibility(View.GONE);
                         }
-                        //New Features to show
-
-//                shareScreenActionFab.setVisibility(View.VISIBLE);
-//                audioRefresh.setVisibility(View.VISIBLE);
-//                meetingShareDetails.setVisibility(View.VISIBLE);
-//                locationSharing.setVisibility(View.GONE);
 
                     }
                 }
@@ -813,37 +812,15 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         TWILIO_ROOM_NAME == null || TWILIO_ROOM_NAME.equalsIgnoreCase("")) {
 
                     AlertDialog alertDialog = new AlertDialog.Builder(
-
-                            // Need to add Alert Box
-
                             VideoActivity.this).create();
-
                     finish();
-
                     // Setting Dialog Title
                     alertDialog.setTitle("Alert");
-
-                    // Setting Dialog Message
-
                     alertDialog.setMessage("Try again...");
-
-
-                    // Setting Icon to Dialog
-
-//            alertDialog.setIcon(R.drawable.tick);
-
-
-                    // Setting OK Button
-
                     alertDialog.setButton("Ok", new DialogInterface.OnClickListener() {
 
                         public void onClick(DialogInterface dialog, int which) {
-
-                            // Write your code here to execute after dialog closed
-
-                            // Need to add Alert Box
                             finish();
-
                         }
 
                     });
@@ -948,6 +925,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void initCamera(){
+        Log.d(TAG , "Thread Name in inintCamera: "+Thread.currentThread().getName());
         // do we have a camera?
         if (!getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -989,7 +967,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     //Added by Rupesh
     private void showThumbnailInPrimaryVideoSection(){
-        video_view.removeAllViews();
+        Log.d(TAG , "Thread Name in showThumbnailInPrimaryVideoSection: "+Thread.currentThread().getName());
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                video_view.removeAllViews();
+            }
+        });
         VideoView videoView = new VideoView(this);
         video_view.addView(videoView);
         primaryVideoView = videoView;
@@ -1003,14 +987,20 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             this.videoCallModel.getLocalVideoTrack().addRenderer(videoView);
         }
-        participant_initial.setVisibility(View.GONE);
-        video_view.setVisibility(View.VISIBLE);
-        rl_recording_section.setVisibility(View.VISIBLE);
-        tv_activeParticipantName.setText("You");
-        mActiveParticipantIndex = -1;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                participant_initial.setVisibility(View.GONE);
+                video_view.setVisibility(View.VISIBLE);
+                rl_recording_section.setVisibility(View.VISIBLE);
+                tv_activeParticipantName.setText("You");
+                mActiveParticipantIndex = -1;
+            }
+        });
     }
 
     private void releaseCameraAndPreview() {
+        Log.d(TAG , "Thread Name in releaseCameraAndPreview: "+Thread.currentThread().getName());
         if (camera != null) {
             camera.lock();
             camera.stopPreview();
@@ -1021,6 +1011,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     // slide the view from below itself to the current position
     public void slideUp(View controlView , View participantView){
+        Log.d(TAG , "Thread Name in slideUp: "+Thread.currentThread().getName());
         controlView.setVisibility(View.VISIBLE);
 
         TranslateAnimation animate = new TranslateAnimation(
@@ -1046,6 +1037,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     // slide the view from its current position to below itself
     public void slideDown(View controlView , View participantView){
+        Log.d(TAG , "Thread Name in slideDown: "+Thread.currentThread().getName());
         TranslateAnimation animate = new TranslateAnimation(
                 0,                 // fromXDelta
                 0,                 // toXDelta
@@ -1068,80 +1060,19 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     }
 
-    //Added by Rupesh
-
-    // slide the view from below itself to the current position
-    public void slideUpParticipantsView(View view){
-
-        int height = 0;
-        if (view != null){
-            height = view.getHeight();
-        }
-
-        TranslateAnimation animate = new TranslateAnimation(
-                0,                 // fromXDelta
-                0,                 // toXDelta
-                0,  // fromYDelta
-                -height);                // toYDelta
-        animate.setDuration(500);
-        animate.setFillAfter(true);
-        if (view != null)
-            view.startAnimation(animate);
-    }
-
-    // slide the view from its current position to below itself
-    public void slideDownParticipantsView(View view){
-        int height = 0;
-        if (view != null){
-            height = view.getHeight();
-        }
-        TranslateAnimation animate = new TranslateAnimation(
-                0,                 // fromXDelta
-                0,                 // toXDelta
-                -height,                 // fromYDelta
-                0); // toYDelta
-        animate.setDuration(500);
-        animate.setFillAfter(true);
-        if (view != null)
-            view.startAnimation(animate);
-    }
-
     public void onSlideViewButtonClick(View controlView , View participantView) {
+        Log.d(TAG , "Thread Name in onSlideViewButtonClick: "+Thread.currentThread().getName());
         if (isUp) {
             slideDown(controlView , participantView);
-            /*if(remoteParticipantList!=null && remoteParticipantList.size()>1) {
-                slideUpParticipantsView(participantsview);
-            }else{
-                if (participantsAdapter!=null){
-                    participantsAdapter.notifyDataSetChanged();
-                }
-                //if(participantsview != null)
-                    //participantsview.setVisibility(View.GONE);
-            }*/
-
         } else {
             slideUp(controlView , participantView);
-            /*if(remoteParticipantList!=null && remoteParticipantList.size()>1) {
-                slideDownParticipantsView(participantsview);
-            }else{
-                if (participantsAdapter!=null){
-                    participantsAdapter.notifyDataSetChanged();
-                }
-                if(participantsview != null){
-                    //participantsview.setVisibility(View.GONE);
-                }
-            }*/
-
         }
         isUp = !isUp;
     }
-    float dX;
-    float dY;
-    int lastAction;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-
+        Log.d(TAG , "Thread Name in onTouch: "+Thread.currentThread().getName());
         if(video_view==v && remoteParticipantList!=null && remoteParticipantList.size()>0)
         {
             if(MotionEvent.ACTION_DOWN==event.getActionMasked()) {
@@ -1149,39 +1080,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
             return true;
         }
-        float newX, newY;
-        /*switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-                dX = card_view_thumbnailView.getX() - event.getRawX();
-                dY = card_view_thumbnailView.getY() - event.getRawY();
-                lastAction = MotionEvent.ACTION_DOWN;
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                newX = event.getRawX() + dX;
-                newY = event.getRawY() + dY;
-                if ((newX <= 0 || newX >= screenWidth - card_view_thumbnailView.getWidth()) || (newY <= 250 || newY >= ((screenHight - card_view_thumbnailView.getHeight())) - 140)) {
-                    lastAction = MotionEvent.ACTION_MOVE;
-                    break;
-                }
-                card_view_thumbnailView.setY(event.getRawY() + dY);
-                card_view_thumbnailView.setX(event.getRawX() + dX);
-                lastAction = MotionEvent.ACTION_MOVE;
-                break;
-
-            case MotionEvent.ACTION_UP:
-                if (lastAction == MotionEvent.ACTION_DOWN)
-                    //Toast.makeText(VideoActivity.this, "Clicked!", Toast.LENGTH_SHORT).show();
-                break;
-
-            default:
-                return false;
-        }*/
         return true;
     }
 
     public void notifytoOhterParticipants()
     {
+        Log.d(TAG , "Thread Name in notifytoOhterParticipants: "+Thread.currentThread().getName());
         Log.e(TAG , "remote participant list size in notifytoOhterParticipants: "+remoteParticipantList.size());
         if(participantsAdapter==null && remoteParticipantList!=null && remoteParticipantList.size()>1) {
             participantsview.setVisibility(View.VISIBLE);
@@ -1232,7 +1136,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @Override
     protected void onResume() {
         super.onResume();
-
+        Log.d(TAG , "Thread Name in onResume: "+Thread.currentThread().getName());
         if (sharedPreference!=null && sharedPreference.getBoolean(Constants.CALL_ENDED_IN_BACKGROUND)){
             exitFromTheRoom();
         }
@@ -1297,6 +1201,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @Override
     protected void onPause() {
+        Log.d(TAG , "Thread Name in onPause: "+Thread.currentThread().getName());
         //AppSession.getSingletonInstance(this).setActivityRunning("VideoActivity");
         if(lmdAudioSwitch!=null) {
             lmdAudioSwitch.stop();
@@ -1334,7 +1239,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @Override
     protected void onDestroy() {
-
+        Log.d(TAG , "Thread Name in onDestroy: "+Thread.currentThread().getName());
         //sharedPreference.setBoolean(Constants.isScreenShared , false);
 
         if (screenVideoTrack != null) {
@@ -1372,6 +1277,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     public  void ScreenShareOn(RemoteParticipant remoteParticipant)
     {
+        Log.d(TAG , "Thread Name in ScreenShareOn: "+Thread.currentThread().getName());
         if (selectedRemoteParticipant != null && selectedRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(remoteParticipant.getIdentity())) {
             selectedRemoteParticipant.setTechRevScreenEnable(true);
             selectedRemoteParticipant.setTechRevScreenSelected(true);
@@ -1385,6 +1291,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     public  void ScreenShareOff(RemoteParticipant remoteParticipant, RemoteVideoTrack remoteVideoTrack)
     {
+        Log.d(TAG , "Thread Name in ScreenShareOff: "+Thread.currentThread().getName());
         Log.e(TAG , "Remotepasrticipant: "+remoteParticipant);
         if (selectedRemoteParticipant != null && selectedRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(remoteParticipant.getIdentity())) {
             if(remoteVideoTrack.getName().equalsIgnoreCase("screen")) {
@@ -1749,11 +1656,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             if (!isCoSigner) {
                 // Commented by Rupesh for temp period for videocall testing
-                /*try {
+                try {
                     checkIfUserAllowedNotaryToCaptureSignatureAndInitial(requestID , userId);
-                } catch  (JSONException e) {
+                } catch (JSONException e) {
                     throw new RuntimeException(e);
-                }*/
+                }
             }
 
         }
@@ -1778,6 +1685,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void showNewParticipantVideoInFront(EventModel eventModel){
+        Log.d(TAG , "Thread Name in showNewParticipantVideoInFront: "+Thread.currentThread().getName());
         reconnectingProgressBar.setVisibility(View.GONE);
 
         showAll(eventModel);
@@ -1808,6 +1716,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void notifiyOthersFromForground(RemoteParticipant remoteParticipant, int ActionType) throws JSONException {
+        Log.d(TAG , "Thread Name in notifiyOthersFromForground: "+Thread.currentThread().getName());
         DataModel dModel =new DataModel();
         dModel.setFrom(remoteParticipant.getIdentity());
         dModel.setTo("All");
@@ -1837,7 +1746,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void notifiyOthersBackFromBackground() throws JSONException {
 
-
+        Log.d(TAG , "Thread Name in notifiyOthersBackFromBackground: "+Thread.currentThread().getName());
         for (int i = 0; i < remoteParticipantList.size(); i++)
         {
 
@@ -1865,6 +1774,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void showAll(EventModel eventModel)
     {
+        Log.d(TAG , "Thread Name in showAll: "+Thread.currentThread().getName());
         //Newly Added for localDataTrack
         if(eventModel.getVideoCallModel()!=null)
         {
@@ -1900,12 +1810,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     public  void showOtherParticipants()
     {
+        Log.d(TAG , "Thread Name in showOtherParticipants: "+Thread.currentThread().getName());
         notifytoOhterParticipants();
     }
 
     @SuppressLint("StaticFieldLeak")
     private void intializeUI() {
-
+        Log.d(TAG , "Thread Name in intializeUI: "+Thread.currentThread().getName());
         onclickInterface = new onClickInterface() {
             @Override
             public void onClickVideo(int index , String participantName) {
@@ -1927,6 +1838,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             @Override
             public void onClickScreen(int index , String participantName) {
+                Log.d(TAG , "Thread Name in onClickScreen: "+Thread.currentThread().getName());
                 SCREEN_SUBSCRIBED = true;
                 isMyViewActive = false;
                 mainThumbnailView.setBackground(VideoActivity.this.getDrawable(R.drawable.unselected_participant_background));
@@ -1946,6 +1858,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         onClickInterfaceParticipant = new ONClickInterfaceParticipant() {
             @Override
             public void onClickParticipantCapture(int index) {
+                Log.d(TAG , "Thread Name in onClickParticipantCapture: "+Thread.currentThread().getName());
                 TechrevRemoteParticipant remoteParticipant = (TechrevRemoteParticipant) remoteParticipantList.get(index);
                 Log.d("===CaptureInterface", "Called");
 
@@ -1984,6 +1897,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             @Override
             public void onClickParticipantAudio(int index) {
+                Log.d(TAG , "Thread Name in onClickParticipantAudio: "+Thread.currentThread().getName());
                 Log.d("===AudioInterface", "Called");
 
                 boolean msgVal = false;
@@ -2024,6 +1938,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             @Override
             public void onClickParticipantVideo(int index) {
+                Log.d(TAG , "Thread Name in onClickParticipantVideo: "+Thread.currentThread().getName());
                 Log.d("===VideoInterface", "Called");
                 boolean msgVal = false;
                 TechrevRemoteParticipant remoteParticipant = (TechrevRemoteParticipant) remoteParticipantList.get(index);
@@ -2057,6 +1972,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             @Override
             public void onClickParticipantCallEnd(int index) {
+                Log.d(TAG , "Thread Name in onClickParticipantCallEnd: "+Thread.currentThread().getName());
                 Log.d("===CallEndInterface", "Called");
                 TechrevRemoteParticipant remoteParticipant = (TechrevRemoteParticipant) remoteParticipantList.get(index);
                 if (remoteParticipant != null) {
@@ -2226,183 +2142,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
             });
 
-            /*captureActionFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    JSONObject json = new JSONObject();
-                    try {
-                        json.put("requestId", requestID);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                    String jsonString = json.toString();
-                    Call<DocumentsByRequestIdModel> docByReqID = serviceLocal.getDocumentsByRequestID(authToken, jsonString);
-
-                    docByReqID.enqueue(new Callback<DocumentsByRequestIdModel>() {
-                        @Override
-                        public void onResponse(Call<DocumentsByRequestIdModel> call, Response<DocumentsByRequestIdModel> response) {
-                            Log.d("====docByReqID", "onResponse");
-                            Log.d("====docByReqID", "" + response.code());
-//                        Log.d("====docByReqID", "" + response.body().getTotal());
-
-                            if (response.body() != null) {
-                                if (MaxImageCaptureLimit > 0) {
-                                    if (response.body().getTotal() != null) {
-                                        if (response.body().getTotal() == 0) {
-                                            //Call Take SnapShot Option
-                                            if (selectedRemoteParticipant != null) {
-                                                // Log.i("===NewCheck ", selectedRemoteParticipant.getIdentity());
-//                                            sendMessage();
-
-
-                                                RemoteVideoTrackPublication remoteVideoTrackPublication = selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().get(0);
-                                                if (remoteVideoTrackPublication.isTrackEnabled() && remoteVideoTrackPublication.isTrackSubscribed()) {
-                                                    Log.d("===Video1", "On");
-                                                    sendMessage();
-                                                } else {
-                                                    Log.d("===Video1", "Off");
-
-                                                    // Add AlertPopup
-                                                    AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                    alert.setTitle("Alert");
-                                                    alert.setMessage("Participant's camera is turned off so you cannot capture the image.");
-                                                    alert.setPositiveButton("Ok", null);
-                                                    alert.show();
-
-                                                }
-
-
-                                            }
-
-                                        } else if (response.body().getResults() != null) {
-
-                                            if (response.body().getResults().size() < MaxImageCaptureLimit) {
-                                                //Call Take SnapShot Optionv
-                                                if (selectedRemoteParticipant != null) {
-                                                    //Log.i("===NewCheck ", selectedRemoteParticipant.getIdentity());
-                                                    // sendMessage();
-
-
-                                                    if (selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
-                                                        RemoteVideoTrackPublication remoteVideoTrackPublication = selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().get(0);
-                                                        if (remoteVideoTrackPublication.isTrackEnabled() && remoteVideoTrackPublication.isTrackSubscribed()) {
-                                                            sendMessage();
-                                                        } else {
-                                                            // Add AlertPopup
-                                                            AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                            alert.setTitle("Alert");
-                                                            alert.setMessage("Participant's camera is turned off so you cannot capture the image.");
-                                                            alert.setPositiveButton("Ok", null);
-                                                            alert.show();
-                                                        }
-                                                    } else {
-
-                                                        AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                        alert.setTitle("Alert");
-                                                        alert.setMessage("Unable to capture the image, please try after sometime.");
-                                                        alert.setPositiveButton("Ok", null);
-                                                        alert.show();
-
-                                                    }
-
-                                                } else {
-                                                    AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                    alert.setTitle("Alert");
-                                                    alert.setMessage("Please select participant from the above participant's list and try again.");
-                                                    alert.setPositiveButton("Ok", null);
-                                                    alert.show();
-
-                                                }
-
-                                            } else {
-                                                // Add AlertPopup
-                                                AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                alert.setTitle("Alert");
-                                                alert.setMessage("As per your current plan, image capture limit is exceeded.");
-                                                alert.setPositiveButton("Ok", null);
-                                                alert.show();
-                                            }
-
-                                        } else {
-                                            // Add AlertPopup
-                                            AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                            alert.setTitle("Alert");
-                                            alert.setMessage("Unable to get proper response from the server, please try later.");
-                                            alert.setPositiveButton("Ok", null);
-                                            alert.show();
-                                        }
-
-                                    } else {
-                                        AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                        alert.setTitle("Alert");
-                                        alert.setMessage("Unable to get response from the server, please try later.");
-                                        alert.setPositiveButton("Ok", null);
-                                        alert.show();
-                                    }
-                                } else {
-                                    //sendMessage();
-
-                                    if (selectedRemoteParticipant != null) {
-                                        Log.i("===NewCheck ", selectedRemoteParticipant.remoteParticipant.getIdentity());
-
-                                        if (remoteParticipantList.size() > 0) {
-                                            if (selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
-                                                RemoteVideoTrackPublication remoteVideoTrackPublication = selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().get(0);
-                                                if (remoteVideoTrackPublication.isTrackEnabled() && remoteVideoTrackPublication.isTrackSubscribed()) {
-                                                    sendMessage();
-                                                } else {
-                                                    if (remoteParticipantList.size() > 0) {
-                                                        // Add AlertPopup
-                                                        AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                        alert.setTitle("Alert");
-                                                        alert.setMessage("Participant's camera is turned off so you cannot capture the image.");
-                                                        alert.setPositiveButton("Ok", null);
-                                                        alert.show();
-                                                    } else {
-                                                        AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                        alert.setTitle("Alert");
-                                                        alert.setMessage("There is no participant to capture image");
-                                                        alert.setPositiveButton("Ok", null);
-                                                        alert.show();
-
-                                                    }
-
-
-                                                }
-                                            } else {
-                                                AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                                alert.setTitle("Alert");
-                                                alert.setMessage("Unable to capture the image, please try after sometime.");
-                                                alert.setPositiveButton("Ok", null);
-                                                alert.show();
-
-
-                                            }
-                                        } else {
-                                            AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                                            alert.setTitle("Alert");
-                                            alert.setMessage("There is no participant to capture image.");
-                                            alert.setPositiveButton("Ok", null);
-                                            alert.show();
-                                        }
-                                    }
-                                }
-
-                            }
-
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<DocumentsByRequestIdModel> call, Throwable t) {
-                            Log.d("====docByReqID", "onFailure");
-                            Log.d("====docByReqID", "onFailure:" + t.toString());
-                        }
-                    });
-
-                }
-            });*/
         } else {
             captureActionFab.setVisibility(View.GONE);
         }
@@ -2506,189 +2245,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         });
 
-        /*viewMeetingActionFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("====TWILIO_ACCESS_TOKEN", "" + TWILIO_ACCESS_TOKEN);
-                Log.d("====TWILIO_ROOM_NAME", "" + TWILIO_ROOM_NAME);
-                Log.d("====BaseURL", "" + BaseURL);
-                Log.d("====authToken", "" + authToken);
-                Log.d("====requestID", "" + requestID);
-                Log.d("====passcode", "" + passcode);
-                if (BaseURL != null && BaseURL.length() > 0 && requestID != null && requestID.length() > 0) {
-                    BASE_URL_VAL = BaseURL + "api/";
-                    JSONObject json = new JSONObject();
-                    try {
-                        json.put("requestId", requestID);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    String jsonString = json.toString();
-                    Call<MeetingDetailsModel> meetingDetailsModelCall = serviceLocal.getAllMeetingDetails(authToken, jsonString);
-                    meetingDetailsModelCall.enqueue(new Callback<MeetingDetailsModel>() {
-
-                        @Override
-                        public void onResponse(Call<MeetingDetailsModel> call, Response<MeetingDetailsModel> response) {
-                            Log.d("=====Response", "Success");
-                            Log.d("=====Response", "Response Code" + response.code());
-
-                            if (response.body() != null) {
-                                dialogView = new Dialog(VideoActivity.this);
-                                dialogView.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                                dialogView.setContentView(R.layout.popup_layout_design);
-                                dialogView.setCancelable(true);
-                                dialogView.show();
-
-                                if (response.body().getResults() != null) {
-                                    if (response.body().getResults().getDocuments() != null) {
-                                        LinearLayout linearLayout = (LinearLayout) dialogView.findViewById(R.id.linearLayout1);
-                                        TextView txtViewUploadDoc = (TextView) dialogView.findViewById(R.id.txtViewUploadDoc);
-                                        if (response.body().getResults().getDocuments().size() > 0) {
-                                            txtViewUploadDoc.setVisibility(View.VISIBLE);
-                                            for (int x = 0; x < response.body().getResults().getDocuments().size(); x++) {
-                                                ImageView image = new ImageView(VideoActivity.this);
-//                                                image.getLayoutParams().width = 100;
-//                                                image.getLayoutParams().height = 20;
-                                                Log.d("====ImageURL", "" + response.body().getResults().getDocuments().get(x).getDocUrl());
-                                                Log.d("====BaseBURL", "" + BASE_URL_VAL);
-                                                String temp = response.body().getResults().getDocuments().get(x).getDocUrl();
-                                                //String nickname = temp.substring(0, temp.indexOf('/'));
-                                                String content = temp.substring(temp.indexOf('/') + 1);
-                                                Log.d("====content", "" + content);
-                                                Log.d("====content", "" + BASE_URL_VAL + content);
-//
-                                                GlideUrl glideUrl = new GlideUrl(BASE_URL_VAL + content,
-                                                        new LazyHeaders.Builder()
-                                                                .addHeader("Authorization", authToken)
-                                                                .build());
-
-                                                Glide.with(VideoActivity.this)
-                                                        .load(glideUrl)
-                                                        .into(image);
-
-                                                TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 300);
-                                                layoutParams.setMargins(10, 0, 0, 10);
-                                                image.setLayoutParams(layoutParams);
-
-//                                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(150, 150);
-//                                                image.setLayoutParams(params);
-//                                                RelativeLayout.LayoutParams params1=new RelativeLayout.LayoutParams(150,150);
-//                                                image.setLayoutParams(params1);
-
-                                                //image.setBackgroundResource(R.drawable.camera_off);
-                                                linearLayout.addView(image);
-                                            }
-
-                                        } else {
-                                            txtViewUploadDoc.setVisibility(View.GONE);
-                                        }
-
-                                    }
-
-                                }
-
-                                TextView titleName = (TextView) dialogView.findViewById(R.id.titleName);
-                                ImageView closeImg = (ImageView) dialogView.findViewById(R.id.close);
-
-                                closeImg.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        dialogView.dismiss();
-                                    }
-                                });
-
-                                if (response.body().getResults() != null) {
-                                    if (response.body().getResults().getMeetingTitle() != null) {
-                                        titleName.setText(response.body().getResults().getMeetingTitle());
-                                    }
-                                }
-
-                                TextView valueSST = (TextView) dialogView.findViewById(R.id.valueSST);
-                                TextView valueSET = (TextView) dialogView.findViewById(R.id.valueSET);
-                                TextView valueDur = (TextView) dialogView.findViewById(R.id.valueDuration);
-                                TextView valueActualStartTime = (TextView) dialogView.findViewById(R.id.valueActualStartTime);
-                                TextView valueActualEndTime = (TextView) dialogView.findViewById(R.id.valueActualEndTime);
-                                if (response.body().getResults() != null) {
-                                    if (response.body().getResults().getScheduledJoinTime() != null) {
-                                        new DateTimeFormationTask(valueSST, valueSET, valueActualStartTime, valueActualEndTime).execute(response.body().getResults().getScheduledJoinTime());
-                                    } else {
-                                        valueSST.setText("-");
-                                    }
-
-                                    if (response.body().getResults().getScheduledExpiryTime() != null) {
-                                        new DateTimeFormationTask(valueSST, valueSET, valueActualStartTime, valueActualEndTime).execute(response.body().getResults().getScheduledExpiryTime());
-                                    } else {
-                                        valueSET.setText("-");
-                                    }
-
-                                    if (response.body().getResults().getJoinTime() != null) {
-                                        new DateTimeFormationTask(valueSST, valueSET, valueActualStartTime, valueActualEndTime).execute(response.body().getResults().getJoinTime());
-                                    } else {
-                                        valueActualStartTime.setText("-");
-                                    }
-
-                                    if (response.body().getResults().getExpiresAt() != null) {
-                                        new DateTimeFormationTask(valueSST, valueSET, valueActualStartTime, valueActualEndTime).execute(response.body().getResults().getExpiresAt());
-                                    } else {
-                                        valueActualEndTime.setText("-");
-                                    }
-                                    if (response.body().getResults().getScheduledMeetingDuration() != null) {
-                                        Log.d("====valueDur", "" + response.body().getResults().getScheduledMeetingDuration());
-                                        valueDur.setText(response.body().getResults().getScheduledMeetingDuration().toString() + " mins");
-
-                                    } else {
-                                        valueDur.setText("-");
-                                    }
-                                    //valueDuration.setText(response.body().getResults().getScheduledMeetingDuration());
-                                }
-
-                                Call<ParticipantDetailsModel> getParticipantData = serviceLocal.getAllParticipantDetails(authToken, jsonString);
-                                getParticipantData.enqueue(new Callback<ParticipantDetailsModel>() {
-                                    @Override
-                                    public void onResponse(Call<ParticipantDetailsModel> call, Response<ParticipantDetailsModel> response) {
-                                        Log.d("=====Response", "Success Participants");
-                                        Log.d("=====Response", "Response Code" + response.code());
-                                        // Log.d("=====Response","Response Code"+response.body().getResults().get(0).getFirstName());
-
-                                        LinearLayoutManager layoutManager = new LinearLayoutManager(VideoActivity.this, LinearLayoutManager.HORIZONTAL, false);
-                                        RecyclerView rView = (RecyclerView) dialogView.findViewById(R.id.recyclerView);
-                                        rView.setLayoutManager(layoutManager);
-
-                                        if (response.body().getResults() != null) {
-                                            if (response.body().getResults().size() > 0) {
-                                                RecyclerViewAdapter adapter = new RecyclerViewAdapter(VideoActivity.this, response.body().getResults());
-                                                rView.setAdapter(adapter);
-                                            }
-                                        }
-
-                                    }
-
-                                    @Override
-                                    public void onFailure(Call<ParticipantDetailsModel> call, Throwable t) {
-                                        Log.d("=====Response", "Failure");
-                                        Log.d("=====Response", "Throwable:" + t.toString());
-                                    }
-                                });
-
-
-                            }
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<MeetingDetailsModel> call, Throwable t) {
-                            Log.d("=====Response", "Failure");
-                            Log.d("=====Response", "Throwable:" + t.toString());
-                        }
-                    });
-
-
-                }
-
-            }
-        });*/
-        //End
-
         //Newly Added for Recording
 
         imgRecording.setOnClickListener(new View.OnClickListener() {
@@ -2773,6 +2329,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void showParticipantScreenInFront(int index) {
+        Log.d(TAG , "Thread Name in showParticipantScreenInFront: "+Thread.currentThread().getName());
         sp_call_view.setSelection(1);
         screenShowingParticipantPosition = index;
         if(sp_call_view.getSelectedItemPosition() == 1){
@@ -2799,6 +2356,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void setSpeakerViewAsDefault(EventModel eventModel) {
+        Log.d(TAG , "Thread Name in setSpeakerViewAsDefault: "+Thread.currentThread().getName());
         int index = -1;
         for(int i = 0; i < remoteParticipantList.size() ; i++){
             Log.e(TAG , "Remote participantList value in set speaker: "+remoteParticipantList);
@@ -2830,6 +2388,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void showParticipantVideoInFront(int index){
+        Log.d(TAG , "Thread Name in showParticipantVideoInFront: "+Thread.currentThread().getName());
         TechrevRemoteParticipant remoteParticipant = (TechrevRemoteParticipant) remoteParticipantList.get(index);
 //      showVideoOfSelectedParticipant(remoteParticipant);
         removeRenderedVideo(selectedRemoteParticipant);
@@ -2847,7 +2406,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @SuppressLint("SetTextI18n")
     private void addRemoteParticipant(TechrevRemoteParticipant remoteParticipant) {
         Log.d("====Inside", "addRemoteParticipant");
-
+        Log.d(TAG , "Thread Name in addRemoteParticipant: "+Thread.currentThread().getName());
         if (selectedRemoteParticipant == null) {
             selectedRemoteParticipant = remoteParticipant;
             showHidePrimaryVideo(selectedRemoteParticipant);
@@ -2857,6 +2416,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void showHidePrimaryVideo(TechrevRemoteParticipant participant) {
+        Log.d(TAG , "Thread Name in showHidePrimaryVideo: "+Thread.currentThread().getName());
         if(participant.isTechRevScreenSelected()) {
             removeRenderedVideo(participant);
         }
@@ -2872,7 +2432,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
      */
 
     private void removePrevRenderedVideo() {
-
+        Log.d(TAG , "Thread Name in removePrevRenderedVideo: "+Thread.currentThread().getName());
         if (remoteParticipantList.size() > 0) {
 
             for (Object obj : remoteParticipantList) {
@@ -2890,9 +2450,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             }
 
                         }
-                        video_view.removeAllViews();
-                        participant_initial.setVisibility(View.VISIBLE);
-                        video_view.setVisibility(View.GONE);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                video_view.removeAllViews();
+                                participant_initial.setVisibility(View.VISIBLE);
+                                video_view.setVisibility(View.GONE);
+                            }
+                        });
                         setParticipantName(remoteParticipant.remoteParticipant.getIdentity());
 
 
@@ -2946,21 +2511,26 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     private void updatePrimaryVideoUIComponents(TechrevRemoteParticipant participant, String participantName) {
         // Update UI components here
+        Log.d(TAG , "Thread Name in updatePrimaryVideoUIComponents: "+Thread.currentThread().getName());
         if (participant.remoteParticipant.getIdentity().equalsIgnoreCase(selectedRemoteParticipant.remoteParticipant.getIdentity())) {
             if (selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
                 for (int index = 0; index < selectedRemoteParticipant.remoteParticipant.getVideoTracks().size(); index++) {
                     VideoTrack remoteVideoTrack = (VideoTrack) selectedRemoteParticipant.remoteParticipant.getVideoTracks().get(index).getVideoTrack();
                     if (remoteVideoTrack != null && !remoteVideoTrack.getName().equals("screen") && !selectedRemoteParticipant.isTechRevScreenSelected()) {
-                        video_view.removeAllViews();
-                        VideoView videoView = new VideoView(VideoActivity.this);
-                        video_view.addView(videoView);
-                        primaryVideoView = videoView;
-                        remoteVideoTrack.addRenderer(videoView);
-                        participant_initial.setVisibility(View.GONE);
-                        video_view.setVisibility(View.VISIBLE);
-                        rl_recording_section.setVisibility(View.VISIBLE);
-
-                        tv_activeParticipantName.setText(participantName);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                video_view.removeAllViews();
+                                VideoView videoView = new VideoView(VideoActivity.this);
+                                video_view.addView(videoView);
+                                primaryVideoView = videoView;
+                                remoteVideoTrack.addRenderer(videoView);
+                                participant_initial.setVisibility(View.GONE);
+                                video_view.setVisibility(View.VISIBLE);
+                                rl_recording_section.setVisibility(View.VISIBLE);
+                                tv_activeParticipantName.setText(participantName);
+                            }
+                        });
 
                         if (participantsAdapter != null && !isMyViewActive) {
                             participantsAdapter.refreshParticipants(mActiveParticipantIndex);
@@ -2974,56 +2544,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void addrevRenderedVideo(TechrevRemoteParticipant participant) {
+        Log.d(TAG , "Thread Name in addrevRenderedVideo: "+Thread.currentThread().getName());
         // Execute the AsyncTask to move heavy operations to a background thread
         new AddRenderedVideoTask(participant).execute();
     }
-
-    /*private void addrevRenderedVideo(TechrevRemoteParticipant participant) {
-        if (participant.remoteParticipant.getIdentity().equalsIgnoreCase(selectedRemoteParticipant.remoteParticipant.getIdentity())) {
-            if (selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
-                for (int index = 0; index < selectedRemoteParticipant.remoteParticipant.getVideoTracks().size(); index++) {
-                    VideoTrack remoteVideoTrack = (VideoTrack) selectedRemoteParticipant.remoteParticipant.getVideoTracks().get(index).getVideoTrack();
-                    if (remoteVideoTrack != null && !remoteVideoTrack.getName().equals("screen") && !selectedRemoteParticipant.isTechRevScreenSelected()) {
-                        //remoteVideoTrack.getRenderers().clear();
-                        video_view.removeAllViews();
-                        VideoView videoView = new VideoView(this);
-                        //layoutParamsPV.gravity= Gravity.CENTER;
-                        //videoView.setLayoutParams(layoutParamsPV);
-                        //videoView.setZOrderOnTop(false);
-                        //videoView.setZ(-1.0f);
-                        //video_view.setLayoutParams(layoutParamsPV);
-                        video_view.addView(videoView);
-                        primaryVideoView = videoView;
-                        remoteVideoTrack.addRenderer(videoView);
-                        participant_initial.setVisibility(View.GONE);
-                        video_view.setVisibility(View.VISIBLE);
-                        rl_recording_section.setVisibility(View.VISIBLE);
-
-                        try {
-                            String activeParticipant = participant.remoteParticipant.getIdentity();
-                            List<String> splitString = Arrays.asList(activeParticipant.split("\\-"));
-                            //Log.d("====INside","splitString:"+splitString.size());
-                            if (splitString.size() > 0) {
-                                tv_activeParticipantName.setText(splitString.get(1));
-                            } else {
-                                String resVal = removePrefix(activeParticipant, "participant-");
-                                tv_activeParticipantName.setText(resVal);
-                            }
-                        } catch (Exception e) {
-                            //Log.d("====Exception","Exception:"+e.toString());
-                            tv_activeParticipantName.setText(participant.remoteParticipant.getIdentity());
-                        }
-
-                        if (participantsAdapter != null && !isMyViewActive){
-                            participantsAdapter.refreshParticipants(mActiveParticipantIndex);
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-    }*/
 
     private class RemoveRenderedVideoTask extends AsyncTask<Void, Void, Void> {
 
@@ -3046,6 +2570,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void removeVideoTracks(TechrevRemoteParticipant participant) {
+        Log.d(TAG , "Thread Name in removeVideoTracks: "+Thread.currentThread().getName());
         if (participant.remoteParticipant.getIdentity().equalsIgnoreCase(selectedRemoteParticipant.remoteParticipant.getIdentity())) {
             for (int index = 0; index < selectedRemoteParticipant.remoteParticipant.getVideoTracks().size(); index++) {
                 VideoTrack remoteVideoTrack = (VideoTrack) selectedRemoteParticipant.remoteParticipant.getVideoTracks().get(index).getVideoTrack();
@@ -3081,70 +2606,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void removeRenderedVideo(TechrevRemoteParticipant participant) {
+        Log.d(TAG , "Thread Name in removeRenderedVideo: "+Thread.currentThread().getName());
         // Execute the AsyncTask to move heavy operations to a background thread
         new RemoveRenderedVideoTask(participant).execute();
-    }
-
-    /*private void removeRenderedVideo(TechrevRemoteParticipant participant) {
-        if (participant.remoteParticipant.getIdentity().equalsIgnoreCase(selectedRemoteParticipant.remoteParticipant.getIdentity())) {
-
-            for (int index = 0; index < selectedRemoteParticipant.remoteParticipant.getVideoTracks().size(); index++) {
-                VideoTrack remoteVideoTrack = (VideoTrack) selectedRemoteParticipant.remoteParticipant.getVideoTracks().get(index).getVideoTrack();
-
-
-                if(remoteVideoTrack!=null) {
-                    String sName=remoteVideoTrack.getName();
-                    Log.d("====removeRenderedVideo",sName);
-                    if (primaryVideoView!=null && selectedRemoteParticipant.isTechRevRemoveMyself()) {
-                        remoteVideoTrack.removeRenderer(primaryVideoView);
-                        primaryVideoView = null;
-
-                    } else if (primaryVideoView!=null && !selectedRemoteParticipant.isTechRevScreenEnable() && selectedRemoteParticipant.isTechRevScreenSelected() && remoteVideoTrack.getName().equals("screen")) {
-                        remoteVideoTrack.removeRenderer(primaryVideoView);
-                        primaryVideoView = null;
-                    } else if (primaryVideoView!=null && !selectedRemoteParticipant.isTechRevScreenSelected() && !remoteVideoTrack.getName().equals("screen")) {
-                        remoteVideoTrack.removeRenderer(primaryVideoView);
-                        primaryVideoView = null;
-                    }
-                }
-
-
-
-
-            }
-
-            if(selectedRemoteParticipant.isTechRevScreenSelected())
-            {
-
-                if(selectedRemoteParticipant.getTechRevVideoEnable())
-                {
-                    selectedRemoteParticipant.setTechRevScreenSelected(false);
-                    addrevRenderedVideo(selectedRemoteParticipant);
-                }
-                else if(!selectedRemoteParticipant.isTechRevScreenEnable()){
-                    selectedRemoteParticipant.setTechRevScreenSelected(false);
-                    //checkAndDisplayName();
-                }
-
-
-            }
-            else{
-                //checkAndDisplayName();
-            }
-
-        }
-
-    }*/
-
-    private void checkAndDisplayName()
-    {
-        video_view.removeAllViews();
-        primaryVideoView = null;
-
-
-        participant_initial.setVisibility(View.VISIBLE);
-        video_view.setVisibility(View.GONE);
-        setParticipantName(selectedRemoteParticipant.remoteParticipant.getIdentity());
     }
 
     private class ShowScreenTask extends AsyncTask<Void, Void, Boolean> {
@@ -3200,6 +2664,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void showCameraTurnedOffAlert(TechrevRemoteParticipant participant) {
+        Log.d(TAG , "Thread Name in showCameraTurnedOffAlert: "+Thread.currentThread().getName());
         if (selectedRemoteParticipant != null && !selectedRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(participant.remoteParticipant.getIdentity())) {
             String s = participant.remoteParticipant.getIdentity();
             String nameOfParticipant = "";
@@ -3235,92 +2700,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void showScreenOfSelectedParticipant(TechrevRemoteParticipant participant) {
+        Log.d(TAG , "Thread Name in showScreenOfSelectedParticipant: "+Thread.currentThread().getName());
         // Execute the AsyncTask to move heavy operations to a background thread
         new ShowScreenTask(participant).execute();
     }
-
-    /*private void showScreenOfSelectedParticipant(TechrevRemoteParticipant participant) {
-
-        if (participant.remoteParticipant.getRemoteVideoTracks().size() > 0 ) {
-
-            selectedRemoteParticipant = participant;
-            selectedRemoteParticipant.setTechRevScreenSelected(true);
-            for (int index = 0; index < participant.remoteParticipant.getVideoTracks().size(); index++) {
-                VideoTrack remoteVideoTrack = (VideoTrack) participant.remoteParticipant.getVideoTracks().get(index).getVideoTrack();
-                if (remoteVideoTrack != null) {
-                    if (remoteVideoTrack.getName().equals("screen")) {
-                        //CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(CoordinatorLayout.LayoutParams.WRAP_CONTENT, CoordinatorLayout.LayoutParams.WRAP_CONTENT);
-                        //layoutParams.setMargins(10, 420, 10, 160);
-
-                        removePrevRenderedVideo();
-                        VideoView videoView = new VideoView(this);
-                        //layoutParamsPV.gravity = Gravity.CENTER;
-                        videoView.setLayoutParams(layoutParamsPV);
-                        videoView.setZOrderOnTop(false);
-                        videoView.setZ(-1.0f);
-                        videoView.setMirror(false);
-                        //video_view.setLayoutParams(layoutParams);
-                        video_view.addView(videoView);
-                        primaryVideoView = videoView;
-                        remoteVideoTrack.addRenderer(videoView);
-
-                        isRemoteViewRendered = true;
-                        participant_initial.setVisibility(View.GONE);
-                        video_view.setVisibility(View.VISIBLE);
-                        rl_recording_section.setVisibility(View.VISIBLE);
-
-                    }
-                }
-            }
-
-        } else {
-
-            if (selectedRemoteParticipant != null && (!selectedRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(participant.remoteParticipant.getIdentity()))) {
-
-                String s = participant.remoteParticipant.getIdentity();
-                Log.d("====remoteParticipant", "s:" + s);
-                String nameOfParticipant = "";
-                if (s != null && s.length() > 0) {
-                    //Log.d("====INside","IF");
-                    //Log.d("====INside","s:"+s);
-                    try {
-                        List<String> splitString = Arrays.asList(s.split("\\-"));
-                        //Log.d("====INside","splitString:"+splitString.size());
-                        if (splitString.size() > 0) {
-                            //holder.name.setText(splitString.get(1));
-                            nameOfParticipant = splitString.get(1);
-                        }
-                        //else {
-                        //String resVal=removePrefix(s, "participant-");
-                        // holder.name.setText(resVal);
-                        //  }
-                    } catch (Exception e) {   //Log.d("====Exception","Exception:"+e.toString());
-                        //holder.name.setText(s);
-                    }
-
-                }
-
-
-                //The video of {Name} is currently turned off so please select another participant from the participant's list
-
-                //{Name}'s camera is turned off so please select another participant from the participant's list
-
-                if (!nameOfParticipant.equalsIgnoreCase("")) {
-                    nameOfParticipant = nameOfParticipant + "'s camera is turned off so please select another participant from the participant's list";
-                } else {
-                    nameOfParticipant = "Selected participant's camera is turned off so please select another participant from the participant's list";
-                }
-                AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                alert.setTitle("Alert");
-                alert.setMessage(nameOfParticipant);
-                alert.setPositiveButton("Ok", null);
-                alert.show();
-
-            }
-
-
-        }
-    }*/
 
     private class SetSelectedParticipantTask extends AsyncTask<TechrevRemoteParticipant, Void, Void> {
 
@@ -3340,6 +2723,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void processRemoteParticipant(TechrevRemoteParticipant participant) {
+            Log.d(TAG , "Thread Name in processRemoteParticipant: "+Thread.currentThread().getName());
             if (participant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
                 RemoteVideoTrackPublication remoteVideoTrackPublication =
                         participant.remoteParticipant.getRemoteVideoTracks().get(0);
@@ -3349,7 +2733,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                  */
                 if (remoteVideoTrackPublication.isTrackSubscribed() && primaryVideoView != null) {
                     remoteVideoTrackPublication.getRemoteVideoTrack().removeRenderer(primaryVideoView);
-                    video_view.removeAllViews();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            video_view.removeAllViews();
+                        }
+                    });
                 }
 
                 if (remoteVideoTrackPublication.isTrackSubscribed()) {
@@ -3384,78 +2773,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void setSelectedRemoteParticipant(TechrevRemoteParticipant participant) {
+        Log.d(TAG , "Thread Name in setSelectedRemoteParticipant: "+Thread.currentThread().getName());
         // Execute the AsyncTask to move heavy operations to a background thread
         new SetSelectedParticipantTask().execute(participant);
     }
-
-    /*private void setSelectedRemoteParticipant(TechrevRemoteParticipant participant) {
-        if (remoteParticipantList.size() > 0) {
-
-            for (Object obj : remoteParticipantList) {
-                TechrevRemoteParticipant remoteParticipant = (TechrevRemoteParticipant) obj;
-
-                if (remoteParticipant != null) {
-                    if (remoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
-                        RemoteVideoTrackPublication remoteVideoTrackPublication =
-                                remoteParticipant.remoteParticipant.getRemoteVideoTracks().get(0);
-                        *//*
-                         * Only remove video tracks that are subscribed to
-                         *//*
-                        if (remoteVideoTrackPublication.isTrackSubscribed() && primaryVideoView != null) {
-                            remoteVideoTrackPublication.getRemoteVideoTrack().removeRenderer(primaryVideoView);
-                            video_view.removeAllViews();
-                        }
-                    }
-                }
-
-            }
-
-            TechrevRemoteParticipant remoteParticipant = participant;
-            if (remoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
-                RemoteVideoTrackPublication remoteVideoTrackPublication =
-                        remoteParticipant.remoteParticipant.getRemoteVideoTracks().get(0);
-
-                selectedRemoteParticipant = remoteParticipant;
-
-
-                // Newly Added Code
-                VideoTrack remoteVideoTrack = (VideoTrack) participant.remoteParticipant.getVideoTracks().get(0).getVideoTrack();
-                if (remoteVideoTrack != null) {
-                    if (remoteVideoTrack.getName().equals("screen")) {
-                        onclickInterface.onClickVideo(0 , "");
-                        //remoteVideoTrackPublication.getRemoteVideoTrack().addRenderer(primaryVideoView);
-                    } else {
-                        if (remoteVideoTrackPublication.isTrackSubscribed()) {
-
-                            VideoView videoView = new VideoView(this);
-                            //layoutParamsPV.gravity = Gravity.CENTER;
-                            //videoView.setLayoutParams(layoutParamsPV);
-                            videoView.setZOrderOnTop(false);
-                            //videoView.setZ(-1.0f);
-                            videoView.setMirror(false);
-                            //video_view.setLayoutParams(layoutParamsPV);
-                            video_view.addView(videoView);
-                            primaryVideoView = videoView;
-                            remoteVideoTrackPublication.getRemoteVideoTrack().addRenderer(videoView);
-
-                            isRemoteViewRendered = true;
-                            participant_initial.setVisibility(View.GONE);
-                            video_view.setVisibility(View.VISIBLE);
-
-                        }
-                    }
-
-                }
-
-
-
-
-
-            }
-        }
-    }*/
-
-
 
     /*
      * Called when remote participant leaves the room
@@ -3476,6 +2797,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void processRemoteParticipant(RemoteParticipant remoteParticipant) {
+            Log.d(TAG , "Thread Name in processRemoteParticipant: "+Thread.currentThread().getName());
             for (int i = 0; i < remoteParticipantList.size(); i++) {
                 TechrevRemoteParticipant participant = (TechrevRemoteParticipant) remoteParticipantList.get(i);
                 if (remoteParticipant.getIdentity().equalsIgnoreCase(participant.remoteParticipant.getIdentity())) {
@@ -3520,57 +2842,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @SuppressLint("SetTextI18n")
     private void removeRemoteParticipant(RemoteParticipant remoteParticipant) {
+        Log.d(TAG , "Thread Name in removeRemoteParticipant: "+Thread.currentThread().getName());
         // Execute the AsyncTask to move heavy operations to a background thread
         new RemoveRemoteParticipantTask().execute(remoteParticipant);
     }
-    /*@SuppressLint("SetTextI18n")
-    private void removeRemoteParticipant(RemoteParticipant remoteParticipant) {
-        //  if (!remoteParticipant.getIdentity().equals(selectedRemoteParticipant.getIdentity())) {
-        //      return;
-        //  }
-
-        for (int i = 0; i < remoteParticipantList.size(); i++) {
-            TechrevRemoteParticipant participant = (TechrevRemoteParticipant) remoteParticipantList.get(i);
-            if (remoteParticipant.getIdentity().equalsIgnoreCase(participant.remoteParticipant.getIdentity())) {
-                remoteParticipantList.remove(i);
-                notifytoOhterParticipants();
-                break;
-            }
-        }
-
-
-        if (selectedRemoteParticipant != null && selectedRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(remoteParticipant.getIdentity())) {
-            if (remoteParticipantList.size() > 0) {
-                selectedRemoteParticipant.setTechRevRemoveMyself(true);
-                removeRenderedVideo(selectedRemoteParticipant);
-                selectedRemoteParticipant = remoteParticipantList.get(0);
-                showHidePrimaryVideo(selectedRemoteParticipant);
-            }
-
-        }
-
-        if (remoteParticipantList.isEmpty()) {
-            //moveLocalVideoToPrimaryView(); commented By Pankaj Khare
-            showNootherparticipant();
-
-        }
-
-        if (member_Type == 1) {
-            if (dialogViewHost != null && dialogViewHost.isShowing()) {
-                rVPadapter.notifyDataSetChanged();
-
-                if (remoteParticipantList.size() > 0) {
-                    rViewPopup.setVisibility(View.VISIBLE);
-                    emptyView.setVisibility(View.GONE);
-                } else {
-                    rViewPopup.setVisibility(View.GONE);
-                    emptyView.setVisibility(View.VISIBLE);
-                }
-            }
-        }
-
-
-    }*/
 
     private class MoveVideoTask extends AsyncTask<Void, Void, String> {
 
@@ -3606,6 +2881,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void updateUIComponents(String participantName) {
+        Log.d(TAG , "Thread Name in updateUIComponents: "+Thread.currentThread().getName());
         // Update UI components here
         card_view_thumbnailView.setVisibility(View.VISIBLE);
         thumbnailVideoView.setVisibility(View.VISIBLE);
@@ -3622,64 +2898,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void moveLocalVideoToThumbnailView() {
+        Log.d(TAG , "Thread Name in moveLocalVideoToThumbnailView: "+Thread.currentThread().getName());
         // Execute the AsyncTask to move heavy operations to a background thread
         new MoveVideoTask().execute();
     }
-
-
-    /*private void moveLocalVideoToThumbnailView() {
-        //if (thumbnailVideoView.getVisibility() == View.GONE) { commented by Pankaj Khare
-        card_view_thumbnailView.setVisibility(View.VISIBLE);
-        thumbnailVideoView.setVisibility(View.VISIBLE);
-
-        if (this.videoCallModel.getLocalVideoTrack() != null) {
-            //localVideoTrack.removeRenderer(primaryVideoView); commented by Pankaj Khare
-            if(thumbnailVideoView!=null)
-            {
-                this.videoCallModel.getLocalVideoTrack().removeRenderer(thumbnailVideoView);
-
-            }
-
-            this.videoCallModel.getLocalVideoTrack().addRenderer(thumbnailVideoView);
-            //thumbnailVideoView.setZOrderOnTop(true);
-        }
-
-        thumbnailVideoView.setMirror(false);
-        // } commented by Pankaj Khare
-        //Log.d("====GetIdentity", "localParticipant: " + selectedRemoteParticipant.remoteParticipant.getIdentity());
-        String s = selectedRemoteParticipant.remoteParticipant.getIdentity();
-        String resVal = "";
-        if (s != null && s.length() > 0) {
-            try {
-                List<String> splitString = Arrays.asList(s.split("\\-"));
-
-                if (splitString.size() > 0) {
-                    //viewHolder.name.setText(splitString.get(1));
-                    Log.d("====GetIdentity", "IF:" + splitString.get(1));
-                    tvLocalParticipantName.setText(splitString.get(1));
-                } else {
-                    resVal = removePrefix(s, "participant-");
-                    resVal = removePrefix(s, "hoster-");
-                    //viewHolder.name.setText(resVal);
-                    Log.d("====GetIdentity", "ELSE:" + resVal);
-                    tvLocalParticipantName.setText(resVal);
-                }
-            } catch (Exception e) {
-                //Log.d("====Exception","Exception:"+e.toString());
-                Log.d("====GetIdentity", "Catch:" + resVal);
-                if(tvLocalParticipantName != null)
-                    tvLocalParticipantName.setText(resVal);
-            }
-
-        } else {
-            Log.d("====GetIdentity", "Outside Else:" + resVal);
-            tvLocalParticipantName.setText(resVal);
-            //viewHolder.name.setText(participant.getIdentity());
-        }
-
-
-
-    }*/
 
     private class ShowNoOtherParticipantTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -3695,6 +2917,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void updateUIComponents(Boolean hasParticipants) {
+            Log.d(TAG , "Thread Name in updateUIComponents: "+Thread.currentThread().getName());
             if (hasParticipants) {
                 nootherparticipant.setVisibility(View.GONE);
                 showHidePrimaryVideo(selectedRemoteParticipant);
@@ -3708,23 +2931,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void showNootherparticipant() {
+        Log.d(TAG , "Thread Name in showNootherparticipant: "+Thread.currentThread().getName());
         // Execute the AsyncTask to move heavy operations to a background thread
         new ShowNoOtherParticipantTask().execute();
     }
-    /*private void showNootherparticipant() {
-        if (remoteParticipantList != null && !remoteParticipantList.isEmpty()) {
-            nootherparticipant.setVisibility(View.GONE);
-            showHidePrimaryVideo(selectedRemoteParticipant);
-
-        } else {
-            nootherparticipant.setVisibility(View.VISIBLE);
-            video_view.setVisibility(View.GONE);
-            participant_initial.setVisibility(View.GONE);
-            selectedRemoteParticipant = null;
-        }
-
-
-    }*/
 
     private class DisconnectClickListenerTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -3740,6 +2950,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void handleDisconnectClick(Boolean isConnected) {
+            Log.d(TAG , "Thread Name in handleDisconnectClick: "+Thread.currentThread().getName());
             /*
              * Disconnect from room
              */
@@ -3761,20 +2972,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         };
     }
-    /*private View.OnClickListener disconnectClickListener() {
-        return v -> {
-            *//*
-             * Disconnect from room
-             *//*
-            if(videoCallManager!=null && isConnectedInRoom)
-            {
-                videoCallManager.endForeground();
-            }
-            else{
-                finish();
-            }
-        };
-    }*/
 
     private class TurnOnOffSpeakerListenerTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -3790,6 +2987,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void handleSpeakerToggle(Boolean isSpeakerOn) {
+            Log.d(TAG , "Thread Name in handleSpeakerToggle: "+Thread.currentThread().getName());
             if (isSpeakerOn) {
                 isSpeakerOn = false;
                 speakerActionFab.setBackgroundResource(R.drawable.white_circle_background);
@@ -3817,27 +3015,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         };
     }
-    /*private View.OnClickListener turnOnOffSpeakerListener(){
-
-        return view -> {
-            if (isSpeakerOn) {
-                isSpeakerOn = false;
-                speakerActionFab.setBackgroundResource(R.drawable.white_circle_background);
-                speakerActionFab.setColorFilter(getResources().getColor(R.color.color_primary));
-                mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-                mAudioManager.setMode(AudioManager.MODE_NORMAL);
-
-            } else {
-                isSpeakerOn = true;
-                speakerActionFab.setBackgroundResource(R.drawable.primary_circle_background);
-                speakerActionFab.setColorFilter(getResources().getColor(R.color.white));
-                mAudioManager.setMode(AudioManager.MODE_NORMAL);
-                mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-
-            }
-            mAudioManager.setSpeakerphoneOn(isSpeakerOn);
-        };
-    }*/
 
     private class AddFileListenerTask extends AsyncTask<Void, Void, Intent> {
 
@@ -3870,16 +3047,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         };
     }
-    /*private View.OnClickListener addFileListener(){
-
-        return view -> {
-            Intent it = new Intent(VideoActivity.this , MyCurrentUploadedDocumentsActivity.class);
-            it.putExtra("REQUEST_ID" , requestID);
-            it.putExtra("AUTH_TOKEN" , authToken);
-            it.putExtra("USER_ID" , userId);
-            startActivity(it);
-        };
-    }*/
 
     private class SwitchCameraClickListenerTask extends AsyncTask<Void, Void, Void> {
 
@@ -3898,6 +3065,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void switchCamera() {
+            Log.d(TAG , "Thread Name in switchCamera: "+Thread.currentThread().getName());
             if (videoCallModel.getCameraCapturerCompat() != null) {
                 if (isControlMenuClickable) {
                     CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
@@ -3929,34 +3097,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         };
     }
-    /*private View.OnClickListener switchCameraClickListener() {
-        return v -> {
-            if(videoCallModel==null || !isConnectedInRoom)
-            {
-                return;
-            }
-            if (videoCallModel.getCameraCapturerCompat() != null) {
-                if (isControlMenuClickable){
-                    CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
-                    videoCallModel.getCameraCapturerCompat().switchCamera();
-                    videoCallModel.setCameraSource(cameraSource);
-                    if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
-
-                        if (cameraSource == CameraSource.BACK_CAMERA){
-                            VideoActivity.CURRENT_CAMERA = 0;
-                        }else {
-                            VideoActivity.CURRENT_CAMERA = 1;
-                        }
-
-                        Log.d(TAG , "CURRENT_CAMERA : "+CURRENT_CAMERA);
-                        thumbnailVideoView.setMirror(cameraSource == CameraSource.BACK_CAMERA);
-                    } else {
-                        primaryVideoView.setMirror(cameraSource == CameraSource.BACK_CAMERA);
-                    }
-                }
-            }
-        };
-    }*/
 
     private class LocalVideoClickListenerTask extends AsyncTask<Void, Void, Integer> {
 
@@ -3985,6 +3125,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void handleLocalVideoClick(Integer videoEnable) {
+            Log.d(TAG , "Thread Name in handleLocalVideoClick: "+Thread.currentThread().getName());
             if (videoEnable == 1) {
                 try {
                     videoCallModel.getLocalVideoTrack().enable(false);
@@ -4032,75 +3173,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         };
     }
-    /*private View.OnClickListener localVideoClickListener() {
-        return v -> {
-            *//*
-             * Enable/disable the local video track
-             *//*
-
-            int videoEnable = -1;
-            Log.e(TAG , "isConnectedInRoom inside localVideoClickListener: "+isConnectedInRoom);
-            if(videoCallModel==null || !isConnectedInRoom)
-            {
-                return;
-            }
-            if (videoCallModel.getLocalParticipant() != null) {
-                if (videoCallModel.getLocalVideoTrack() != null) {
-                    if (videoCallModel.getLocalVideoTrack().isEnabled()) {
-                        videoEnable = 1;
-
-
-                    } else {
-                        videoEnable = 0;
-
-
-                    }
-
-
-                }
-            }
-
-            if (videoEnable == 1) {
-                try {
-
-                    videoCallModel.getLocalVideoTrack().enable(false);
-                    isDisableVideo=true;
-                    int icon = getResourceID("camera_off", "drawable");
-                    localVideoActionFab.setImageDrawable(ContextCompat.getDrawable(
-                            VideoActivity.this, icon));
-
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("from", userMeetingIdentifier);
-                    jsonObject.put("to", "All");
-                    jsonObject.put("messageType", "CameraOff");
-                    jsonObject.put("content", "");
-                    videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                } catch (Exception e) {
-                    Log.d("====Exception", "ProcessRequest " + e.toString());
-                }
-
-            } else if (videoEnable == 0) {
-                videoCallModel.getLocalVideoTrack().enable(true);
-                isDisableVideo=false;
-                //Unmuted Icon
-                int icon = getResourceID("camera_on", "drawable");
-                localVideoActionFab.setImageDrawable(ContextCompat.getDrawable(
-                        VideoActivity.this, icon));
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("from", userMeetingIdentifier);
-                    jsonObject.put("to", "All");
-                    jsonObject.put("messageType", "CameraOn");
-                    jsonObject.put("content", "");
-                    videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                } catch (Exception e) {
-                    Log.d("====Exception", "ProcessRequest " + e.toString());
-                }
-            }
-
-
-        };
-    }*/
 
     private class MuteClickListenerTask extends AsyncTask<Void, Void, Integer> {
 
@@ -4129,6 +3201,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void handleMuteClick(Integer audioEnable) {
+            Log.d(TAG , "Thread Name in handleMuteClick: "+Thread.currentThread().getName());
             if (audioEnable == 1) {
                 try {
                     videoCallModel.getLocalAudioTrack().enable(false);
@@ -4176,74 +3249,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         };
     }
-    /*private View.OnClickListener muteClickListener() {
-        return v -> {
-            *//*
-             * Enable/disable the local audio track. The results of this operation are
-             * signaled to other Participants in the same Room. When an audio track is
-             * disabled, the audio is muted.
-             *//*
-            int audioEnable = -1;
-
-            if(videoCallModel==null || !isConnectedInRoom)
-            {
-                return;
-            }
-
-            if (videoCallModel.getLocalParticipant() != null) {
-                if (videoCallModel.getLocalAudioTrack() != null) {
-                    if (videoCallModel.getLocalAudioTrack().isEnabled()) {
-                        audioEnable = 1;
-                    } else {
-                        audioEnable = 0;
-                    }
-
-
-                }
-            }
-
-            if (audioEnable == 1) {
-                try {
-
-                    videoCallModel.getLocalAudioTrack().enable(false);
-                    isDisableAudio=true;
-                    int icon = getResourceID("mic_off", "drawable");
-                    muteActionFab.setImageDrawable(ContextCompat.getDrawable(
-                            VideoActivity.this, icon));
-
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("from", userMeetingIdentifier);
-                    jsonObject.put("to", "All");
-                    jsonObject.put("messageType", "AudioMuted");
-                    jsonObject.put("content", "");
-                    videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                } catch (Exception e) {
-                    Log.d("====Exception", "ProcessRequest " + e.toString());
-                }
-            } else if (audioEnable == 0) {
-                videoCallModel.getLocalAudioTrack().enable(true);
-                isDisableAudio=false;
-                //Unmuted Icon
-                int icon = getResourceID("mic_on", "drawable");
-                muteActionFab.setImageDrawable(ContextCompat.getDrawable(
-                        VideoActivity.this, icon));
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("from", userMeetingIdentifier);
-                    jsonObject.put("to", "All");
-                    jsonObject.put("messageType", "AudioUnMuted");
-                    jsonObject.put("content", "");
-                    videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                } catch (Exception e) {
-                    Log.d("====Exception", "ProcessRequest " + e.toString());
-                }
-            } else {
-
-            }
-
-
-        };
-    }*/
 
     private class ChatClickListenerTask extends AsyncTask<Void, Void, Void> {
         private WeakReference<VideoActivity> activityReference;
@@ -4280,19 +3285,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         };
     }
-    /*private View.OnClickListener chatClickListener() {
-        return v -> {
-            //Toast.makeText(getApplicationContext() , "Chat clicked" , Toast.LENGTH_LONG).show();
-            try {
-                getAllMessagesByMeetingId(requestID , "New");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        };
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     private void getAllMessagesByMeetingId(String meeting_id, String req_type) {
+        Log.d(TAG , "Thread Name in getAllMessagesByMeetingId: "+Thread.currentThread().getName());
         chatBadge.setVisibility(View.GONE);
         ProgressDialog dialog = new ProgressDialog(mActivity);
         runOnUiThread(new Runnable() {
@@ -4396,190 +3392,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
-    /*private void getAllMessagesByMeetingId(String meeting_id, String req_type) {
-        chatBadge.setVisibility(View.GONE);
-        ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.e(TAG, "Meeting ID: " + meeting_id);
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("meetingId", meeting_id);
-            String data = obj.toString();
-
-            new AsyncTask<String, Void, ChatDataModel>() {
-
-                @Override
-                protected ChatDataModel doInBackground(String... params) {
-                    String authToken = params[0];
-                    String data = params[1];
-                    Call<ChatDataModel> responseBodyCall = serviceLocal.getAllMessagesByMeetingId(authToken, data);
-
-                    try {
-                        Response<ChatDataModel> response = responseBodyCall.execute(); // Synchronous execution
-                        return response.body();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                }
-
-                @Override
-                protected void onPostExecute(ChatDataModel response) {
-                    if (dialog != null) {
-                        dialog.dismiss();
-                    }
-                    chatList = new ArrayList<>();
-
-                    if (response != null) {
-                        Log.e(TAG, "Chat Data: \n" + new Gson().toJson(response));
-                        if (req_type.equals("New")) {
-                            chatAlertDialog.setView(mView);
-                        }
-
-                        listView = mView.findViewById(R.id.chat_list_view);
-                        TextView tv_no_data_found = mView.findViewById(R.id.no_data);
-                        ImageView iv_go_back = mView.findViewById(R.id.back_btn);
-                        ImageView iv_attach_file = mView.findViewById(R.id.attachment_action_fab);
-                        ImageView iv_send_message = mView.findViewById(R.id.send_action_fab);
-                        EditText et_message = mView.findViewById(R.id.message);
-
-                        iv_go_back.setOnClickListener(view -> chatAlertDialog.dismiss());
-
-                        iv_send_message.setOnClickListener(view -> {
-                            try {
-                                if (et_message.getText().toString().isEmpty()) {
-                                    Toast.makeText(mActivity, "Please enter a message", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    saveNewMessage(meeting_id, et_message.getText().toString(), userId, "Message");
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        });
-
-                        if (response.getChatDataList().size() > 0) {
-                            chatList.addAll(response.getChatDataList());
-                            if (chatList.size() > 0) {
-                                tv_no_data_found.setVisibility(View.GONE);
-                                listView.setVisibility(View.VISIBLE);
-                                ChatViewAdapter adapter = new ChatViewAdapter(mActivity, chatList, userId, meeting_id, authToken);
-                                listView.setAdapter(adapter);
-                                listView.setSelection(adapter.getCount() - 1);
-                                adapter.setMessageInterface(VideoActivity.this);
-                            }
-                        } else {
-                            tv_no_data_found.setVisibility(View.VISIBLE);
-                            listView.setVisibility(View.GONE);
-                        }
-
-                        chatAlertDialog.show();
-                    }
-                }
-            }.execute(authToken, data);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }*/
-
-    /*private void getAllMessagesByMeetingId(String meeting_id , String req_type) throws JSONException {
-        chatBadge.setVisibility(View.GONE);
-        ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.e(TAG , "Meeting ID: "+meeting_id);
-        JSONObject obj = new JSONObject();
-        obj.put("meetingId" , meeting_id);
-        String data = obj.toString();
-        Call<ChatDataModel> responseBodyCall = serviceLocal.getAllMessagesByMeetingId(authToken, data);
-        responseBodyCall.enqueue(new Callback<ChatDataModel>() {
-            @Override
-            public void onResponse(Call<ChatDataModel> call, Response<ChatDataModel> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                chatList = new ArrayList<ChatDataModel.ChatData>();
-                if(response != null){
-                    Log.e(TAG , "Chat Data: \n"+new Gson().toJson(response.body()));
-                    if(req_type.equals("New")){
-
-                        *//*if(mView.getParent() != null){
-                            ((ViewGroup)mView.getParent()).removeView(mView);
-                        }
-                        mView = getLayoutInflater().inflate(R.layout.activity_chat , null);*//*
-                        chatAlertDialog.setView(mView);
-                    }
-                    listView = mView.findViewById(R.id.chat_list_view);
-                    TextView tv_no_data_found = mView.findViewById(R.id.no_data);
-                    ImageView iv_go_back = mView.findViewById(R.id.back_btn);
-                    ImageView iv_attach_file = mView.findViewById(R.id.attachment_action_fab);
-                    ImageView iv_send_message = mView.findViewById(R.id.send_action_fab);
-                    EditText et_message = mView.findViewById(R.id.message);
-
-
-                    iv_go_back.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            chatAlertDialog.dismiss();
-                        }
-                    });
-
-                    iv_send_message.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            try {
-                                if(et_message.getText().toString().isEmpty()){
-                                    Toast.makeText(mActivity, "Please enter a message", Toast.LENGTH_SHORT).show();
-                                }else {
-                                    saveNewMessage(meeting_id , et_message.getText().toString() , userId , "Message");
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                    if(response.body().getChatDataList().size() > 0) {
-                        for(int i = 0; i < response.body().getChatDataList().size() ; i++) {
-                            chatList.add(response.body().getChatDataList().get(i));
-                            if(i == response.body().getChatDataList().size() - 1) {
-                                Log.e(TAG , "Chat List Size: "+chatList.size());
-                                if(chatList.size() > 0){
-                                    Log.e(TAG , "Inside if");
-                                    tv_no_data_found.setVisibility(View.GONE);
-                                    listView.setVisibility(View.VISIBLE);
-                                    ChatViewAdapter adapter = new ChatViewAdapter(mActivity , chatList , userId, meeting_id, authToken);
-                                    listView.setAdapter(adapter);
-                                    listView.setSelection(adapter.getCount() - 1);
-                                    adapter.setMessageInterface(VideoActivity.this);
-                                }
-                            }
-                        }
-                    }else {
-                        Log.e(TAG , "Inside else");
-                        tv_no_data_found.setVisibility(View.VISIBLE);
-                        listView.setVisibility(View.GONE);
-                    }
-
-                    chatAlertDialog.show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ChatDataModel> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void saveNewMessage(String meeting_id, String message, String userID, String req_type) throws JSONException {
+        Log.d(TAG , "Thread Name in saveNewMessage: "+Thread.currentThread().getName());
         Log.e(TAG, "Meeting ID: " + meeting_id);
         JSONObject obj = new JSONObject();
         if (req_type.equals("Message")) {
@@ -4648,119 +3463,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     }
 
-    /*private void saveNewMessage(String meeting_id, String message, String userID, String req_type) throws JSONException {
-        *//*ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();*//*
-        Log.e(TAG , "Meeting ID: "+meeting_id);
-        JSONObject obj = new JSONObject();
-        if(req_type.equals("Message")){
-            obj.put("meetingId" , meeting_id);
-            obj.put("message" , message);
-            obj.put("messageType" , "1");
-            obj.put("receiverId" , "0");
-            obj.put("receiverType" , "0");
-            obj.put("senderId" , userID);
-            obj.put("senderName" , firstName +" "+ lastName);
-            obj.put("senderType" , "0");
-        }else {
-            obj.put("meetingId" , meeting_id);
-            obj.put("docId" , message);
-            obj.put("messageType" , "1");
-            obj.put("receiverId" , "0");
-            obj.put("receiverType" , "0");
-            obj.put("senderId" , userID);
-            obj.put("senderName" , firstName +" "+ lastName);
-            obj.put("senderType" , "0");
-        }
-        String data = obj.toString();
-        Call<ChatDataModel> responseBodyCall = serviceLocal.saveNewMessage(authToken, data);
-        responseBodyCall.enqueue(new Callback<ChatDataModel>() {
-            @Override
-            public void onResponse(Call<ChatDataModel> call, Response<ChatDataModel> response) {
-                *//*if(dialog!=null){
-                    dialog.dismiss();
-                }*//*
-                if(chatAttachFileAlertDialog != null){
-                    chatAttachFileAlertDialog.dismiss();
-                }
-
-                if(response != null){
-                    if(mView != null){
-                        mView.findViewById(R.id.message).requestFocus();
-                    }
-                    hideSoftKeyboard(VideoActivity.this);
-                    sendChatMessage("NewMessage" , response.body().toString());
-                    Log.e(TAG , "Chat Data: \n"+new Gson().toJson(response.body()));
-                    *//*chatAlertDialog = builder.create();
-                    if(mView.getParent() != null){
-                        ((ViewGroup)mView.getParent()).removeView(mView);
-                    }
-                    chatAlertDialog.setView(mView);*//*
-                    ListView listView = mView.findViewById(R.id.chat_list_view);
-                    TextView tv_no_data_found = mView.findViewById(R.id.no_data);
-                    ImageView iv_go_back = mView.findViewById(R.id.back_btn);
-                    ImageView iv_attach_file = mView.findViewById(R.id.attachment_action_fab);
-                    ImageView iv_send_message = mView.findViewById(R.id.send_action_fab);
-                    EditText et_message = mView.findViewById(R.id.message);
-
-                    iv_go_back.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //chatAlertDialog.dismiss();
-                        }
-                    });
-
-                    iv_send_message.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            try {
-                                if(et_message.getText().toString().isEmpty()){
-                                    Toast.makeText(mActivity, "Please enter a message", Toast.LENGTH_SHORT).show();
-                                }else {
-                                    saveNewMessage(meeting_id , et_message.getText().toString(), userId, "Message");
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                    for(int i = 0; i < response.body().getChatDataList().size() ; i++) {
-                        chatList.add(response.body().getChatDataList().get(i));
-                        if(i == response.body().getChatDataList().size() - 1) {
-                            Log.e(TAG , "Chat List Size: "+chatList.size());
-                            et_message.setText("");
-                            if(chatList.size() > 0){
-                                Log.e(TAG , "Inside if");
-                                tv_no_data_found.setVisibility(View.GONE);
-                                listView.setVisibility(View.VISIBLE);
-                                ChatViewAdapter adapter = new ChatViewAdapter(mActivity , chatList , userId, meeting_id, authToken);
-                                listView.setAdapter(adapter);
-                                listView.setSelection(adapter.getCount() - 1);
-                            }else {
-                                Log.e(TAG , "Inside else");
-                                tv_no_data_found.setVisibility(View.VISIBLE);
-                                listView.setVisibility(View.GONE);
-                            }
-                            //chatAlertDialog.show();
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ChatDataModel> call, Throwable t) {
-                *//*if(dialog!=null){
-                    dialog.dismiss();
-                }*//*
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
     private void hideSoftKeyboard(Activity activity) {
+        Log.d(TAG , "Thread Name in hideSoftKeyboard: "+Thread.currentThread().getName());
         View view = mView.findViewById(R.id.message);
         InputMethodManager inputMethodManager = (InputMethodManager)activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
         if(view != null){
@@ -4770,6 +3474,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @SuppressLint("StaticFieldLeak")
     public void refreshChat() {
+        Log.d(TAG , "Thread Name in refreshChat: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -4789,12 +3494,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*public void refreshChat() throws JSONException {
-        getAllMessagesByMeetingId(requestID , "Refresh");
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void attachFileToChat() {
+        Log.d(TAG , "Thread Name in attachFileToChat: "+Thread.currentThread().getName());
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mActivity);
         LayoutInflater inflater = mActivity.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.fragment_file_chooser, null);
@@ -4837,6 +3539,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @SuppressLint("StaticFieldLeak")
     private void chooseFile() {
+        Log.d(TAG , "Thread Name in chooseFile: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -4871,73 +3574,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*private void attachFileToChat(){
-
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mActivity);
-        LayoutInflater inflater = mActivity.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.fragment_file_chooser, null);
-        dialogBuilder.setView(dialogView);
-
-        ll_attach_file = dialogView.findViewById(R.id.attache_file);
-        ll_send_file = dialogView.findViewById(R.id.send_file);
-
-        ll_attach_file.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(ContextCompat.checkSelfPermission(mActivity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED)
-                {
-                    // Permission is not granted
-                    ActivityCompat.requestPermissions(VideoActivity.this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, FILE_PERMISSION_CODE);
-                }else {
-                    chooseFile();
-                }
-            }
-        });
-
-        ll_send_file.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    saveNewMessage(requestID , uploaded_chat_file_docID , userId , "Attachment");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        chatAttachFileAlertDialog = dialogBuilder.create();
-        chatAttachFileAlertDialog.show();
-    }*/
-
-//    private void chooseFile(){
-//
-//        String[] mimeTypes =
-//                {"application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .doc & .docx
-//                        "application/vnd.ms-powerpoint","application/vnd.openxmlformats-officedocument.presentationml.presentation", // .ppt & .pptx
-//                        "application/vnd.ms-excel","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xls & .xlsx
-//                        "text/plain",
-//                        "application/pdf",
-//                        "application/zip",
-//                        "image/*"};
-//
-//        Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            chooseFile.setType(mimeTypes.length == 1 ? mimeTypes[0] : "*/*");
-//            if (mimeTypes.length > 0) {
-//                chooseFile.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-//            }
-//        } else {
-//            String mimeTypesStr = "";
-//            for (String mimeType : mimeTypes) {
-//                mimeTypesStr += mimeType + "|";
-//            }
-//            chooseFile.setType(mimeTypesStr.substring(0,mimeTypesStr.length() - 1));
-//        }
-//        chooseFile = Intent.createChooser(chooseFile, "Choose a file");
-//        startActivityForResult(chooseFile, PICKFILE_RESULT_CODE);
-//    }
-
     @SuppressLint("StaticFieldLeak")
     private View.OnClickListener shareScreenClickListener() {
         return v -> {
@@ -4971,39 +3607,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         };
     }
 
-    /*@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private View.OnClickListener shareScreenClickListener() {
-        return v -> {
-            try {
-
-                Log.d("====ScreenTest", "IF");
-
-                //Newly Added
-
-                if (isShareScreenStarted) {
-                    int icon = getResourceID("start_screen_share", "drawable");
-                    shareScreenActionFab.setImageDrawable(ContextCompat.getDrawable(
-                            VideoActivity.this, icon));
-                    isShareScreenStarted = false;
-                    stopScreenCapture();
-                } else {
-                    int icon = getResourceID("stop_screen_share", "drawable");
-                    shareScreenActionFab.setImageDrawable(ContextCompat.getDrawable(
-                            VideoActivity.this, icon));
-                    isShareScreenStarted = true;
-                    startScreenCapture();
-                }
-
-            } catch (Exception e) {
-                Log.d("====ScreenShare", "Exception:" + e.toString());
-
-            }
-        };
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void requestScreenCapturePermission() {
+        Log.d(TAG , "Thread Name in requestScreenCapturePermission: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -5019,17 +3626,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }.execute();
     }
-
-    /*@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void requestScreenCapturePermission() {
-        Log.d(TAG, "Requesting permission to capture screen");
-        MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)
-                getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-
-        // This initiates a prompt dialog for the user to confirm screen projection.
-        startActivityForResult(mediaProjectionManager.createScreenCaptureIntent(),
-                REQUEST_MEDIA_PROJECTION);
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -5103,76 +3699,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*@SuppressLint("StaticFieldLeak")
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.e(TAG , "Inside onActivityResult");
-        if (requestCode == REQUEST_MEDIA_PROJECTION) {
-            if (resultCode != AppCompatActivity.RESULT_OK) {
-//                Toast.makeText(this, "screen_capture_permission_not_granted",
-//                        Toast.LENGTH_LONG).show();
-                int icon = getResourceID("start_screen_share", "drawable");
-                shareScreenActionFab.setImageDrawable(ContextCompat.getDrawable(
-                        VideoActivity.this, icon));
-                isShareScreenStarted = false;
-                stopScreenCapture();
-                return;
-            }
-            screenCapturer = new ScreenCapturer(this, resultCode, data, screenCapturerListener);
-            startScreenCapture();
-        }
-        if (resultCode == RESULT_OK) {
-            //set the image captured to our ImageView
-            //mImageView.setImageURI(image_uri);
-            if (image_uri != null) {
-                Log.d("====Image URL", "Inside");
-                Log.d("====Image URL", "image_uri:" + image_uri.toString());
-                imageDialog(image_uri);
-            }
-
-        }
-
-        if (requestCode == PICKFILE_RESULT_CODE) {
-            Uri uri = data.getData();
-            String src = uri.getPath();
-            Bitmap bitmap = null;
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-            int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-            cursor.moveToFirst();
-
-            String name = cursor.getString(nameIndex);
-            String size = Long.toString(cursor.getLong(sizeIndex));
-            String mime_type = getMimeType(uri);
-
-            //Toast.makeText(this, "Chosen file path: "+src, Toast.LENGTH_SHORT).show();
-            Log.e(TAG , "Chosen file path: "+src);
-            Log.e(TAG , "Chosen file name: "+name);
-            Log.e(TAG , "Chosen File Mime Type: "+getMimeType(uri));
-            View myView = getLayoutInflater().inflate(R.layout.fragment_file_chooser, null);
-            TextView tv_file_name = myView.findViewById(R.id.file_name);
-            tv_file_name.setText(name);
-            uploadAttachedFile(bitmap , name , mime_type);
-        }
-
-        if (resultCode == RESULT_OK && requestCode == SIGNATURE_INITIAL_CAPTURE_CODE) {
-
-            if (data.getBooleanExtra("RESULT" , false)) {
-                sendUpdateToServer();
-            }
-
-        }
-
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     public void uploadAttachedFile(Bitmap bitmap, String file_name, String mime_type) {
         ProgressDialog dialog = new ProgressDialog(mActivity);
@@ -5237,57 +3763,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*public void uploadAttachedFile(Bitmap bitmap , String file_name , String mime_type) {
-
-
-        ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-
-        String pathDetails = saveToInternalStorageFotAttachment(bitmap , file_name);
-        String name = mypath.getName().replace("jpg",mime_type.split("/")[1]);
-        Log.e("===pathDetails", "" + pathDetails);
-        Log.e("===pathDetails", "Image Path:" + mypath);
-        Log.e("===pathDetails", "Image Name:" + name);
-        Log.e("===pathDetails", "Image Mime Type: "+mime_type);
-        String extension = mypath.getName().split("\\.")[1];
-
-        // Parsing any Media type file
-        RequestBody requestBody1 = RequestBody.create(MediaType.parse(mime_type), mypath);
-        MultipartBody.Part fileToUpload = MultipartBody.Part.createFormData("file", name , requestBody1);
-        RequestBody filename = RequestBody.create(MediaType.parse("text/plain"), name);
-        Call<AttachedFileUploadResponseModel> call = serviceLocal.uploadAttachedFile(authToken, fileToUpload, filename, name, false, userId);
-        call.enqueue(new Callback<AttachedFileUploadResponseModel>() {
-            @Override
-            public void onResponse(Call<AttachedFileUploadResponseModel> call, Response<AttachedFileUploadResponseModel> response) {
-                dialog.dismiss();
-                Log.d("====Inside1", "Success");
-                Log.d("====Inside1", "Response:" + response.code());
-                if (response.code() == 200) {
-                    if (response.body() != null) {
-                        Log.d(TAG, "UPLOADED DOC ID:" + response.body().getDocId());
-                        uploaded_chat_file_docID = response.body().getDocId();
-                        ll_attach_file.setVisibility(View.GONE);
-                        ll_send_file.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<AttachedFileUploadResponseModel> call, Throwable t) {
-                Log.d("====Inside1", "Failure");
-                Log.d("====Inside1", "Throwable:" + t.toString());
-                dialog.dismiss();
-
-            }
-        });
-
-        // File Upload Work Ends
-
-
-    }*/
-
     private class GetMimeTypeTask extends AsyncTask<Uri, Void, String> {
 
         @Override
@@ -5320,23 +3795,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             return "*/*"; // Return a default value in case of an error
         }
     }
-//    public String getMimeType(Uri uri) {
-//        String mimeType = "*/*";
-//        if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
-//            ContentResolver cr = getContentResolver();
-//            mimeType = cr.getType(uri);
-//        } else {
-//            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
-//                    .toString());
-//            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-//                    fileExtension.toLowerCase());
-//        }
-//        return mimeType;
-//    }
 
     @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void startScreenCapture() {
+        Log.d(TAG , "Thread Name in startScreenCapture: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -5359,27 +3822,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void startScreenCapture() {
-
-        if (Build.VERSION.SDK_INT >= 29) {
-            screenCapturerManager.startForeground();
-        }
-
-        if (screenCapturer == null) {
-            requestScreenCapturePermission();
-        } else {
-            screenVideoTrack = LocalVideoTrack.create(this, true, screenCapturer, "screen");
-
-            if (videoCallModel != null) {
-                videoCallModel.getLocalParticipant().publishTrack(screenVideoTrack);
-            }
-        }
-
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void stopScreenCapture() {
+        Log.d(TAG , "Thread Name in stopScreenCapture: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -5399,35 +3844,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 return null;
             }
         }.execute();
-    }
-
-    /*private void stopScreenCapture() {
-
-        if (Build.VERSION.SDK_INT >= 29) {
-            screenCapturerManager.endForeground();
-        }
-
-        if (screenVideoTrack != null) {
-            if (videoCallModel != null) {
-                videoCallModel.getLocalParticipant().unpublishTrack(screenVideoTrack);
-            }
-            //screenVideoTrack.removeRenderer(localVideoView);
-            screenVideoTrack.release();
-            screenVideoTrack = null;
-        }
-
-
-    }*/
-
-    private void openCamera() {
-        ContentValues values = new ContentValues();
-        values.put(MediaStore.Images.Media.TITLE, "New Picture");
-        values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera");
-        image_uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-        //Camera intent
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
-        startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE);
     }
 
 
@@ -5479,37 +3895,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute(image_uri);
     }
 
-    /*@SuppressLint("RestrictedApi")
-    void imageDialog(Uri image_uri) {
-        dialogImage = new Dialog(VideoActivity.this);
-        dialogImage.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialogImage.setContentView(R.layout.dialog_image_popup);
-        dialogImage.setCancelable(true);
-        ImageView imageView = (ImageView) dialogImage.findViewById(R.id.popimageView);
-        TextView textView = (TextView) dialogImage.findViewById(R.id.title);
-        //imageView.setImageBitmap(mResultsBitmap);
-        imageView.setImageURI(image_uri);
-        textView.setText("Captured Image");
-        ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.add("Profile Picture");
-        arrayList.add("ID Proof Front");
-        arrayList.add("ID Proof Back");
-        arrayList.add("Custom");
-
-        Spinner checkInProviders = (Spinner) dialogImage.findViewById(R.id.spinner);
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(VideoActivity.this,
-                android.R.layout.simple_spinner_item, arrayList);
-
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        checkInProviders.setAdapter(dataAdapter);
-        dialogImage.show();
-    }*/
-
-
     //Newly Added for Image capture Starts
 
     @SuppressLint("StaticFieldLeak")
     private void takePicture() {
+        Log.d(TAG , "Thread Name in takePicture: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
             private WeakReference<VideoActivity> activityReference;
 
@@ -5541,20 +3931,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }.execute();
     }
-
-    /*private void takePicture() {
-        //cameraCapturer.takePicture(photographer);
-
-        //cameraCapturerCompat.getCamera1().takePicture(photographer);
-        //cameraCapturer.takePicture(photographer);
-
-        //camera.startPreview();
-        //camera.takePicture(null, null, new PhotoHandler(getApplicationContext()));
-
-        //pictureService.startCapturing(this);
-        videoCallModel.getCameraCapturerCompat().getCamera1().takePicture(photographer);
-
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -5598,21 +3974,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }.execute(picturesTaken);
     }
-
-    /*@RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public void onDoneCapturingAllPhotos(TreeMap<String, byte[]> picturesTaken) {
-        if (picturesTaken != null && !picturesTaken.isEmpty()) {
-            picturesTaken.forEach((pictureUrl, pictureData) -> {
-                //convert the byte array 'pictureData' to a bitmap (no need to read the file from the external storage) but in case you
-                //You can also use 'pictureUrl' which stores the picture's location on the device
-                final Bitmap bitmap = BitmapFactory.decodeByteArray(pictureData, 0, pictureData.length);
-            });
-            Toast.makeText(VideoActivity.this, "Done capturing all photos!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        Toast.makeText(VideoActivity.this, "No camera detected!", Toast.LENGTH_SHORT).show();
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -5686,73 +4047,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute(pictureData);
     }
 
-    /*@Override
-    public void onCaptureDone(String pictureUrl, byte[] pictureData) {
-        *//*if (pictureData != null && pictureUrl != null) {
-            runOnUiThread(() -> {
-                //convert byte array 'pictureData' to a bitmap (no need to read the file from the external storage)
-                final Bitmap bitmap = BitmapFactory.decodeByteArray(pictureData, 0, pictureData.length);
-                //scale image to avoid POTENTIAL "Bitmap too large to be uploaded into a texture" when displaying into an ImageView
-                final int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
-                final Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
-                //do whatever you want with the bitmap or the scaled one...
-            });
-            Toast.makeText(VideoActivity.this, "Picture saved to " + pictureUrl, Toast.LENGTH_SHORT).show();
-        }*//*
-        if(pictureData != null && pictureData.length > 0){
-            Bitmap bitmapOrg = BitmapFactory.decodeByteArray(pictureData, 0, pictureData.length);
-
-            int width = bitmapOrg.getWidth();
-            int height = bitmapOrg.getHeight();
-            int newWidth = 200;
-            int newHeight = 200;
-
-            // calculate the scale - in this case = 0.4f
-            float scaleWidth = ((float) newWidth) / width;
-            float scaleHeight = ((float) newHeight) / height;
-
-            // createa matrix for the manipulation
-            Matrix matrix = new Matrix();
-            // resize the bit map
-            matrix.postScale(scaleWidth, scaleHeight);
-            // rotate the Bitmap
-            matrix.postRotate(180);
-
-            // recreate the new Bitmap
-            Bitmap resizedBitmap = Bitmap.createBitmap(bitmapOrg, 0, 0,
-                    newWidth, newHeight, matrix, true);
-
-            //Matrix matrix = new Matrix();
-            //matrix.postScale(-1, 1 , bitmapOrg.getWidth() / 2f , bitmapOrg.getHeight() / 2f);
-            //matrix.setScale(-1 , 1);
-            //matrix.postTranslate(bitmap.getWidth() , 0);
-            //Bitmap dst = Bitmap.createBitmap(bitmapOrg, 0, 0, bitmapOrg.getWidth(), bitmapOrg.getHeight(), matrix, true);
-            //dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
-            Log.d("====Inside", "onPictureTaken");
-            // localphotoVideoTrack.removeRenderer(thumbnailVideoView);
-            //localphotoVideoTrack.release();
-            //createAudioAndVideoTracks();
-            if (bitmapOrg != null) {
-                // showPicture(bitmap);
-                // uploadPicture(bitmap);
-                uploadImageFile(resizedBitmap);
-                // uploadImageFile(flip(bitmap ,FLIP_HORIZONTAL));
-//                        var message = {
-//                                from: this.thisUserMeetingIdentifier,
-//                                to: this.meetingHosterIdentifier,
-//                                messageType: "uploadedImage",
-//                                content: res.remoteFileName
-//                    };//
-
-            } else {
-                Toast.makeText(VideoActivity.this,
-                        "take_picture_failed",
-                        Toast.LENGTH_LONG).show();
-                alertDialog1.dismiss();
-            }
-        }
-    }*/
-
     @SuppressLint("NewApi")
     private int findFrontFacingCamera() {
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
@@ -5772,22 +4066,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
         return -1; // or any default value indicating not found
     }
-
-    /*private int findFrontFacingCamera() {
-        int cameraId = -1;
-        // Search for the front facing camera
-        int numberOfCameras = Camera.getNumberOfCameras();
-        for (int i = 0; i < numberOfCameras; i++) {
-            Camera.CameraInfo info = new Camera.CameraInfo();
-            Camera.getCameraInfo(i, info);
-            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                Log.d(TAG, "Camera found");
-                cameraId = i;
-                break;
-            }
-        }
-        return cameraId;
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     private final CameraCapturer.PictureListener photographer =
@@ -5858,80 +4136,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
             };
 
-    /*private final CameraCapturer.PictureListener photographer =
-            new CameraCapturer.PictureListener() {
-                @Override
-                public void onShutter() {
-                }
-
-                @Override
-                public void onPictureTaken(byte[] bytes) {
-                    *//*Matrix m = new Matrix();
-                    m.preScale(-1, 1);
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    Bitmap dst = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
-                    dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);*//*
-                    Log.d("====Inside", "onPictureTaken");
-                    // localphotoVideoTrack.removeRenderer(thumbnailVideoView);
-                    //localphotoVideoTrack.release();
-                    //createAudioAndVideoTracks();
-
-                    Bitmap bitmapOrg = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    Bitmap finBitmap = null;
-
-                    if (CURRENT_CAMERA == 1){
-                        int width = bitmapOrg.getWidth();
-                        int height = bitmapOrg.getHeight();
-                        int newWidth = width;
-                        int newHeight = height;
-
-                        // calculate the scale - in this case = 0.4f
-                        float scaleWidth = ((float) newWidth) / width;
-                        float scaleHeight = ((float) newHeight) / height;
-
-                        // createa matrix for the manipulation
-                        Matrix matrix = new Matrix();
-                        // resize the bit map
-                        matrix.postScale(scaleWidth, scaleHeight);
-                        // rotate the Bitmap
-                        matrix.postRotate(360);
-
-                        // recreate the new Bitmap
-                        finBitmap = Bitmap.createBitmap(bitmapOrg, 0, 0,
-                                newWidth, newHeight, matrix, true);
-                    }else {
-                        Matrix m = new Matrix();
-                        m.preScale(-1, 1);
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        Bitmap dst = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
-                        dst.setDensity(DisplayMetrics.DENSITY_DEFAULT);
-                        finBitmap = dst;
-                    }
-
-                    if (bitmapOrg != null) {
-                        // showPicture(bitmap);
-                        // uploadPicture(bitmap);
-                        uploadImageFile(finBitmap);
-                        // uploadImageFile(flip(bitmap ,FLIP_HORIZONTAL));
-//                        var message = {
-//                                from: this.thisUserMeetingIdentifier,
-//                                to: this.meetingHosterIdentifier,
-//                                messageType: "uploadedImage",
-//                                content: res.remoteFileName
-//                    };//
-
-
-                    } else {
-                        Toast.makeText(VideoActivity.this,
-                                "take_picture_failed",
-                                Toast.LENGTH_LONG).show();
-                        alertDialog1.dismiss();
-                    }
-                }
-            };*/
-
     @SuppressLint("StaticFieldLeak")
     private void uploadPicture(UploadImageModel uploadModel) {
+        Log.d(TAG , "Thread Name in uploadPicture: "+Thread.currentThread().getName());
         new AsyncTask<UploadImageModel, Void, String>() {
             @Override
             protected String doInBackground(UploadImageModel... params) {
@@ -5986,54 +4193,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute(uploadModel);
     }
 
-    /*private void uploadPicture(UploadImageModel uploadModel) {
-        // Upload the picture to server using Blob
-        // when the response is success than send message back to banker
-
-        if (videoCallModel != null && bankerdModel != null) {
-            try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("from", userMeetingIdentifier);
-                jsonObject.put("to", bankerdModel.getFrom());
-                if (bankerdModel.getMessageType().equalsIgnoreCase("CaptureSignatureImageFromCustomer")) {
-                    jsonObject.put("messageType", "uploadedSignatureImage");
-                    JSONObject contentJson = new JSONObject();
-                    contentJson.put("requestParticipantId", reqeustParticipantId);
-                    contentJson.put("uploadedDocId", uploadModel.getUploadedDocId());
-                    contentJson.put("userId", userId);
-                    contentJson.put("requestId", requestID);
-                    jsonObject.put("content", contentJson);
-                }else if (bankerdModel.getMessageType().equalsIgnoreCase("CaptureInitialImageFromCustomer")) {
-                    jsonObject.put("messageType", "uploadedInitialImage");
-                    JSONObject contentJson = new JSONObject();
-                    contentJson.put("requestParticipantId", reqeustParticipantId);
-                    contentJson.put("uploadedDocId", uploadModel.getUploadedDocId());
-                    contentJson.put("userId", userId);
-                    contentJson.put("requestId", requestID);
-                    jsonObject.put("content", contentJson);
-                } else {
-                    jsonObject.put("messageType", "uploadedImage");
-                    jsonObject.put("content", uploadModel.getUploadedDocId());
-                }
-                // In content DocID need to be passed
-
-                *//*if (!isSignatureCaptured){*//*
-                Log.d(TAG , "Capture Image Data Track : "+new Gson().toJson(jsonObject));
-                isSignatureCaptured = true;
-                videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                return;
-                *//*}*//*
-            } catch (Exception e) {
-                Log.e("uploadPicture() ", e.getMessage() + "");
-            }
-
-        }
-
-
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void showPicture(DataModel dataModel) {
+        Log.d(TAG , "Thread Name in showPicture: "+Thread.currentThread().getName());
         Log.d("===Inside", "ProcessRequest showPicture");
 
         // Download the picture based on datamodel.content; this will get DocID
@@ -6086,73 +4248,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
-    /*private void showPicture(DataModel dataModel) {
-
-        Log.d("===Inside", "ProcessRequest showPicture");
-
-        // Download the picture bases of datamodel.content this will get DocID
-        String documentID = dataModel.getContent();
-        Log.d("===Inside", "ProcessRequest documentID:" + documentID);
-        if (documentID != null && documentID.length() > 0) {
-            Log.d("===Inside", "ProcessRequest documentID");             //
-            Log.d("===InsideImageDownload", "authToken:" + authToken);
-            Log.d("===InsideImageDownload", "documentID:" + documentID);
-            Call<ResponseBody> requestDownload = serviceLocal.downloadImage(authToken, documentID);
-            requestDownload.enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    Log.d("===InsideImageDownload", "ProcessRequest Success");
-                    Log.d("===InsideImageDownload", "ProcessRequest Response:" + response.code());
-                    try {
-                        InputStream input = response.body().byteStream();
-                        Bitmap myBitmap = BitmapFactory.decodeStream(input);
-                        AddImageDialog(myBitmap, documentID);
-                        Log.d("===InsideImageDownload", "ProcessRequest Done");
-
-                    } catch (Exception e) {
-                        Log.d("===InsideImageDownload", "ProcessRequest Exception:" + e.toString());
-                        if (alertDialog2 != null && alertDialog2.isShowing()) {
-                            alertDialog2.dismiss();
-                            alertDialog2 = null;
-                        }
-
-                        AlertDialog.Builder alert = new AlertDialog.Builder(VideoActivity.this);
-                        alert.setTitle("Alert");
-                        alert.setMessage("Unable to download captured image from server, please try after sometime.");
-                        alert.setPositiveButton("Ok", null);
-                        alert.show();
-                    }
-
-
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.d("===InsideImageDownload", "ProcessRequest Failure");
-                    Log.d("===InsideImageDownload", "ProcessRequest Throwable:" + t.toString());
-                    alertDialog2.dismiss();
-                    alertDialog2 = null;
-
-                }
-            });
-
-
-        }
-
-
-        //Added statically for validating the Image
-
-
-        //Log.d("===showPicture",""+bitmap.toString());
-//        pictureImageView.setImageBitmap(bitmap);
-//        pictureDialog.show();
-        // Once added we should see our linear layout rendered live below
-
-
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void openScreenshot(final File imageFile) {
+        Log.d(TAG , "Thread Name in openScreenshot: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Uri>() {
             @Override
             protected Uri doInBackground(Void... params) {
@@ -6173,45 +4271,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*private void openScreenshot(File imageFile) {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        Uri uri = Uri.fromFile(imageFile);
-        intent.setDataAndType(uri, "image/*");
-        startActivity(intent);
-    }*/
-
-    private void takeScreenshot() {
-        Date now = new Date();
-        android.text.format.DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
-
-        try {
-            // image naming and path  to include sd card  appending name you choose for file
-            String mPath = Environment.getExternalStorageDirectory().toString() + "/" + now + ".jpg";
-
-            // create bitmap screen capture
-            View v1 = getWindow().getDecorView().getRootView();
-            v1.setDrawingCacheEnabled(true);
-            Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
-            v1.setDrawingCacheEnabled(false);
-
-            File imageFile = new File(mPath);
-
-            FileOutputStream outputStream = new FileOutputStream(imageFile);
-            int quality = 100;
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-            outputStream.flush();
-            outputStream.close();
-
-            openScreenshot(imageFile);
-        } catch (Throwable e) {
-            // Several error may come out with file handling or DOM
-            e.printStackTrace();
-        }
-    }
-
     @SuppressLint("StaticFieldLeak")
     private void addCameraVideo(final DataModel dataModel) {
+        Log.d(TAG , "Thread Name in addCameraVideo: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Bitmap>() {
             @Override
             protected Bitmap doInBackground(Void... params) {
@@ -6230,225 +4292,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 // Example: showPicture(bitmap);
             }
         }.execute();
-    }
-
-    /*private void addCameraVideo(DataModel dataModel) {
-
-        Log.d("===Inside", "ProcessRequest addCameraVideo");
-
-        //localVideoTrack.removeRenderer(primaryVideoView);
-        //localVideoTrack.release();
-        //cameraCapturer = new CameraCapturer(this, CameraSource.FRONT_CAMERA);
-        //localphotoVideoTrack = LocalVideoTrack.create(this, true, cameraCapturer);
-
-        //thumbnailVideoView.setMirror(true);
-        //localphotoVideoTrack.addRenderer(thumbnailVideoView);
-//        localVideoView = primaryVideoView;
-        bankerdModel = dataModel;
-        takePicture();
-
-        // Initialize the camera capturer and start the camera preview
-        // CameraCapturer.CameraSource.BACK_CAMERA
-        //getAvailableCameraSource()
-        //cameraCapturerCompat.getCameraSource()
-
-//        cameraCapturer = new CameraCapturer(this, CameraSource.FRONT_CAMERA);
-//        localVideoTrack1 = LocalVideoTrack.create(this, true, cameraCapturer);
-//        localVideoTrack1.getRenderers().clear();
-//
-//        // for showing thumbnailVideoView
-//        thumbnailVideoView.setMirror(true);
-//        localVideoTrack1.addRenderer(thumbnailVideoView);
-//        localVideoView = thumbnailVideoView;
-//        thumbnailVideoView.setMirror(cameraCapturerCompat.getCameraSource() == CameraSource.FRONT_CAMERA);
-
-        //primaryVideoView.setMirror(false);
-        //localVideoTrack.addRenderer(primaryVideoView);
-
-
-        // Start
-        // Layout Based Validate
-//        localVideoTrack = LocalVideoTrack.create(this, true, new ViewCapturer(capturedView));
-//        localVideoTrack.addRenderer(primaryVideoView);
-        //End
-        //screenShot(capturedView);
-
-        //start new by saving the View in Android
-//        primaryVideoView.setDrawingCacheEnabled(true);
-//        primaryVideoView.buildDrawingCache();
-//        Bitmap bm = primaryVideoView.getDrawingCache();
-//        View v1 = getWindow().getDecorView().getRootView();
-
-        //takeScreenshot();
-//        primaryVideoView.setDrawingCacheEnabled(true);
-//        Bitmap bm = Bitmap.createBitmap(primaryVideoView.getDrawingCache());
-//        primaryVideoView.setDrawingCacheEnabled(false);
-
-
-//                VideoFormat vf=cameraCapturerCompat.getVideoCapturer().getSupportedFormats().get(20);
-//        cameraCapturerCompat.getVideoCapturer().startCapture(vf,
-//                new VideoCapturer.Listener() {
-//                    @Override
-//                    public void onCapturerStarted(boolean success) {
-//
-//                    }
-//                    public tvi.webrtc.VideoFrame process (tvi.webrtc.VideoFrame frame){
-//                        return tvi.webrtc.VideoFrame(
-//                                frame.buffer.cropAndScale(0, 0, frame.buffer.width, frame.buffer.height, 400, 400),
-//                                frame.rotation,
-//                                frame.timestampNs
-//                        );
-//                    }
-//                    @Override
-//                    public void onFrameCaptured(@NonNull VideoFrame videoFrame) {
-//                        BitmapFactory.Options options = new BitmapFactory.Options();
-//                        options.inMutable = true;
-//
-//                        tvi.webrtc.VideoFrame newVf=null;
-//
-//                        try {
-//                            Field field = videoFrame.getClass().getDeclaredField("webRtcVideoFrame");
-//                            field.setAccessible(true);
-//
-//                            Object value = field.get(videoFrame);
-//                            newVf=(tvi.webrtc.VideoFrame)value;
-//                            VideoFrame vf= new  VideoFrame(newVf,videoFrame.dimensions,videoFrame.orientation);
-////                            Field field1 = value.getClass().getDeclaredField("buffer");
-////                            field1.setAccessible(true);
-////                            Object value1 = field.get(value);
-//                           // byte[] imagebuffer=(byte[])newVf.getBuffer();
-//                            Bitmap bmp = BitmapFactory.decodeByteArray(newVf.getBuffer(), 0, vf.imageBuffer.length, options);
-//                            cameraCapturerCompat.getVideoCapturer().stopCapture();
-//                            showPicture(bmp);
-//
-//                        } catch (IllegalAccessException | NoSuchFieldException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//
-//                    }
-//                });
-//        View v1 = getWindow().getDecorView().getRootView();
-//        View v2 = getAllChildren(v1);
-//        v2.setDrawingCacheEnabled(true);
-//        Bitmap bm = Bitmap.createBitmap(v2.getDrawingCache());
-//        v2.setDrawingCacheEnabled(false);
-//
-//        if(bm!=null){
-//          Log.d("=====bm","Not Null");
-//            showPicture(bm);
-//        }else {
-//            Log.d("=====bm","Null");
-//        }
-        //Stop new by saving the View in Android
-
-
-//       //ScreenShots validate Start
-//        localVideoTrack1 = LocalVideoTrack.create(this, true, new CameraCapturer(this,
-//                CameraCapturer.CameraSource.FRONT_CAMERA, null));
-//        snapshotVideoRenderer = new SnapshotVideoRenderer(pictureImage);
-//        localVideoTrack1.addRenderer(snapshotVideoRenderer);
-//
-//        //ScreenShots validate End
-    }*/
-
-    private View getAllChildren(View v) {
-
-//        if (!(v instanceof ViewGroup)) {
-//            ArrayList<View> viewArrayList = new ArrayList<View>();
-//            viewArrayList.add(v);
-//            return viewArrayList;
-//        }
-//
-//        ArrayList<View> result = new ArrayList<View>();
-
-        // View cView=null;
-        ViewGroup viewGroup = (ViewGroup) v;
-        View cView = viewGroup.getChildAt(1);
-//        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-//
-//            View child = viewGroup.getChildAt(i);
-//
-//            if(child instanceof VideoView)
-//            {
-//                VideoView vv=(VideoView) child;
-//
-//            }
-//
-//            //Do not add any parents, just add child elements
-//
-//        }
-        return cView;
-    }
-
-    private boolean checkPermissionForCamera() {
-        int resultCamera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-
-        return resultCamera == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestPermissionForCamera() {
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.CAMERA},
-                CAMERA_PERMISSION_REQUEST_CODE);
-    }
-
-
-    // Ends
-
-
-    @SuppressLint("StaticFieldLeak")
-    private class DateTimeFormationTask extends AsyncTask<String, Void, String> {
-        private TextView textViewSST;
-        private TextView textViewSET;
-        private TextView textViewActualStartTime;
-        private TextView textViewActualEndTime;
-
-        DateTimeFormationTask(TextView textViewSST, TextView textViewSET, TextView textViewActualStartTime, TextView textViewActualEndTime) {
-            this.textViewSST = textViewSST;
-            this.textViewSET = textViewSET;
-            this.textViewActualStartTime = textViewActualStartTime;
-            this.textViewActualEndTime = textViewActualEndTime;
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            if (params.length > 0) {
-                String utcDateTime = params[0];
-                final String[] finDateTime = new String[1];
-                dateTimeFormation(utcDateTime, new DateTimeFormatCallback() {
-                    @Override
-                    public void onFormatComplete(String formattedDateTime) {
-                        if (formattedDateTime != null) {
-                            finDateTime[0] = formattedDateTime;
-                        }
-                    }
-                });
-                return finDateTime[0];
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            // Now 'result' contains the formatted date
-            // You can use it as needed, for example, set it to a TextView
-            if (result != null) {
-                // Do something with the formatted date
-                // For example, set it to a TextView
-                // Assuming you have TextViews named valueSST, valueSET, valueActualStartTime, valueActualEndTime
-                textViewSST.setText(result);
-                textViewSET.setText(result);
-                textViewActualStartTime.setText(result);
-                textViewActualEndTime.setText(result);
-            } else {
-                // Handle the case where the result is null
-                textViewSST.setText("-");
-                textViewSET.setText("-");
-                textViewActualStartTime.setText("-");
-                textViewActualEndTime.setText("-");
-            }
-        }
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -6493,58 +4336,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         void onFormatComplete(String formattedDateTime);
     }
 
-    /*public String dateTimeFormation(Context context, String utcDateTime) {
-        String endDateTime = "";
-        String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date = null;
-        try {
-            date = (Date) simpleDateFormat.parse(utcDateTime);
-            SimpleDateFormat simpleDateFormatHeader = new SimpleDateFormat("dd MMM yyyy, hh:mm a");
-            //Toast.makeText(mContext, ""+mStringArrayList.get(i).getMessageType(), Toast.LENGTH_SHORT).show();
-            endDateTime = simpleDateFormatHeader.format(date);
-            return endDateTime;
-        } catch (
-                ParseException e) {
-            e.printStackTrace();
-            return endDateTime;
-        }
-
-    }*/
-
-
-    private Bitmap convertLayoutToImage() {
-//        LinearLayout linearView = (LinearLayout) this.getLayoutInflater(null).inflate(R.layout
-//                .marker_layout, null, false); //you can pass your xml layout
-
-        linearView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-        linearView.layout(0, 0, linearView.getMeasuredWidth(), linearView.getMeasuredHeight());
-
-        linearView.setDrawingCacheEnabled(true);
-        linearView.buildDrawingCache();
-        return linearView.getDrawingCache();// creates bitmap and returns the same
-    }
-
-    public Bitmap screenShot(View view) {
-        Bitmap bitmap = Bitmap.createBitmap(view.getWidth(),
-                view.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-        return bitmap;
-    }
-
-
-    private void CaptureImageFromCustomer() {
-        //addCameraVideo();
-
-    }
-
-
     @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void processRequest(DataModel dModel) throws JSONException {
+        Log.d(TAG , "Thread Name in processRequest: "+Thread.currentThread().getName());
         Log.e(TAG, "Process request::: " + dModel);
         if (dModel != null) {
             Log.e(TAG, "Process request Type::: " + dModel.getMessageType());
@@ -6640,233 +4435,85 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     break;
                 case "RemoveMessage":
                 case "NotifySignerToCaptureSignature":
-                case "NotifySignerToCaptureInitial":
-                case "requestToReplaceSignature":
-                    // Handle Notification Request
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            // Handle the notification requests
-                            // Example: NotifySignerToCaptureSignature, NotifySignerToCaptureInitial, requestToReplaceSignature, etc.
-                            // Add your logic here
-                            return null;
-                        }
-
-                        @Override
-                        protected void onPostExecute(Void aVoid) {
-                            // Handle UI updates after the background task
-                        }
-                    }.execute();
-                    break;
-            }
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    /*private void processRequest(DataModel dModel) throws JSONException {
-
-        Log.e(TAG , "Process request::: "+dModel);
-        if (dModel != null) {
-            Log.e(TAG , "Process request Type::: "+dModel.getMessageType());
-            switch (dModel.getMessageType()) {
-                case "uploadedImage":
-                    Log.d("===Inside", "ProcessRequest onMessageValue: uploadedImage ");
-                    showPicture(dModel);
-                    break;
-                case "AudioMuted":
-                    Log.d("===Inside", "ProcessRequest AudioMuted");
-                    audioMuted(dModel);
-                    break;
-                case "AudioUnMuted":
-                    Log.d("===Inside", "ProcessRequest AudioUnMuted");
-                    // Remove the Audio UnMute Control
-                    audioUnMuted(dModel);
-                    break;
-                case "CameraOff":
-                    CameraOff(dModel);
-                    Log.d("===Inside", "ProcessRequest CameraOff");
-                    break;
-                case "CameraOn":
-                    // Remove the CameraOn Control
-                    CameraOn(dModel);
-                    Log.d("===Inside", "ProcessRequest CameraOn");
-
-                    break;
-                case "CaptureImageFromCustomer":
-                    *//* if (!isSignatureCaptured){*//*
-                    Log.d("===Inside", "ProcessRequest onMessageValue: CaptureImageFromCustomer ");
-                    alertDialog1 = new AlertDialog.Builder(VideoActivity.this).create();
-                    alertDialog1.setTitle("Alert");
-                    alertDialog1.setMessage("Capturing participant image is in progress.");
-                    alertDialog1.setCancelable(false);
-                    alertDialog1.show();
-                    addCameraVideo(dModel);
-                    *//*}*//*
-                    break;
-                case "CaptureSignatureImageFromCustomer":
-                    *//*if (!isSignatureCaptured){*//*
-                    Log.d("===Inside", "ProcessRequest onMessageValue: CaptureSignatureImageFromCustomer");
-                    alertDialog1 = new AlertDialog.Builder(VideoActivity.this).create();
-                    alertDialog1.setTitle("Alert");
-                    alertDialog1.setMessage("Capturing signature is in progress.");
-                    alertDialog1.setCancelable(false);
-                    alertDialog1.show();
-                    addCameraVideo(dModel);
-                    *//*}*//*
-                    break;
-                case "CaptureInitialImageFromCustomer":
-                    *//*if (!isSignatureCaptured){*//*
-                    Log.d("===Inside", "ProcessRequest onMessageValue: CaptureInitialImageFromCustomer");
-                    alertDialog1 = new AlertDialog.Builder(VideoActivity.this).create();
-                    alertDialog1.setTitle("Alert");
-                    alertDialog1.setMessage("Capturing initial is in progress.");
-                    alertDialog1.setCancelable(false);
-                    alertDialog1.show();
-                    addCameraVideo(dModel);
-                    *//*}*//*
-                    break;
-                case "LeaveFromRoom":
-                    Log.d("===LeaveFromRoom", "ProcessRequest CAlled");
-                    //leavingFromRoom
-
-                    if (member_Type == 2 && leavingFromRoom == false) {
-                        Log.d("===LeaveFromRoom", "leavingFromRoom Before" + leavingFromRoom);
-                        leavingFromRoom = true;
-                        Log.d("===LeaveFromRoom", "leavingFromRoom After" + leavingFromRoom);
-                    }
-                    exitFromTheRoom();
-                    break;
-                case "NotaryCancelsRequest":
-                    leavingFromRoom = true;
-                    exitFromTheRoom();
-                    break;
-                case "NotaryEndCallOfCustomer":
-                    leavingFromRoom = true;
-                    exitFromTheRoom();
-                    break;
-                case "RemoveCustomersFromMobile":
-                    leavingFromRoom = true;
-                    exitFromTheRoom();
-                    break;
-                case "LocationSent":
-                    break;
-                case "IP Address Captured":
-                    break;
-                case "MuteOrUnmuteAudio":
-                    Log.e(TAG , "Inside MuteOrUnmuteAudio case");
-                    muteUnmuteAudio(dModel);
-                    break;
-                case "SwitchOnOrOffVideo":
-                    Log.e(TAG , "Inside SwitchOnOrOffVideo case");
-                    SwitchOnOrOffVideo(dModel);
-                    break;
-                case "notifyScreenShare":
-                    break;
-                case "ChangeToSelectedView":
-                    break;
-                case "NewMessage":
-                    Log.e(TAG , "New message received...");
-                    if(chatAlertDialog != null){
-                        if(chatAlertDialog.isShowing()){
-                            Log.e(TAG , "Chat is open");
-                            updateNewMessageInChat(dModel);
-                        }else {
-                            Log.e(TAG , "Chat is not open");
-                            chatBadge.setVisibility(View.VISIBLE);
-                        }
-                    }
-                    break;
-                case "requestToAccessDoc":
-                    //Toast.makeText(VideoActivity.this, "Notary is requesting you for document access to proceed...", Toast.LENGTH_LONG).show();
-                    getCustomerDisagreeCount(requestID);
-                    break;
-                case "RemoveMessage":
-                    break;
-                case "NotifySignerToCaptureSignature":
                     //Toast.makeText(this, "Request to capture initial image", Toast.LENGTH_SHORT).show();
-                    if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed()) {
-                        // Show the capture signature dialog fragment
-                        CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
-                            @RequiresApi(api = Build.VERSION_CODES.M)
-                            @Override
-                            public void onOptionSelected(int selectedOption) {
-                                //1 = Capture through camera & 2 = Draw through whiteboard
-                                if (selectedOption == 1) {
+                    // Show the capture signature dialog fragment
+                    CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
+                        @Override
+                        public void onOptionSelected(int selectedOption) {
+                            //1 = Capture through camera & 2 = Draw through whiteboard
+                            if (selectedOption == 1) {
 
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                    AlertDialog dialog = builder.setTitle("Capture Signature")
-                                            .setMessage("Are you sure, you want to capture your signature?")
-                                            .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                    //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
-                                                    Intent it = new Intent(mActivity, CameraActivity.class);
-                                                    it.putExtra("REQUEST_ID" , requestID);
-                                                    it.putExtra("AUTH_TOKEN" , authToken);
-                                                    it.putExtra("USER_ID" , userId);
-                                                    it.putExtra("TYPE" , "1");
-                                                    it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                    *//*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*//*
-                                                    mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
-                                                }
-                                            })
-                                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                                AlertDialog dialog = builder.setTitle("Capture Signature")
+                                        .setMessage("Are you sure, you want to capture your signature?")
+                                        .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
+                                                Intent it = new Intent(mActivity, CameraActivity.class);
+                                                it.putExtra("REQUEST_ID" , requestID);
+                                                it.putExtra("AUTH_TOKEN" , authToken);
+                                                it.putExtra("USER_ID" , userId);
+                                                it.putExtra("TYPE" , "1");
+                                                it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
+                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
+                                                mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                                            }
+                                        })
+                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
 
-                                                }
-                                            })
-                                            .show();
-                                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-                                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+                                            }
+                                        })
+                                        .show();
+                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+                                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
 
-                                } else {
+                            } else {
 
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                    AlertDialog dialog = builder.setTitle("Draw Signature")
-                                            .setMessage("Are you sure, you want to draw your signature?")
-                                            .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                    //Toast.makeText(mActivity, "Opening whiteboard", Toast.LENGTH_SHORT).show();
-                                                    Intent it = new Intent(mActivity, WhiteBoardActivity.class);
-                                                    it.putExtra("REQUEST_ID" , requestID);
-                                                    it.putExtra("AUTH_TOKEN" , authToken);
-                                                    it.putExtra("USER_ID" , userId);
-                                                    it.putExtra("TYPE" , "1");
-                                                    it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                    *//*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*//*
-                                                    mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
-                                                }
-                                            })
-                                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                                AlertDialog dialog = builder.setTitle("Draw Signature")
+                                        .setMessage("Are you sure, you want to draw your signature?")
+                                        .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                //Toast.makeText(mActivity, "Opening whiteboard", Toast.LENGTH_SHORT).show();
+                                                Intent it = new Intent(mActivity, WhiteBoardActivity.class);
+                                                it.putExtra("REQUEST_ID" , requestID);
+                                                it.putExtra("AUTH_TOKEN" , authToken);
+                                                it.putExtra("USER_ID" , userId);
+                                                it.putExtra("TYPE" , "1");
+                                                it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
+                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
+                                                mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                                            }
+                                        })
+                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
 
-                                                }
-                                            })
-                                            .show();
-                                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-                                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+                                            }
+                                        })
+                                        .show();
+                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+                                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
 
-                                }
                             }
-                        });
-                        FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
-                        Fragment prev = mActivity.getFragmentManager().findFragmentByTag("signature_dialog");
-                        if (prev != null) {
-                            ft.remove(prev);
                         }
-                        ft.addToBackStack(null);
-                        captureSignerSignatureDialogFragment.show(ft,"signature_dialog");
+                    });
+                    FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
+                    Fragment prev = mActivity.getFragmentManager().findFragmentByTag("signature_dialog");
+                    if (prev != null) {
+                        ft.remove(prev);
                     }
-
+                    ft.addToBackStack(null);
+                    captureSignerSignatureDialogFragment.show(ft,"signature_dialog");
                     break;
                 case "NotifySignerToCaptureInitial":
                     //Toast.makeText(this, "Request to capture signature image", Toast.LENGTH_SHORT).show();
                     // Show the capture initial dialog fragment
                     CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
-                        @RequiresApi(api = Build.VERSION_CODES.M)
                         @Override
                         public void onOptionSelected(int selectedOption) {
                             //1 = Capture through camera & 2 = Draw through whiteboard
@@ -6884,7 +4531,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                                 it.putExtra("USER_ID" , userId);
                                                 it.putExtra("TYPE" , "0");
                                                 it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                *//*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*//*
+                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
                                                 mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
                                                 break;
 
@@ -6918,7 +4565,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                                 it.putExtra("USER_ID" , userId);
                                                 it.putExtra("TYPE" , "0");
                                                 it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                *//*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*//*
+                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
                                                 mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
                                                 break;
 
@@ -6994,15 +4641,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
 
                     break;
-
             }
-
-
         }
-    }*/
+    }
 
     @SuppressLint("StaticFieldLeak")
     private void sendUpdateToServer() {
+        Log.d(TAG , "Thread Name in sendUpdateToServer: "+Thread.currentThread().getName());
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -7032,22 +4677,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }.execute();
     }
-
-    /*private void sendUpdateToServer() {
-
-        Toast.makeText(VideoActivity.this, "Sending update to server...", Toast.LENGTH_SHORT).show();
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("from", userMeetingIdentifier);
-            jsonObject.put("to", "All");
-            jsonObject.put("messageType", "RefreshMeetingImages");
-            jsonObject.put("content", "RefreshMeetingImages");
-            videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-        } catch (Exception e) {
-            Log.d("====Exception", "" + e.toString());
-        }
-
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     public void getCustomerDisagreeCount(String message_id) throws JSONException {
@@ -7093,130 +4722,67 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*public void getCustomerDisagreeCount(String message_id) throws JSONException {
-        *//*ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();*//*
-        Log.e(TAG , "Meeting ID: "+message_id);
-        JSONObject obj = new JSONObject();
-        obj.put("requestId" , message_id);
-        String data = obj.toString();
-        Call<CustomerDisagreeCountModel> responseBodyCall = serviceLocal.getCustomerDisagreeCount(authToken, data);
-        responseBodyCall.enqueue(new Callback<CustomerDisagreeCountModel>() {
-            @Override
-            public void onResponse(Call<CustomerDisagreeCountModel> call, Response<CustomerDisagreeCountModel> response) {
-                *//*if(dialog!=null){
-                    dialog.dismiss();
-                }*//*
-                if (response.body() != null){
-                    //Toast.makeText(VideoActivity.this, "Disagree count: "+response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount(), Toast.LENGTH_SHORT).show();
-                    DOCUMENT_ACCESS_DISAGREE_COUNT = Integer.parseInt(response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount());
-                    if (DOCUMENT_ACCESS_DISAGREE_COUNT == 0){
-                        showDocumentAccessDialog("Document Access Required!" , "By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.");
-                    }else {
-                        SpannableStringBuilder builder = new SpannableStringBuilder();
-                        String first = "By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.\n\n";
-                        String second = "Note: By clicking on 'I Disagree', the request will be cancelled automatically.";
-
-                        SpannableString blackSpannable= new SpannableString(first);
-                        blackSpannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, first.length(), 0);
-                        builder.append(blackSpannable);
-
-                        SpannableString redSpannable= new SpannableString(first);
-                        redSpannable.setSpan(new ForegroundColorSpan(Color.RED), 0, second.length(), 0);
-                        builder.append(redSpannable);
-
-                        showDocumentAccessConfirmationDialog("Document Access Required!" , Html.fromHtml("<font color='#000000'>By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.<br><br>    </font><font color='#FF0000'>Note: By clicking on 'I Disagree', the request will be cancelled automatically.</font>"));
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CustomerDisagreeCountModel> call, Throwable t) {
-                *//*if(dialog!=null){
-                    dialog.dismiss();
-                }*//*
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
+    @SuppressLint("StaticFieldLeak")
     public void updateDisagreeCount(String message_id, int count) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-
-        Log.e(TAG, "Meeting ID: " + message_id);
-        JSONObject obj = new JSONObject();
-        obj.put("requestId", message_id);
-        obj.put("customerDisagreeCount", count);
-        String data = obj.toString();
-
-        new AsyncTask<Void, Void, CustomerDisagreeCountModel>() {
+        runOnUiThread(new Runnable() {
             @Override
-            protected CustomerDisagreeCountModel doInBackground(Void... params) {
-                Call<CustomerDisagreeCountModel> responseBodyCall = serviceLocal.updateDisagreeCount(authToken, data);
+            public void run() {
+                ProgressDialog dialog = new ProgressDialog(VideoActivity.this);
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+
+                Log.e(TAG, "Meeting ID: " + message_id);
+                JSONObject obj = new JSONObject();
                 try {
-                    Response<CustomerDisagreeCountModel> response = responseBodyCall.execute();
-                    if (response.isSuccessful() && response.body() != null) {
-                        // Handle the response on the UI thread
-                        // Toast.makeText(VideoActivity.this, "Disagree count: " + response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount(), Toast.LENGTH_SHORT).show();
-                    }
-                } catch (IOException e) {
-                    Log.e("====IOException", e.toString());
-                }
-                return null;
-            }
+                    obj.put("requestId", message_id);
+                    obj.put("customerDisagreeCount", count);
+                    String data = obj.toString();
 
-            @Override
-            protected void onPostExecute(CustomerDisagreeCountModel customerDisagreeCountModel) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-            }
-        }.execute();
-    }
+                    Call<CustomerDisagreeCountModel> responseBodyCall = serviceLocal.updateDisagreeCount(authToken, data);
+                    responseBodyCall.enqueue(new Callback<CustomerDisagreeCountModel>() {
+                        @Override
+                        public void onResponse(Call<CustomerDisagreeCountModel> call, Response<CustomerDisagreeCountModel> response) {
+                            if (dialog != null && dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
+                            if (response.isSuccessful() && response.body() != null) {
+                                // Handle successful response
+                                Toast.makeText(VideoActivity.this, "Disagree count updated.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                // Handle unsuccessful response
+                                Log.e("updateDisagreeCount", "Unsuccessful response");
+                            }
+                        }
 
-    /*public void updateDisagreeCount(String message_id , int count) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.e(TAG , "Meeting ID: "+message_id);
-        JSONObject obj = new JSONObject();
-        obj.put("requestId" , message_id);
-        obj.put("customerDisagreeCount" , count);
-        String data = obj.toString();
-        Call<CustomerDisagreeCountModel> responseBodyCall = serviceLocal.updateDisagreeCount(authToken, data);
-        responseBodyCall.enqueue(new Callback<CustomerDisagreeCountModel>() {
-            @Override
-            public void onResponse(Call<CustomerDisagreeCountModel> call, Response<CustomerDisagreeCountModel> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
+                        @Override
+                        public void onFailure(Call<CustomerDisagreeCountModel> call, Throwable t) {
+                            if (dialog != null && dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
+                            // Handle network failure
+                            Log.e("updateDisagreeCount", "Network call failed: " + t.toString());
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-                if (response.body() != null){
-                    //Toast.makeText(VideoActivity.this, "Disagree count: "+response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CustomerDisagreeCountModel> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
             }
         });
-    }*/
+    }
 
     @SuppressLint("StaticFieldLeak")
     private void confirmDeleteRequest(String meeting_id) throws JSONException {
+        Log.d(TAG , "Thread Name in sendUpdateToServer: "+Thread.currentThread().getName());
         ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
 
         Log.e(TAG, "Meeting ID: " + meeting_id);
         JSONObject obj = new JSONObject();
@@ -7227,9 +4793,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         responseBodyCall.enqueue(new Callback<CosignerDetailsModel>() {
             @Override
             public void onResponse(Call<CosignerDetailsModel> call, Response<CosignerDetailsModel> response) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
                 if (response.body() != null) {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
@@ -7263,61 +4834,18 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
     }
 
-    /*private void confirmDeleteRequest(String meeting_id) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.e(TAG , "Meeting ID: "+meeting_id);
-        JSONObject obj = new JSONObject();
-        obj.put("requestId" , meeting_id);
-        String data = obj.toString();
-        Call<CosignerDetailsModel> responseBodyCall = serviceLocal.getCosignerDetailsByRequestId(authToken, data);
-        responseBodyCall.enqueue(new Callback<CosignerDetailsModel>() {
-            @Override
-            public void onResponse(Call<CosignerDetailsModel> call, Response<CosignerDetailsModel> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                if (response.body() != null){
-                    JSONObject object = new JSONObject();
-                    if (response.body().getCosigners().size() > 0){
-                        try {
-                            object.put("RequestId" , requestID);
-                            object.put("RequestStatus" , 2);
-                            object.put("CosignerList" , response.body().getCosigners());
-                            updateRequestStatusByCustomer(object);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }else {
-                        try {
-                            object.put("RequestId" , requestID);
-                            object.put("RequestStatus" , 2);
-                            updateRequestStatusByCustomer(object);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CosignerDetailsModel> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void updateRequestStatusByCustomer(JSONObject obj) throws JSONException {
+        Log.d(TAG , "Thread Name in updateRequestStatusByCustomer: "+Thread.currentThread().getName());
         ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
 
         Log.d(TAG, "Prepared Object: " + new Gson().toJson(obj));
         String data = obj.toString();
@@ -7326,9 +4854,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         responseBodyCall.enqueue(new Callback<UpdateRequestStatusResponse>() {
             @Override
             public void onResponse(Call<UpdateRequestStatusResponse> call, Response<UpdateRequestStatusResponse> response) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
                 if (response.body() != null) {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
@@ -7368,49 +4901,18 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
     }
 
-    /*private void updateRequestStatusByCustomer(JSONObject obj) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.d(TAG , "Prepared Object: "+new Gson().toJson(obj));
-        String data = obj.toString();
-        Call<UpdateRequestStatusResponse> responseBodyCall = serviceLocal.updateRequestStatusByCustomer(authToken, data);
-        responseBodyCall.enqueue(new Callback<UpdateRequestStatusResponse>() {
-            @Override
-            public void onResponse(Call<UpdateRequestStatusResponse> call, Response<UpdateRequestStatusResponse> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                if (response.body() != null){
-                    if (response.body().getStatus() == 1){
-                        try {
-                            notifyServiceProvider();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }else {
-                        Toast.makeText(VideoActivity.this , "We are unable to cancel your request. Please contact support team." , Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UpdateRequestStatusResponse> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void notifyServiceProvider() throws JSONException {
+        Log.d(TAG , "Thread Name in notifyServiceProvider: "+Thread.currentThread().getName());
         ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
 
         JSONObject dataObject = new JSONObject();
         dataObject.put("userId", userId);
@@ -7427,9 +4929,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         responseBodyCall.enqueue(new Callback<UpdateRequestStatusResponse>() {
             @Override
             public void onResponse(Call<UpdateRequestStatusResponse> call, Response<UpdateRequestStatusResponse> response) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
                 if (response.body() != null) {
                     new AsyncTask<Void, Void, Void>() {
                         @Override
@@ -7505,151 +5012,76 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
     }
 
-    /*private void notifyServiceProvider() throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-
-        JSONObject dataObject = new JSONObject();
-        dataObject.put("userId" , userId);
-        dataObject.put("requestId" , requestID);
-
-        JSONObject finalObj = new JSONObject();
-        finalObj.put("userId" , userId);
-        finalObj.put("topic" , "serviceProviderRequestCancelled");
-        finalObj.put("dataObject" , dataObject);
-
-        String data = finalObj.toString();
-        Call<UpdateRequestStatusResponse> responseBodyCall = serviceLocal.notifyServiceProvider(authToken, data);
-        responseBodyCall.enqueue(new Callback<UpdateRequestStatusResponse>() {
-            @Override
-            public void onResponse(Call<UpdateRequestStatusResponse> call, Response<UpdateRequestStatusResponse> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                if (response.body() != null){
-                    if (response.body().getStatus() == 1){
-                        Toast.makeText(VideoActivity.this, "Your notarization request has been cancelled by you.", Toast.LENGTH_LONG).show();
-                    } else if (response.body().getStatus() == 2){
-                        Toast.makeText(VideoActivity.this , "Sorry, the request is already cancelled." , Toast.LENGTH_LONG).show();
-                    }if (response.body().getStatus() == 3){
-                        Toast.makeText(VideoActivity.this , "Sorry, the request is already notarized." , Toast.LENGTH_LONG).show();
-                    }if (response.body().getStatus() == 4){
-                        Toast.makeText(VideoActivity.this , "Sorry, the request is already cancelled by notary." , Toast.LENGTH_LONG).show();
-                    }else {
-                        //Toast.makeText(VideoActivity.this , "Something went wrong. Please contact support team." , Toast.LENGTH_LONG).show();
-                    }
-                    exitFromTheRoom();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UpdateRequestStatusResponse> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     public void updateAgreeCount(String message_id) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-
-        Log.e(TAG, "Meeting ID: " + message_id);
-        JSONObject obj = new JSONObject();
-        obj.put("RequestId", message_id);
-        String data = obj.toString();
-
-        Call<CustomerDisagreeCountModel> responseBodyCall = serviceLocal.updateAgreeCount(authToken, data);
-        responseBodyCall.enqueue(new Callback<CustomerDisagreeCountModel>() {
+        runOnUiThread(new Runnable() {
             @Override
-            public void onResponse(Call<CustomerDisagreeCountModel> call, Response<CustomerDisagreeCountModel> response) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-                if (response.body() != null) {
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... params) {
-                            // Handle the response in the background
-                            // For example, update UI or perform post-processing tasks
-                            return null;
-                        }
+            public void run() {
+                // Show loading indicator
+                ProgressDialog dialog = new ProgressDialog(VideoActivity.this);
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
 
-                        @Override
-                        protected void onPostExecute(Void result) {
-                            // Update UI or perform post-processing tasks on the main thread
-                            // For example, show a Toast message
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }.execute();
+                Log.e(TAG, "Meeting ID: " + message_id);
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("RequestId", message_id);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
                 }
-            }
+                String data = obj.toString();
 
-            @Override
-            public void onFailure(Call<CustomerDisagreeCountModel> call, Throwable t) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
+                Call<CustomerDisagreeCountModel> responseBodyCall = serviceLocal.updateAgreeCount(authToken, data);
+                responseBodyCall.enqueue(new Callback<CustomerDisagreeCountModel>() {
+                    @Override
+                    public void onResponse(Call<CustomerDisagreeCountModel> call, Response<CustomerDisagreeCountModel> response) {
+                        // Dismiss loading indicator
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        if (response.isSuccessful() && response.body() != null) {
+                            // Handle successful response
+                            Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Handle unsuccessful response
+                            Log.d("onResponse", "Unsuccessful response");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<CustomerDisagreeCountModel> call, Throwable t) {
+                        // Dismiss loading indicator
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        // Handle network failure
+                        Log.d("onFailure", "Network call failed: " + t.toString());
+                    }
+                });
             }
         });
     }
 
-    /*public void updateAgreeCount(String message_id) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.e(TAG , "Meeting ID: "+message_id);
-        JSONObject obj = new JSONObject();
-        obj.put("RequestId" , message_id);
-        String data = obj.toString();
-        Call<CustomerDisagreeCountModel> responseBodyCall = serviceLocal.updateAgreeCount(authToken, data);
-        responseBodyCall.enqueue(new Callback<CustomerDisagreeCountModel>() {
-            @Override
-            public void onResponse(Call<CustomerDisagreeCountModel> call, Response<CustomerDisagreeCountModel> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                if (response.body() != null){
-                    //Toast.makeText(VideoActivity.this, "Disagree count: "+response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CustomerDisagreeCountModel> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     private void showDocumentAccessDialog(String title, String message) {
+        Log.d(TAG , "Thread Name in showDocumentAccessDialog: "+Thread.currentThread().getName());
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message)
                 .setCancelable(false)
                 .setPositiveButton("I Agree", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
                         ProgressDialog agreeDialog = new ProgressDialog(VideoActivity.this);
-                        agreeDialog.setMessage("Please wait");
-                        agreeDialog.setCancelable(false);
-                        agreeDialog.show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.cancel();
+                                agreeDialog.setMessage("Please wait");
+                                agreeDialog.setCancelable(false);
+                                agreeDialog.show();
+                            }
+                        });
 
                         new AsyncTask<Void, Void, Void>() {
                             @Override
@@ -7667,20 +5099,30 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             protected void onPostExecute(Void result) {
                                 // Update UI or perform post-processing tasks on the main thread
-                                if (agreeDialog != null) {
-                                    agreeDialog.dismiss();
-                                }
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (agreeDialog != null) {
+                                            agreeDialog.dismiss();
+                                        }
+                                    }
+                                });
                             }
                         }.execute();
                     }
                 })
                 .setNegativeButton("I Disagree", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
                         ProgressDialog disagreeDialog = new ProgressDialog(VideoActivity.this);
-                        disagreeDialog.setMessage("Please wait");
-                        disagreeDialog.setCancelable(false);
-                        disagreeDialog.show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.cancel();
+                                disagreeDialog.setMessage("Please wait");
+                                disagreeDialog.setCancelable(false);
+                                disagreeDialog.show();
+                            }
+                        });
 
                         new AsyncTask<Void, Void, Void>() {
                             @Override
@@ -7706,72 +5148,48 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             protected void onPostExecute(Void result) {
                                 // Update UI or perform post-processing tasks on the main thread
-                                if (disagreeDialog != null) {
-                                    disagreeDialog.dismiss();
-                                }
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (disagreeDialog != null) {
+                                            disagreeDialog.dismiss();
+                                        }
+                                    }
+                                });
                             }
                         }.execute();
                     }
                 });
 
-        // Creating dialog box
-        AlertDialog alert = builder.create();
-        alert.setTitle(title);
-        alert.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Creating dialog box
+                AlertDialog alert = builder.create();
+                alert.setTitle(title);
+                alert.show();
+            }
+        });
     }
-
-    /*private void showDocumentAccessDialog(String title, String message){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("I Agree", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        try {
-                            updateAgreeCount(requestID);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                })
-                .setNegativeButton("I Disagree", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                        if(DOCUMENT_ACCESS_DISAGREE_COUNT == 0){
-                            try {
-                                updateDisagreeCount(requestID , DOCUMENT_ACCESS_DISAGREE_COUNT++);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }else {
-                            try {
-                                confirmDeleteRequest(requestID);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                });
-        //Creating dialog box
-        AlertDialog alert = builder.create();
-        alert.setTitle(title);
-        alert.show();
-
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     private void showDocumentAccessConfirmationDialog(String title, Spanned message) {
+        Log.d(TAG , "Thread Name in showDocumentAccessConfirmationDialog: "+Thread.currentThread().getName());
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(message)
                 .setCancelable(false)
                 .setPositiveButton("I Agree", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
                         ProgressDialog agreeDialog = new ProgressDialog(VideoActivity.this);
-                        agreeDialog.setMessage("Please wait");
-                        agreeDialog.setCancelable(false);
-                        agreeDialog.show();
+                       runOnUiThread(new Runnable() {
+                           @Override
+                           public void run() {
+                               dialog.dismiss();
+                               agreeDialog.setMessage("Please wait");
+                               agreeDialog.setCancelable(false);
+                               agreeDialog.show();
+                           }
+                       });
 
                         new AsyncTask<Void, Void, Void>() {
                             @Override
@@ -7789,20 +5207,30 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             protected void onPostExecute(Void result) {
                                 // Update UI or perform post-processing tasks on the main thread
-                                if (agreeDialog != null) {
-                                    agreeDialog.dismiss();
-                                }
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (agreeDialog != null) {
+                                            agreeDialog.dismiss();
+                                        }
+                                    }
+                                });
                             }
                         }.execute();
                     }
                 })
                 .setNegativeButton("I Disagree", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
                         ProgressDialog disagreeDialog = new ProgressDialog(VideoActivity.this);
-                        disagreeDialog.setMessage("Please wait");
-                        disagreeDialog.setCancelable(false);
-                        disagreeDialog.show();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.dismiss();
+                                disagreeDialog.setMessage("Please wait");
+                                disagreeDialog.setCancelable(false);
+                                disagreeDialog.show();
+                            }
+                        });
 
                         new AsyncTask<Void, Void, Void>() {
                             @Override
@@ -7828,66 +5256,42 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             protected void onPostExecute(Void result) {
                                 // Update UI or perform post-processing tasks on the main thread
-                                if (disagreeDialog != null) {
-                                    disagreeDialog.dismiss();
-                                }
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (disagreeDialog != null) {
+                                            disagreeDialog.dismiss();
+                                        }
+                                    }
+                                });
                             }
                         }.execute();
                     }
                 });
 
-        // Creating dialog box
-        AlertDialog alert = builder.create();
-        alert.setTitle(title);
-        alert.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Creating dialog box
+                AlertDialog alert = builder.create();
+                alert.setTitle(title);
+                alert.show();
+            }
+        });
     }
-
-    /*private void showDocumentAccessConfirmationDialog(String title, Spanned message){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("I Agree", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                        try {
-                            updateAgreeCount(requestID);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                })
-                .setNegativeButton("I Disagree", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                        if(DOCUMENT_ACCESS_DISAGREE_COUNT == 0){
-                            try {
-                                updateDisagreeCount(requestID , DOCUMENT_ACCESS_DISAGREE_COUNT++);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }else {
-                            try {
-                                confirmDeleteRequest(requestID);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                });
-        //Creating dialog box
-        AlertDialog alert = builder.create();
-        alert.setTitle(title);
-        alert.show();
-
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     private void updateNewMessageInChat(DataModel dModel) {
+        Log.d(TAG , "Thread Name in updateNewMessageInChat: "+Thread.currentThread().getName());
         ProgressDialog dialog = new ProgressDialog(this);
         dialog.setMessage("Please wait");
         dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -7911,11 +5315,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*private void updateNewMessageInChat(DataModel dModel) throws JSONException {
-        getAllMessagesByMeetingId(requestID , "Refresh");
-    }*/
-
     private void CameraOff(DataModel dModel) {
+        Log.d(TAG , "Thread Name in CameraOff: "+Thread.currentThread().getName());
         Log.d("====CameraOff", "ProcessRequest remoteParticipantList Size:" + remoteParticipantList.size());
         Log.d("====CameraOff", "ProcessRequest Called");
         for (int i = 0; i < remoteParticipantList.size(); i++) {
@@ -7947,44 +5348,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
-    /*private void CameraOff(DataModel dModel) {
-        Log.d("====CameraOff", "ProcessRequest remoteParticipantList Size:" + remoteParticipantList.size());
-        Log.d("====CameraOff", "ProcessRequest Called");
-        for (int i = 0; i < remoteParticipantList.size(); i++) {
-            Log.d("====CameraOff", "ProcessRequest Called inside for");
-            TechrevRemoteParticipant participant = remoteParticipantList.get(i);
-            if (participant.remoteParticipant.getIdentity().equalsIgnoreCase(dModel.getFrom())) {
-                Log.d("====CameraOff", "ProcessRequest Called inside for IF");
-                // If Equals Update Paticipate Adapter
-
-                participant.setTechRevVideoEnable(false);
-
-                int finalI = i;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Stuff that updates the UI
-//                        participantsAdapter = new ParticipantsAdapter(remoteParticipantList,VideoActivity.this,onclickInterface);
-//                        RecyclerView.LayoutManager manager = new LinearLayoutManager(VideoActivity.this,LinearLayoutManager.HORIZONTAL, false);
-//                        recyclerView.setLayoutManager(manager);
-//                        recyclerView.setAdapter(participantsAdapter);
-                        Log.d("===UI CameraOff", "ProcessRequest CAlled");
-                        notifytoOhterParticipants();
-                        if (selectedRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(dModel.getFrom())) {
-                            removeRenderedVideo(selectedRemoteParticipant);
-                        }
-
-
-                    }
-                });
-
-            }
-
-
-        }
-    }*/
-
     private void CameraOn(DataModel dModel) {
+        Log.d(TAG , "Thread Name in CameraOn: "+Thread.currentThread().getName());
         Log.d("====CameraOn", "ProcessRequest Called");
         for (int k = 0; k < remoteParticipantList.size(); k++) {
             Log.d("====CameraOn", "ProcessRequest Called inside for");
@@ -8016,48 +5381,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }
     }
-
-    /*private void CameraOn(DataModel dModel) {
-
-        Log.d("====CameraOn", "ProcessRequest Called");
-        for (int k = 0; k < remoteParticipantList.size(); k++) {
-            Log.d("====CameraOn", "ProcessRequest Called inside for");
-            TechrevRemoteParticipant techrevRemoteParticipant = remoteParticipantList.get(k);
-            if (techrevRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(dModel.getFrom())) {
-                Log.d("====CameraOn", "ProcessRequest Called inside for IF");
-                // If Equals Update Paticipate Adapter
-
-                Log.d("====CameraOn", "ProcessRequest remoteParticipantList Size:" + remoteParticipantList.size());
-                techrevRemoteParticipant.setTechRevVideoEnable(true);
-
-                int finalK = k;
-                runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        // Stuff that updates the UI
-//                        participantsAdapter = new ParticipantsAdapter(remoteParticipantList,VideoActivity.this,onclickInterface);
-//                        RecyclerView.LayoutManager manager = new LinearLayoutManager(VideoActivity.this,LinearLayoutManager.HORIZONTAL, false);
-//                        recyclerView.setLayoutManager(manager);
-//                        recyclerView.setAdapter(participantsAdapter);
-                        Log.d("===UI CameraOn", "ProcessRequest CAlled");
-                        notifytoOhterParticipants();
-                        if (selectedRemoteParticipant.remoteParticipant.getIdentity().equalsIgnoreCase(dModel.getFrom())) {
-                            addrevRenderedVideo(selectedRemoteParticipant);
-                        }
-
-
-                    }
-                });
-
-            }
-
-
-        }
-
-    }*/
 
     private void audioUnMuted(DataModel dModel) {
+        Log.d(TAG , "Thread Name in audioUnMuted: "+Thread.currentThread().getName());
         Log.d("====audioUnMuted", "ProcessRequest Called");
         for (int k = 0; k < remoteParticipantList.size(); k++) {
             Log.d("====audioUnMuted", "ProcessRequest Called inside for");
@@ -8084,42 +5410,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
-    /*private void audioUnMuted(DataModel dModel) {
-        Log.d("====audioUnMuted", "ProcessRequest Called");
-        for (int k = 0; k < remoteParticipantList.size(); k++) {
-            Log.d("====audioUnMuted", "ProcessRequest Called inside for");
-            //TechrevRemoteParticipant remoteParticipant = (TechrevRemoteParticipant) remoteParticipantList.get(k);
-
-            if (remoteParticipantList.get(k).remoteParticipant.getIdentity().equalsIgnoreCase(dModel.getFrom())) {
-                Log.d("====audioUnMuted", "ProcessRequest Called inside for IF");
-                // If Equals Update Paticipate Adapter
-                remoteParticipantList.get(k).setTechRevAudioEnable(true);
-                Log.d("====audioUnMuted", "ProcessRequest remoteParticipantList Size:" + remoteParticipantList.size());
-
-
-                runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        // Stuff that updates the UI
-//                        participantsAdapter = new ParticipantsAdapter(remoteParticipantList,VideoActivity.this,onclickInterface);
-//                        RecyclerView.LayoutManager manager = new LinearLayoutManager(VideoActivity.this,LinearLayoutManager.HORIZONTAL, false);
-//                        recyclerView.setLayoutManager(manager);
-//                        recyclerView.setAdapter(participantsAdapter);
-                        Log.d("===UI audioUnMuted", "ProcessRequest CAlled");
-                        notifytoOhterParticipants();
-
-
-                    }
-                });
-
-            }
-
-
-        }
-    }*/
-
     private void audioMuted(DataModel dModel) {
+        Log.d(TAG , "Thread Name in audioMuted: "+Thread.currentThread().getName());
         Log.d("====audioMuted", "ProcessRequest Called");
         for (int k = 0; k < remoteParticipantList.size(); k++) {
             Log.d("====audioMuted", "ProcessRequest Called inside for");
@@ -8134,46 +5426,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
-    /*private void audioMuted(DataModel dModel) {
-        Log.d("====audioMuted", "ProcessRequest Called");
-        for (int k = 0; k < remoteParticipantList.size(); k++) {
-            Log.d("====audioMuted", "ProcessRequest Called inside for");
-            //      TechrevRemoteParticipant remoteParticipant = (TechrevRemoteParticipant) remoteParticipantList.get(k);
-
-            if (remoteParticipantList.get(k).remoteParticipant.getIdentity().equalsIgnoreCase(dModel.getFrom())) {
-                Log.d("====audioMuted", "ProcessRequest Called inside for IF");
-                // If Equals Update Paticipate Adapter
-
-                remoteParticipantList.get(k).setTechRevAudioEnable(false);
-
-                runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Log.d("===UI audioMuted", "ProcessRequest CAlled");
-
-//                        // Stuff that updates the UI
-//                        participantsAdapter = new ParticipantsAdapter(remoteParticipantList,VideoActivity.this,onclickInterface);
-//                        RecyclerView.LayoutManager manager = new LinearLayoutManager(VideoActivity.this,LinearLayoutManager.HORIZONTAL, false);
-//                        recyclerView.setLayoutManager(manager);
-//                        recyclerView.setAdapter(participantsAdapter);
-                        notifytoOhterParticipants();
-
-
-
-
-                    }
-                });
-
-            }
-
-
-        }
-
-
-    }*/
-
     private void SwitchOnOrOffVideo(DataModel dModel) {
+        Log.d(TAG , "Thread Name in SwitchOnOrOffVideo: "+Thread.currentThread().getName());
         boolean msgval = dModel.getMessageValue();
         Log.d("===Inside", "ProcessRequest msgval:" + msgval);
 
@@ -8185,21 +5439,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
     }
 
-    /*private void SwitchOnOrOffVideo(DataModel dModel) {
-        boolean msgval = dModel.getMessageValue();
-        Log.d("===Inside", "ProcessRequest msgval:" + msgval);
-        boolean eventFire = false;
-
-
-        int icon = msgval ? getResourceID("camera_off", "drawable") : getResourceID("camera_on", "drawable");
-        localVideoActionFab.setImageDrawable(ContextCompat.getDrawable(
-                VideoActivity.this, icon));
-
-
-
-    }*/
-
     private void muteUnmuteAudio(DataModel dModel) {
+        Log.d(TAG , "Thread Name in muteUnmuteAudio: "+Thread.currentThread().getName());
         boolean msgval = dModel.getMessageValue();
         Log.d("===Inside", "ProcessRequest msgval:" + msgval);
 
@@ -8210,23 +5451,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     VideoActivity.this, icon));
         });
     }
-
-    /*private void muteUnmuteAudio(DataModel dModel) {
-
-        boolean msgval = dModel.getMessageValue();
-        Log.d("===Inside", "ProcessRequest msgval:" + msgval);
-
-        boolean eventFire = false;
-
-
-        int icon = msgval ? getResourceID("mic_off", "drawable") : getResourceID("mic_on", "drawable");
-        muteActionFab.setImageDrawable(ContextCompat.getDrawable(
-                VideoActivity.this, icon));
-
-
-
-
-    }*/
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -8268,35 +5492,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
     }
 
-    /*@RequiresApi(api = Build.VERSION_CODES.M)
-    public void commonExit() {
-        // your code.
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        exitFromTheRoom();
-                        break;
-
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
-                        break;
-                }
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(VideoActivity.this);
-        AlertDialog dialog = builder.setMessage("Are you sure, you want to exit?")
-                .setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener)
-                .show();
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getColor(R.color.color_primary));
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getColor(R.color.red));
-    }*/
-
     private void exitFromTheRoom() {
-
+        Log.d(TAG , "Thread Name in exitFromTheRoom: "+Thread.currentThread().getName());
         if (member_Type == 1) {
             // Newly Added start
             try {
@@ -8331,11 +5528,17 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void sendMessage() {
+        Log.d(TAG , "Thread Name in sendMessage: "+Thread.currentThread().getName());
         // Display a progress dialog
         ProgressDialog dialog = new ProgressDialog(VideoActivity.this);
         dialog.setMessage("Please wait, Image capture is in progress.");
         dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
 
         // Perform network operation in the background
         new Thread(new Runnable() {
@@ -8358,47 +5561,23 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (dialog != null && dialog.isShowing()) {
-                            dialog.dismiss();
-                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (dialog != null && dialog.isShowing()) {
+                                    dialog.dismiss();
+                                }
+                            }
+                        });
                     }
                 });
             }
         }).start();
     }
 
-    /*private void sendMessage() {
-
-        alertDialog2 = new AlertDialog.Builder(VideoActivity.this).create();
-        alertDialog2.setTitle("Alert");
-        alertDialog2.setMessage("Please wait, Image capture is in progress.");
-        alertDialog2.setCancelable(false);
-        alertDialog2.show();
-
-
-        if (selectedRemoteParticipant != null) {
-            if (selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("from", userMeetingIdentifier);
-                    jsonObject.put("to", selectedRemoteParticipant.remoteParticipant.getIdentity());
-                    jsonObject.put("messageType", "CaptureImageFromCustomer");
-                    jsonObject.put("content", "");
-                    videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                } catch (Exception e) {
-                    Log.d("====Exception", "" + e.toString());
-
-                }
-
-
-            }
-
-        }
-
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void sendChatMessage(final String message_type, final String content) {
+        Log.d(TAG , "Thread Name in sendChatMessage: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
             ProgressDialog dialog;
 
@@ -8408,7 +5587,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 dialog = new ProgressDialog(VideoActivity.this);
                 dialog.setMessage("Sending chat message...");
                 dialog.setCancelable(false);
-                dialog.show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.show();
+                    }
+                });
             }
 
             @Override
@@ -8431,100 +5615,17 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             @Override
             protected void onPostExecute(Void result) {
                 // Dismiss the progress dialog
-                if (dialog != null && dialog.isShowing()) {
-                    dialog.dismiss();
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
             }
         }.execute();
     }
-
-    /*private void sendChatMessage(String message_type , String content) {
-
-        if(videoCallModel != null){
-            try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("from", userMeetingIdentifier);
-                jsonObject.put("to", "All");
-                jsonObject.put("messageType", message_type);
-                jsonObject.put("content", content);
-                videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-            } catch (Exception e) {
-                Log.d("====Exception", "" + e.toString());
-            }
-        }
-
-    }*/
-
-
-    //Step1 Get the ClientID
-
-    public void forGettingClientID() {
-        //Step1 Starts
-
-        JSONObject json1 = new JSONObject();
-        try {
-            json1.put("requestId", requestID);
-            json1.put("passcode", passcode);
-            json1.put("isEncryptedPasscode", "false");
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String jsonString1 = json1.toString();
-        Call<RequestForMeetingRoomModel> reqForMeetingRoom = serviceLocal.getRequestForMeetingRoom(authToken, jsonString1);
-        reqForMeetingRoom.enqueue(new Callback<RequestForMeetingRoomModel>() {
-            @Override
-            public void onResponse(Call<RequestForMeetingRoomModel> call, Response<RequestForMeetingRoomModel> response) {
-                Log.d("====reqForMeetingRoom", "onResponse");
-                Log.d("====reqForMeetingRoom", "" + response.code());
-                Log.d("====reqForMeetingRoom", "ClientId:" + response.body().getClientId());
-                //CAll Step2 get the
-
-            }
-
-            @Override
-            public void onFailure(Call<RequestForMeetingRoomModel> call, Throwable t) {
-                Log.d("====reqForMeetingRoom", "onFailure");
-            }
-        });
-
-        //Step1 Ends
-
-
-    }
-
-    //Step2 Get the MaxImageCaptureLimit
-
-    public void getMaxImageCaptureLimit(String clientID) {
-        JSONObject json2 = new JSONObject();
-        try {
-            json2.put("clientId", clientID);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String jsonString2 = json2.toString();
-
-        Call<ClientActivePlanDetailsByClientIdModel> getClientActivePlanDetailsByClientId = serviceLocal.getClientActivePlanDetailsByClientId(authToken, jsonString2);
-
-        getClientActivePlanDetailsByClientId.enqueue(new Callback<ClientActivePlanDetailsByClientIdModel>() {
-            @Override
-            public void onResponse(Call<ClientActivePlanDetailsByClientIdModel> call, Response<ClientActivePlanDetailsByClientIdModel> response) {
-                Log.d("====DetailsByClientId", "onResponse");
-                Log.d("====DetailsByClientId", "" + response.code());
-                Log.d("====DetailsByClientId", "" + response.body().getResults().getMaxImageCaptureLimit());
-            }
-
-            @Override
-            public void onFailure(Call<ClientActivePlanDetailsByClientIdModel> call, Throwable t) {
-                Log.d("====DetailsByClientId", "onFailure");
-                Log.d("====DetailsByClientId", "Throwable:" + t.toString());
-            }
-        });
-
-
-    }
-
 
     @SuppressLint("StaticFieldLeak")
     public interface SaveCallback {
@@ -8532,6 +5633,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void saveToInternalStorage(Bitmap bitmapImage, SaveCallback callback) {
+        Log.d(TAG , "Thread Name in saveToInternalStorage: "+Thread.currentThread().getName());
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
         // path to /data/data/yourapp/app_data/imageDir
         directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
@@ -8561,31 +5663,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             callback.onDirectorySaved(directoryPath);
         }
     }
-
-
-    /*private String saveToInternalStorage(Bitmap bitmapImage) {
-        ContextWrapper cw = new ContextWrapper(getApplicationContext());
-        // path to /data/data/yourapp/app_data/imageDir
-        directory = cw.getDir("imageDir", Context.MODE_PRIVATE);
-        // Create imageDir
-        mypath = new File(directory, "profile.jpg");
-
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(mypath);
-            // Use the compress method on the BitMap object to write image to the OutputStream
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return directory.getAbsolutePath();
-    }*/
 
     private String saveToInternalStorageFotAttachment(Bitmap bitmapImage , String file_name) {
         ContextWrapper cw = new ContextWrapper(getApplicationContext());
@@ -8728,42 +5805,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute(fileName, docName);
     }
 
-    // Updating Document Name
-   /* public void updateDocumentName(String fileName, String docName) {
-
-        //Start Upload Document
-
-        JSONObject json1 = new JSONObject();
-        try {
-            json1.put("fileName", fileName);
-            json1.put("documentname", docName);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String jsonString1 = json1.toString();
-
-        Call<ResponseBody> responseBodyCall = serviceLocal.updateDocumentName(authToken, jsonString1);
-        responseBodyCall.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d("====Inside", "Success");
-                Log.d("====Inside", "response:" + response.code());
-                Toast.makeText(VideoActivity.this, "Image uploaded successfully", Toast.LENGTH_SHORT).show();
-                dialogImage.dismiss();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("====Inside", "Failure");
-                Log.d("====Inside", "Throwable:" + t.toString());
-                dialogImage.dismiss();
-            }
-        });
-
-        //End Upload Document
-
-    }*/
-
     // Deleting the File Name
     @SuppressLint("StaticFieldLeak")
     public void deleteFileName(String fileName) {
@@ -8801,37 +5842,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }.execute(fileName);
     }
-    /*public void deleteFileName(String fileName) {
-
-        // Delete File Name Starts
-        JSONObject json2 = new JSONObject();
-        try {
-            json2.put("fileName", fileName);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String jsonString2 = json2.toString();
-        Call<ResponseBody> responseBodyCall1 = serviceLocal.deleteFileName(authToken, jsonString2);
-        responseBodyCall1.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d("====Inside", "deleteFileName:Success");
-                Log.d("====Inside", "deleteFileName:response:" + response.code());
-                dialogImage.dismiss();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("====Inside", "deleteFileName:Failure");
-                Log.d("====Inside", "deleteFileName:Throwable:" + t.toString());
-                dialogImage.dismiss();
-            }
-        });
-        // Delete File Name Ends
-    }*/
 
     @SuppressLint("StaticFieldLeak")
     private void AddImageDialog(Bitmap bitmap, String documentID) {
+        Log.d(TAG , "Thread Name in AddImageDialog: "+Thread.currentThread().getName());
         Log.d("===Inside", "AddImageDialog");
         alertDialog2.dismiss();
         alertDialog2 = null;
@@ -8949,103 +5963,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
     }
 
-    /*private void AddImageDialog(Bitmap bitmap, String documentID) {
-        Log.d("===Inside", "AddImageDialog");
-        alertDialog2.dismiss();
-        alertDialog2 = null;
-
-        dialogImage = new Dialog(VideoActivity.this);
-        dialogImage.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialogImage.setContentView(R.layout.dialog_image_popup);
-        dialogImage.setCancelable(true);
-        //Newly Added
-        LinearLayout linearLayout = (LinearLayout) dialogImage.findViewById(R.id.llPopup);
-        ImageView imageView = (ImageView) dialogImage.findViewById(R.id.popimageView);
-        TextView textView = (TextView) dialogImage.findViewById(R.id.title);
-        Button btnSubmit = (Button) dialogImage.findViewById(R.id.btnSubmit);
-        Button btnCancel = (Button) dialogImage.findViewById(R.id.btnCancel);
-        EditText etCustomName = (EditText) dialogImage.findViewById(R.id.customName);
-
-
-        //imageView.setImageBitmap(mResultsBitmap);
-
-        // Newly Added
-        imageView.setImageBitmap(flip(bitmap, FLIP_HORIZONTAL));
-//        imageView.setScaleY(-1);
-//        imageView.setScaleX(-1);
-//        imageView.setRotationX(180);
-
-
-        //Previous
-        //imageView.setImageBitmap(bitmap);
-        textView.setText("Captured Image");
-        ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.add("Profile Picture");
-        arrayList.add("ID Proof Front");
-        arrayList.add("ID Proof Back");
-        arrayList.add("Custom");
-
-        Spinner checkInProviders = (Spinner) dialogImage.findViewById(R.id.spinner);
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(VideoActivity.this,
-                android.R.layout.simple_spinner_item, arrayList);
-
-        checkInProviders.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String strValue = checkInProviders.getItemAtPosition(i).toString();
-                if (strValue.matches("Custom")) {
-                    Log.d("====Inside Spinner", "IF");
-                    etCustomName.setVisibility(View.VISIBLE);
-                } else {
-                    Log.d("====Inside Spinner", "ELSE");
-                    etCustomName.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        checkInProviders.setAdapter(dataAdapter);
-        dialogImage.show();
-
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("====Inside", "Submit");
-                // call another API to update the name of the document
-                //dialogImage.dismiss();
-
-                if (checkInProviders.getSelectedItem().toString().equalsIgnoreCase("Custom")) {
-                    if (etCustomName.getText().toString().trim().length() > 0) {
-                        updateDocumentName(documentID, etCustomName.getText().toString());
-                    } else {
-                        Toast.makeText(VideoActivity.this, "Enter custom document name", Toast.LENGTH_SHORT).show();
-                        etCustomName.requestFocus();
-                    }
-
-                } else {
-                    updateDocumentName(documentID, checkInProviders.getSelectedItem().toString());
-                }
-
-
-            }
-        });
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d("====Inside", "Cancel");
-                // call another API to cancel the name of the document
-                // dialogImage.dismiss();
-                deleteFileName(documentID);
-            }
-        });
-
-    }*/
-
     public static String removePrefix(String s, String prefix) throws ExecutionException, InterruptedException {
         if (s != null && prefix != null && s.startsWith(prefix)) {
             // Perform background task to remove prefix
@@ -9063,48 +5980,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
         return s;
     }
-
-    /*public static String removePrefix(String s, String prefix) {
-        if (s != null && prefix != null && s.startsWith(prefix)) {
-            return s.substring(prefix.length());
-        }
-        return s;
-    }*/
-
-    @SuppressLint("StaticFieldLeak")
-    private boolean checkPermission(String permission) throws ExecutionException, InterruptedException {
-        if (Build.VERSION.SDK_INT >= 23) {
-            final String currentPermission = permission;
-            // Perform background task to check permission
-            return new AsyncTask<Void, Void, Boolean>() {
-                @Override
-                protected Boolean doInBackground(Void... voids) {
-                    int result = ContextCompat.checkSelfPermission(VideoActivity.this, currentPermission);
-                    return result == PackageManager.PERMISSION_GRANTED;
-                }
-
-                @Override
-                protected void onPostExecute(Boolean isPermissionGranted) {
-                    // Update UI or perform any additional task after the background task completes
-                }
-            }.execute().get(); // This may cause ANR, consider using other asynchronous patterns
-        } else {
-            return true;
-        }
-    }
-
-    /*private boolean checkPermission(String permission) {
-        if (Build.VERSION.SDK_INT >= 23) {
-            int result = ContextCompat.checkSelfPermission(VideoActivity.this, permission);
-            if (result == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }*/
 
     // Trigger new location updates at interval
     protected void startLocationUpdates() {
@@ -9162,46 +6037,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }
     }
-
-    /*protected void startLocationUpdates() {
-
-        if (!isTryingLocationg) {
-            isTryingLocationg = true;
-            // Create the location request to start receiving updates
-            mLocationRequest = new LocationRequest();
-            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            mLocationRequest.setInterval(UPDATE_INTERVAL);
-            //  mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-
-            // Create LocationSettingsRequest object using location request
-            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-            builder.addLocationRequest(mLocationRequest);
-            LocationSettingsRequest locationSettingsRequest = builder.build();
-
-            // Check whether location settings are satisfied
-            // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
-            SettingsClient settingsClient = LocationServices.getSettingsClient(this);
-            settingsClient.checkLocationSettings(locationSettingsRequest);
-
-            // new Google API SDK v11 uses getFusedLocationProviderClient(this)
-            if (ActivityCompat.checkSelfPermission(
-                    this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE);
-                return;
-            }
-
-            mLocationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    // do work here
-                    onLocationChanged(locationResult.getLastLocation());
-                }
-            };
-            getFusedLocationProviderClient(this).requestLocationUpdates(mLocationRequest, mLocationCallback,
-                    Looper.myLooper());
-        }
-    }*/
 
     public void sendLocationToServer(Location location) {
         /*Getting the current time to check if the location has been shared 30 mins before*/
@@ -9263,57 +6098,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         /*Getting the current time to check if the location has been shared 30 mins before*/
     }
 
-    /*public void sendLocationToServer(Location location) {
-
-        *//*Getting the current time to check if the location has been shared 30 mins before*//*
-        String currentDateAndTime = "";
-        String lastLocationSharedDateAndTime = "";
-        String lastLocationSharedRequestID = "";
-        try {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/M/yyyy hh:mm:ss");
-            currentDateAndTime = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss", Locale.getDefault()).format(new Date());
-            lastLocationSharedDateAndTime = sharedPreference.getString("LastLocationSharedTime");
-            lastLocationSharedRequestID = sharedPreference.getString("LastLocationSharedRequestID");
-
-            if (isLocationButtonClicked){
-                shareLocation(location , currentDateAndTime);
-                return;
-            }
-
-            Log.d(TAG , "CURRENT REQUEST ID: "+requestID);
-            Log.d(TAG , "STORED REQUEST ID: "+lastLocationSharedRequestID);
-            Log.d(TAG, "CURRENT_DATE_AND_TIME: " + currentDateAndTime);
-            Log.d(TAG, "LAST_LOCATION_SHARED_DATE_AND_TIME: " + lastLocationSharedDateAndTime);
-
-            if (lastLocationSharedDateAndTime.equalsIgnoreCase("") ||
-                    lastLocationSharedDateAndTime.equalsIgnoreCase(null) ||
-                    lastLocationSharedDateAndTime.equalsIgnoreCase("NA") ||
-                    lastLocationSharedRequestID.equalsIgnoreCase("") ||
-                    lastLocationSharedRequestID.equalsIgnoreCase(null) ||
-                    lastLocationSharedRequestID.equalsIgnoreCase("NA")){
-                shareLocation(location , currentDateAndTime);
-            }else {
-                long timeDifference = printDifference(simpleDateFormat.parse(lastLocationSharedDateAndTime) , simpleDateFormat.parse(currentDateAndTime));
-                long MAX_DURATION = MILLISECONDS.convert(30, MINUTES);
-                Log.d(TAG , "MAX_DURATION: "+MAX_DURATION);
-                Log.d(TAG , "Last location shared time difference: "+timeDifference);
-                if (!requestID.equalsIgnoreCase(lastLocationSharedRequestID)){
-                    shareLocation(location , currentDateAndTime);
-                }else if (timeDifference >= MAX_DURATION){
-                    shareLocation(location , currentDateAndTime);
-                }
-            }
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        *//*Getting the current time to check if the location has been shared 30 mins before*//*
-
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void shareLocation(Location location, String currentDateAndTime) {
+        Log.d(TAG , "Thread Name in shareLocation: "+Thread.currentThread().getName());
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -9386,71 +6173,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*private void shareLocation(Location location , String currentDateAndTime){
-        String finalCurrentDateAndTime = currentDateAndTime;
-        Log.d("====One", "" + requestID);
-        Log.d("====Two", "" + userMeetingIdentifier);
-        String pName = "";
-        try {
-            List<String> splitString = Arrays.asList(userMeetingIdentifier.split("\\-"));
-            if (splitString.size() > 0) {
-                Log.d("====Three", "" + splitString.get(1));
-                pName = splitString.get(1);
-            }
-        } catch (Exception e) {
-            Log.d("====Exception", "Exception:" + e.toString());
-            //viewHolder.name.setText(participant.remoteParticipant.getIdentity());
-        }
-
-        JSONObject json2 = new JSONObject();
-        try {
-            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-
-            Log.d(TAG, "Latitude: " + location.getLatitude());
-            Log.d(TAG, "Longitude: " + location.getLongitude());
-            Log.d(TAG, "User ID: " + userId);
-            Log.d(TAG, "Request ID: " + requestID);
-            Log.d(TAG, "IP Address: " + ip);
-            if (location != null) {
-                json2.put("latitude", location.getLatitude());
-                json2.put("longitude", location.getLongitude());
-            } else {
-                json2.put("latitude", "");
-                json2.put("longitude", "");
-            }
-            //json2.put("participantMeetingId", userMeetingIdentifier);
-            //json2.put("participantName", pName);
-            json2.put("requestId", requestID);
-            json2.put("userId", userId);
-            json2.put("ipaddress", ip);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        String jsonString2 = json2.toString();
-        Log.d("====jsonString2", "" + jsonString2);
-        Log.d("====jsonString2", "authToken : " + authToken);
-
-        Call<ResponseBody> responseBodyCall1 = serviceLocal.shareLocationData(authToken, jsonString2);
-        responseBodyCall1.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d("====jsonString2", "Success");
-                Log.d("====jsonString2", "Response:" + response.code());
-                sharedPreference.setString("LastLocationSharedTime", finalCurrentDateAndTime);
-                sharedPreference.setString("LastLocationSharedRequestID", requestID);
-                Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
-                Log.d(TAG , "LOCATION SHARED SUCCESSFULLY!");
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("====onResponse", "Failure" + t.toString());
-
-            }
-        });
-    }*/
-
     //Added By Rupesh to find out the difference between two dates
     //1 minute = 60 seconds
     //1 hour = 60 x 60 = 3600
@@ -9518,30 +6240,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
-    /*public void onLocationChanged(Location location) {
-        // New location has now been determined
-        String msg = "Updated Location: " +
-                Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());
-        Log.d(TAG, " onLocationChanged : " + msg);
-        sendLocationToServer(location);
-        if (mLocationRequest != null && mLocationCallback != null) {
-            try {
-                getFusedLocationProviderClient(this).removeLocationUpdates(mLocationCallback);
-                mLocationCallback = null;
-                mLocationRequest = null;
-                isTryingLocationg = false;
-                Log.d(TAG, "StopLocation updates successful! ");
-            } catch (Exception exp) {
-                mLocationCallback = null;
-                mLocationRequest = null;
-                isTryingLocationg = false;
-                Log.d(TAG, " Security exception while removeLocationUpdates");
-            }
-        }
-
-    }*/
-
     // Start for Flip Image
 
     public static Bitmap flip(Bitmap src, int type) {
@@ -9566,56 +6264,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         return Bitmap.createBitmap(src, 0, 0, src.getWidth(), src.getHeight(), matrix, true);
     }
 
-    public static boolean compare(String str1, String str2) {
-        return (str1 == null ? str2 == null : str1.equals(str2));
-    }
-
-    public String convertToString(final double val) {
-        final StringBuilder result = new StringBuilder();
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (String.valueOf(val) != null) {
-                        Log.d("===ConToString", " if :" + String.valueOf(val));
-                        result.append(String.valueOf(val));
-                    } else {
-                        Log.d("===ConToString", " else");
-                        // You can handle this case based on your requirements
-                        result.append("");
-                    }
-                } catch (Exception e) {
-                    Log.d("===ConToString", "" + e.toString());
-                    // You can handle this exception based on your requirements
-                    result.append("");
-                }
-            }
-        });
-
-        return result.toString();
-    }
-
-    /*public String convertToString(double val) {
-        try {
-            if (String.valueOf((val)) != null) {
-                Log.d("===ConToString", " if :" + String.valueOf((val)));
-                return String.valueOf((val));
-            } else {
-                Log.d("===ConToString", " else");
-                return "";
-            }
-
-        } catch (Exception e) {
-            Log.d("===ConToString", "" + e.toString());
-            return "";
-        }
-
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void startCountDown(String endStr) {
+        Log.d(TAG , "Thread Name in startCountDown: "+Thread.currentThread().getName());
         if (mCountDownTimer == null) {
             try {
                 LocalTime localTime = LocalTime.parse(endStr);
@@ -9710,86 +6362,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
-    /*@RequiresApi(api = Build.VERSION_CODES.O)
-    private void startCountDown(String endStr) {
-        if (mCountDownTimer == null) {
-            try {
-                LocalTime localTime = LocalTime.parse(endStr);
-                int milisecond = localTime.toSecondOfDay() * 1000;
-                long secondsInMilli = 1000;
-                long minutesInMilli = secondsInMilli * 60;
-                long hoursInMilli = minutesInMilli * 60;
-                long daysInMilli = hoursInMilli * 24;
-
-                if (milisecond > 0) {
-                    mCountDownTimer = new CountDownTimer(milisecond, 1000) {
-
-                        public void onTick(long millisUntilFinished) {
-
-                            long elapsedHours = millisUntilFinished / hoursInMilli;
-                            millisUntilFinished = millisUntilFinished % hoursInMilli;
-
-                            long elapsedMinutes = millisUntilFinished / minutesInMilli;
-                            millisUntilFinished = millisUntilFinished % minutesInMilli;
-
-                            long elapsedSeconds = millisUntilFinished / secondsInMilli;
-
-                            Log.d("startCountDown()", "elapsedHours : " + elapsedHours);
-
-                            Log.d("startCountDown()", "elapsedMinutes : " + elapsedMinutes);
-
-                            Log.d("startCountDown()", "elapsedSeconds : " + elapsedSeconds);
-                            String strHour = "" + elapsedHours;
-                            if (strHour.length() == 1) {
-                                strHour = "0" + strHour;
-                            }
-
-                            String strMin = "" + elapsedMinutes;
-                            if (strMin.length() == 1) {
-                                strMin = "0" + strMin;
-                            }
-
-                            String strSecond = "" + elapsedSeconds;
-                            if (strSecond.length() == 1) {
-                                strSecond = "0" + strSecond;
-                            }
-
-                            //tv_expire_time.setText("Meeting expires in " + strHour + ":" + strMin + ":" + strSecond);
-                            if (elapsedHours == 0 && elapsedMinutes == 0 && !isPopupShows) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(VideoActivity.this);
-                                builder.setTitle(getString(R.string.app_name));
-                                builder.setCancelable(false);
-                                builder.setMessage("This meeting is going to be expired with in one minute.");
-                                builder.setPositiveButton("Ok", null);
-                                builder.show();
-                                isPopupShows = true;
-                            }
-                        }
-
-                        public void onFinish() {
-                            //tv_expire_time.setText("Meeting has expired.");
-                            AlertDialog.Builder builder = new AlertDialog.Builder(VideoActivity.this);
-                            builder.setTitle(getString(R.string.app_name));
-                            builder.setCancelable(false);
-                            builder.setMessage("Meeting has expired.");
-                            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    exitFromTheRoom();
-                                }
-                            });
-                            builder.show();
-                        }
-
-                    }.start();
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }*/
-
     private String getInitial(String name) {
         Pattern pattern = Pattern.compile(" ");
         String[] names = pattern.split(name);
@@ -9801,6 +6373,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void setColorAndText(String name) {
+        Log.d(TAG , "Thread Name in setColorAndText: "+Thread.currentThread().getName());
         Random rnd = new Random();
         int color = Color.argb(255, rnd.nextInt(100), rnd.nextInt(100), rnd.nextInt(100));
         participant_initial.setTextColor(color);
@@ -9808,6 +6381,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     }
 
     private void setParticipantName(String identity) {
+        Log.d(TAG , "Thread Name in setParticipantName: "+Thread.currentThread().getName());
         if (identity != null && identity.length() > 0) {
             try {
                 List<String> splitString = Arrays.asList(identity.split("\\-"));
@@ -9833,10 +6407,16 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     @SuppressLint("StaticFieldLeak")
     @Override
     public void deleteMessage(String message_id) throws JSONException {
+        Log.d(TAG , "Thread Name in deleteMessage: "+Thread.currentThread().getName());
         ProgressDialog dialog = new ProgressDialog(this);
         dialog.setMessage("Please wait");
         dialog.setCancelable(false);
-        dialog.show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
         Log.e(TAG , "Meeting ID: "+message_id);
 
         // Wrap your network operations in an AsyncTask
@@ -9860,9 +6440,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             @Override
             protected void onPostExecute(DeleteMessageResponseModel result) {
-                if (dialog != null) {
-                    dialog.dismiss();
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
 
                 if (result != null && result.getResult().equals("1")) {
                     try {
@@ -9875,43 +6460,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
         }.execute(message_id);
     }
-
-    /*@Override
-    public void deleteMessage(String message_id) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.e(TAG , "Meeting ID: "+message_id);
-        JSONObject obj = new JSONObject();
-        obj.put("messageId" , message_id);
-        String data = obj.toString();
-        Call<DeleteMessageResponseModel> responseBodyCall = serviceLocal.deleteMessage(authToken, data);
-        responseBodyCall.enqueue(new Callback<DeleteMessageResponseModel>() {
-            @Override
-            public void onResponse(Call<DeleteMessageResponseModel> call, Response<DeleteMessageResponseModel> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                if (response.body().getResult().equals("1")){
-                    try {
-                        sendChatMessage("RemoveMessage" , response.body().toString());
-                        refreshChat();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<DeleteMessageResponseModel> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
 
     //Added By Rupesh
     private final ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
@@ -9966,11 +6514,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     /*Added by Rupesh*/
 
     private void startTimerInBackground(){
+        Log.d(TAG , "Thread Name in startTimerInBackground: "+Thread.currentThread().getName());
         mCountDownTimerInBackground = new CountDownTimer(18000000, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 if (!IS_APP_IN_BACKGROUND){
-                    mCountDownTimerInBackground.cancel();
+                    if (mCountDownTimerInBackground != null) {
+                        mCountDownTimerInBackground.cancel();
+                    }
                     mCountDownTimerInBackground = null;
                     if (IS_VIDEO_DISABLED){
                         IS_VIDEO_DISABLED = false;
@@ -10010,6 +6561,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     @SuppressLint("StaticFieldLeak")
     private void checkIfUserAllowedNotaryToCaptureSignatureAndInitial(String meetingId, String userId) throws JSONException {
+        Log.d(TAG , "Thread Name in checkIfUserAllowedNotaryToCaptureSignatureAndInitial: "+Thread.currentThread().getName());
         ProgressDialog dialog = new ProgressDialog(mActivity);
         runOnUiThread(new Runnable() {
             @Override
@@ -10052,7 +6604,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     }
                 });
 
-                if (result != null) {
+                if (result != null && result.getAuthorizationDetails() != null) {
                     Log.d(TAG, "Signer Signature/Initial Allow Data: \n" + new Gson().toJson(result));
                     if (!result.getAuthorizationDetails().getHasAuthorizedForSignature().equalsIgnoreCase("1") ||
                             !result.getAuthorizationDetails().getHasAuthorizedForInitial().equalsIgnoreCase("1")) {
@@ -10088,65 +6640,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute(data);
     }
 
-    /*private void checkIfUserAllowedNotaryToCaptureSignatureAndInitial (String meetingId, String userId) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        //dialog.show();
-        Log.e(TAG , "Meeting ID: "+meetingId);
-        JSONObject obj = new JSONObject();
-        obj.put("RequestId" , meetingId);
-        obj.put("UserId" , userId);
-        String data = obj.toString();
-        Call<SignerSignatureInitialAuthorizationModel> responseBodyCall = serviceLocal.getRequestParticipantByReqIdAndUserId(authToken, data);
-        responseBodyCall.enqueue(new Callback<SignerSignatureInitialAuthorizationModel>() {
-            @Override
-            public void onResponse(Call<SignerSignatureInitialAuthorizationModel> call, Response<SignerSignatureInitialAuthorizationModel> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                if(response != null){
-                    Log.d(TAG , "Signer Signature/Initial Allow Data: \n"+new Gson().toJson(response.body()));
-                    if (!response.body().getAuthorizationDetails().getHasAuthorizedForSignature().equalsIgnoreCase("1") ||
-                            !response.body().getAuthorizationDetails().getHasAuthorizedForInitial().equalsIgnoreCase("1")) {
-
-                        if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed()) {
-                            // Ask here for the authorization
-                            SignerAuthirizationDialogFragment authorizationDialogFragment = new SignerAuthirizationDialogFragment(mActivity, new SignerAuthirizationDialogFragment.OnAuthorizationActionPerformed() {
-                                @Override
-                                public void onAuthorizationGiven() {
-                                    try {
-                                        updateRequestParticipantCapture(requestID , userId);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                            FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
-                            Fragment prev = mActivity.getFragmentManager().findFragmentByTag("dialog");
-                            if (prev != null) {
-                                ft.remove(prev);
-                            }
-                            ft.addToBackStack(null);
-                            authorizationDialogFragment.show(ft,"dialog");
-                        }
-
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<SignerSignatureInitialAuthorizationModel> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
     @SuppressLint("StaticFieldLeak")
     private void updateRequestParticipantCapture(String meetingId, String userId) throws JSONException {
+        Log.d(TAG , "Thread Name in updateRequestParticipantCapture: "+Thread.currentThread().getName());
         ProgressDialog dialog = new ProgressDialog(mActivity);
         runOnUiThread(new Runnable() {
             @Override
@@ -10197,238 +6693,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute(data);
     }
 
-    /*private void updateRequestParticipantCapture (String meetingId, String userId) throws JSONException {
-        ProgressDialog dialog = new ProgressDialog(mActivity);
-        dialog.setMessage("Please wait");
-        dialog.setCancelable(false);
-        dialog.show();
-        Log.e(TAG , "Meeting ID: "+meetingId);
-        JSONObject obj = new JSONObject();
-        obj.put("requestId" , meetingId);
-        obj.put("userId" , userId);
-        obj.put("updateCapture" , "1");
-        String data = obj.toString();
-        Call<CommonModel> responseBodyCall = serviceLocal.updateRequestParticipantCapture(authToken, data);
-        responseBodyCall.enqueue(new Callback<CommonModel>() {
-            @Override
-            public void onResponse(Call<CommonModel> call, Response<CommonModel> response) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                if(response != null){
-                    Log.e(TAG , "Signer Signature/Initial Authorization Update Response Data: \n"+new Gson().toJson(response.body()));
-                }
-            }
-
-            @Override
-            public void onFailure(Call<CommonModel> call, Throwable t) {
-                if(dialog!=null){
-                    dialog.dismiss();
-                }
-                Log.d("====onResponse", "Failure" + t.toString());
-            }
-        });
-    }*/
-
 
     /*Added by Rupesh*/
-
-    /*Unsued Functions TODO: TO BE DELETED*/
-    public boolean isCameraUsedByOtherApp() {
-        Camera camera = null;
-        try {
-            camera = Camera.open();
-        } catch (RuntimeException e) {
-            Log.e(TAG , "CAMERA USED BY OTHER APPLICATION EXCEPTION DETAILS: "+e.toString());
-            return true;
-        } finally {
-            if (camera != null) camera.release();
-        }
-        return false;
-    }
-    private String getParticipantName(String identity) {
-        if (identity != null && identity.length() > 0) {
-            try {
-                List<String> splitString = Arrays.asList(identity.split("\\-"));
-                if (splitString.size() > 0) {
-                    return splitString.get(1);
-                } else {
-                    return removePrefix(identity, "participant-");
-                }
-            } catch (Exception e) {
-                return identity;
-            }
-        } else {
-            return identity;
-        }
-    }
-    public void sendLocation() throws ExecutionException, InterruptedException {
-
-        if (checkPermission(wantPermission)) {
-            Log.d("====getLocation", "In1");
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            Location lastKnownLocationGps = locationManager.getLastKnownLocation(gpsLocationProvider);
-            Location lastKnownLocationNetwork = locationManager.getLastKnownLocation(networkLocationProvider);
-
-            if (lastKnownLocationGps == null) {
-                Log.d("=====LTest", "NO GPS");
-
-                Log.d("====One", "" + requestID);
-                Log.d("====Two", "" + userMeetingIdentifier);
-                String pName = "";
-                try {
-                    List<String> splitString = Arrays.asList(userMeetingIdentifier.split("\\-"));
-                    if (splitString.size() > 0) {
-                        Log.d("====Three", "" + splitString.get(1));
-                        pName = splitString.get(1);
-                    }
-                } catch (Exception e) {
-                    Log.d("====Exception", "Exception:" + e.toString());
-                }
-
-                JSONObject json2 = new JSONObject();
-                try {
-                    if (lastKnownLocationNetwork != null) {
-                        try {
-                            String lat1 = "";
-                            String lon1 = "";
-//                            lat1= Double.toString(lastKnownLocationNetwork.getLatitude());
-//                            lon1= Double.toString(lastKnownLocationNetwork.getLongitude());
-                            lat1 = convertToString(lastKnownLocationNetwork.getLatitude());
-                            lon1 = convertToString(lastKnownLocationNetwork.getLongitude());
-                            boolean res = compare(lat1, lon1);
-                            if (res) {
-                                json2.put("latitude", "");
-                                json2.put("longitude", "");
-                            } else {
-                                json2.put("latitude", lastKnownLocationNetwork.getLatitude());
-                                json2.put("longitude", lastKnownLocationNetwork.getLongitude());
-                            }
-
-                        } catch (Exception e) {
-                            Log.d("====latLog", "Exception:" + e.toString());
-                            json2.put("latitude", "");
-                            json2.put("longitude", "");
-                        }
-                    } else {
-                        json2.put("latitude", "");
-                        json2.put("longitude", "");
-                    }
-                    json2.put("participantMeetingId", userMeetingIdentifier);
-                    json2.put("participantName", pName);
-                    json2.put("requestId", requestID);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                String jsonString2 = json2.toString();
-                Log.d("====jsonString2", "" + jsonString2);
-
-                Call<ResponseBody> responseBodyCall1 = serviceLocal.locationData(authToken, jsonString2);
-                responseBodyCall1.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        Log.d("====onResponse", "Success");
-                        Log.d("====onResponse", "Response:" + response.code());
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Log.d("====onResponse", "Failure" + t.toString());
-
-                    }
-                });
-
-
-            } else {
-                Log.d("=====LTest", "GPS " + lastKnownLocationGps.toString());
-
-//                if (lastKnownLocationNetwork == null) {
-//                    Log.d("=====LTest", "NO Network");
-//                    Log.d("=====LTest", "Location (GPS) " + lastKnownLocationGps.getLatitude() + ", " +
-//                            lastKnownLocationGps.getLongitude());
-//                    Log.d("=====LTest", "Time (GPS) " + lastKnownLocationGps.getTime());
-//                    Log.d("=====LTest", "Accuracy (GPS) " + lastKnownLocationGps.getAccuracy());
-//                }
-//                else {
-//                    Log.d("=====LTest", "Network " + lastKnownLocationNetwork.toString());
-//                    //Both Location provider have last location decide location base on accuracy
-//                    if (lastKnownLocationGps.getAccuracy() <= lastKnownLocationNetwork.getAccuracy()) {
-//                        Log.d("=====LTest", "Location (GPS) " + lastKnownLocationGps.getLatitude() + ", " +
-//                                lastKnownLocationGps.getLongitude());
-//                    }
-//                    else {
-//                        Log.d("=====LTest", "Location (Network) " + lastKnownLocationNetwork.getLatitude() + ", " +
-//                                lastKnownLocationNetwork.getLongitude());
-//                    }
-//                }
-                Log.d("====One", "" + requestID);
-                Log.d("====Two", "" + userMeetingIdentifier);
-                String pName = "";
-                try {
-                    List<String> splitString = Arrays.asList(userMeetingIdentifier.split("\\-"));
-                    if (splitString.size() > 0) {
-                        Log.d("====Three", "" + splitString.get(1));
-                        pName = splitString.get(1);
-                    }
-                } catch (Exception e) {
-                    Log.d("====Exception", "Exception:" + e.toString());
-                    //viewHolder.name.setText(participant.remoteParticipant.getIdentity());
-                }
-
-                JSONObject json2 = new JSONObject();
-                try {
-                    if (lastKnownLocationGps != null) {
-                        json2.put("latitude", lastKnownLocationGps.getLatitude());
-                        json2.put("longitude", lastKnownLocationGps.getLongitude());
-                    } else if (lastKnownLocationNetwork != null) {
-                        json2.put("latitude", lastKnownLocationNetwork.getLatitude());
-                        json2.put("longitude", lastKnownLocationNetwork.getLongitude());
-                    } else {
-                        json2.put("latitude", "");
-                        json2.put("longitude", "");
-                    }
-                    json2.put("participantMeetingId", userMeetingIdentifier);
-                    json2.put("participantName", pName);
-                    json2.put("requestId", requestID);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                String jsonString2 = json2.toString();
-                Log.d("====jsonString2", "" + jsonString2);
-
-                Call<ResponseBody> responseBodyCall1 = serviceLocal.locationData(authToken, jsonString2);
-                responseBodyCall1.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        Log.d("====onResponse", "Success");
-                        Log.d("====onResponse", "Response:" + response.code());
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(VideoActivity.this, "Your location has been shared successfully.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Log.d("====onResponse", "Failure" + t.toString());
-
-                    }
-                });
-
-
-            }
-        }
-
-
-    }
-    /*Unsued Functions TODO: TO BE DELETED*/
 
 }
