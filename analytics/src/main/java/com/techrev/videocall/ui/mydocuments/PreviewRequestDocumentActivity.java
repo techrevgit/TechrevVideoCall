@@ -1,14 +1,18 @@
 package com.techrev.videocall.ui.mydocuments;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -133,10 +137,19 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
         String base64 = Base64.encodeToString(pdfByteArray, Base64.DEFAULT);
         // Create a data URI
         String dataUri = "data:application/pdf;base64," + base64;
+        Log.d(TAG , "Data URI: "+dataUri);
         // Load the data URI in WebView
         pdfWebview.loadData(dataUri, "application/pdf", "base64");
         // Optional: Set a WebViewClient to handle redirects within the WebView
-        pdfWebview.setWebViewClient(new WebViewClient());
+        pdfWebview.setWebViewClient(new WebViewClient() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                Log.e("PDF WebView Error", error.getDescription().toString());
+            }
+        });
+
     }
 
 }
