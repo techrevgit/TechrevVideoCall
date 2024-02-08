@@ -268,7 +268,7 @@ public class AddCoSignerActivity extends Activity {
                         }
                     }
                 }, authToken, cosignerID);
-                if (response.body().getResults().size() > 0){
+                if (response.body().getResults() != null && response.body().getResults().size() > 0){
                     recyclerView.setVisibility(View.VISIBLE);
                     tvEmpty.setVisibility(View.GONE);
                     cosignerID = response.body().getResults().get(0).getUserId();

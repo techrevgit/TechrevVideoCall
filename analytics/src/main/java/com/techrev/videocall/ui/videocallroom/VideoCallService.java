@@ -1121,7 +1121,7 @@ public class VideoCallService extends Service {
             {
                 dModel.setMessageType("AudioUnMuted");
             }
-            if (dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier)) {
+            if (dModel.getTo() != null && dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier)) {
                 EventBus.getDefault().post(new EventModel(null, dModel, Constants.EVENTTYPE_PARTICIPANT_MESSAGE_COMING_FROM_ROOM));
             }
         }
@@ -1174,13 +1174,22 @@ public class VideoCallService extends Service {
                 Gson gson = new Gson();
                 try {
                     Log.e(TAG , "DATA TRACK DETAILS AT ON MESSAGE RECEIVED: "+messageDetails);
-                    DataModel dModel = gson.fromJson(messageDetails, DataModel.class);
-                    if (dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier)) {
+                    DataModel dModel = null;
+                    try {
+                        dModel = gson.fromJson(messageDetails, DataModel.class);
+                    }catch (Exception e) {
+                        Log.d(TAG , "Exception while converting data track to DataModel");
+                        Log.d(TAG , "Exception Details: "+e.getMessage());
+                        Log.d(TAG , "Exception Details: "+e);
+                    }
+                    if (dModel.getTo() != null && dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier)) {
                         Log.d("===Inside", "ProcessRequest onMessageValue: IF ");
                         processRequest(dModel);
                         if(APP_STATUS== Constants.APP_STATUS_FOREGROUND) {
                             EventBus.getDefault().post(new EventModel(null, dModel, Constants.EVENTTYPE_PARTICIPANT_MESSAGE_COMING_FROM_ROOM));
                         }
+                    } else {
+                        Log.d(TAG , "DataModel dModel.getTo() is null");
                     }
                 }catch (Exception e){
                     Log.e(TAG , "DATA TRACK DETAILS AT ON MESSAGE RECEIVED EXCEPTION: "+e.getMessage());

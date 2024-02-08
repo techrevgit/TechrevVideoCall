@@ -12,7 +12,6 @@ public class TechrevVideoCallManager {
                                      String passcode, int memberType, String userMeetingIdentifier, String maxImageCaptureLimit,
                                      String requestID, int isRecordingEnabled, String endDate, String startDate, String duration,
                                      String userId, boolean isCoSigner, String userDetails, String requestParticipantId, String clientId) {
-        //Toast.makeText(context, "You are now connected to room successfully!", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(context, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
