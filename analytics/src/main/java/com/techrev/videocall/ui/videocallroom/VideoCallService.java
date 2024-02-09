@@ -1174,22 +1174,62 @@ public class VideoCallService extends Service {
                 Gson gson = new Gson();
                 try {
                     Log.e(TAG , "DATA TRACK DETAILS AT ON MESSAGE RECEIVED: "+messageDetails);
-                    DataModel dModel = null;
+                    Log.d(TAG , "Converting the JSON data to DataModel...>");
+                    JSONObject jsonObject = new JSONObject(messageDetails); // jsonString is your JSON string
+                    DataModel dModel = new DataModel();
                     try {
-                        dModel = gson.fromJson(messageDetails, DataModel.class);
+                        Log.d(TAG , "JSON Data conversion started...>");
+                        //dModel = gson.fromJson(messageDetails, DataModel.class); commented by Rupesh
+
+                        if (jsonObject.has("from") && !jsonObject.isNull("from")) {
+                            String from = jsonObject.getString("from");
+                            Log.d(TAG , "from: "+from);
+                            dModel.setFrom(from);
+                        }
+
+                        if (jsonObject.has("to") && !jsonObject.isNull("to")) {
+                            String to = jsonObject.getString("to");
+                            Log.d(TAG , "to: "+to);
+                            dModel.setTo(to);
+                        }
+
+                        if (jsonObject.has("messageType") && !jsonObject.isNull("messageType")) {
+                            String messageType = jsonObject.getString("messageType");
+                            Log.d(TAG , "messageType: "+messageType);
+                            dModel.setMessageType(messageType);
+                        }
+
+                        if (jsonObject.has("content") && !jsonObject.isNull("content")) {
+                            String content = jsonObject.getString("content");
+                            Log.d(TAG , "content: "+content);
+                            dModel.setContent(content);
+                        }
+
+                        if (jsonObject.has("messageValue") && !jsonObject.isNull("messageValue")) {
+                            String messageValue = jsonObject.getString("messageValue");
+                            Log.d(TAG , "messageValue: "+messageValue);
+                            dModel.setContent(messageValue);
+                        }
+
                     }catch (Exception e) {
                         Log.d(TAG , "Exception while converting data track to DataModel");
                         Log.d(TAG , "Exception Details: "+e.getMessage());
                         Log.d(TAG , "Exception Details: "+e);
                     }
-                    if (dModel.getTo() != null && dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier)) {
+                    Log.d(TAG , "JSON Data conversion finished!");
+                    Log.d(TAG , "from: "+dModel.getFrom());
+                    Log.d(TAG , "to: "+dModel.getTo());
+                    Log.d(TAG , "messageType: "+dModel.getMessageType());
+                    Log.d(TAG , "content: "+dModel.getContent());
+                    Log.d(TAG , "messageValue: "+dModel.getMessageValue());
+                    if (dModel.getTo() != null && (dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier))) {
                         Log.d("===Inside", "ProcessRequest onMessageValue: IF ");
                         processRequest(dModel);
                         if(APP_STATUS== Constants.APP_STATUS_FOREGROUND) {
                             EventBus.getDefault().post(new EventModel(null, dModel, Constants.EVENTTYPE_PARTICIPANT_MESSAGE_COMING_FROM_ROOM));
                         }
                     } else {
-                        Log.d(TAG , "DataModel dModel.getTo() is null");
+                        Log.d(TAG , "DataModel dModel.getTo() is null / this message is not for this user");
                     }
                 }catch (Exception e){
                     Log.e(TAG , "DATA TRACK DETAILS AT ON MESSAGE RECEIVED EXCEPTION: "+e.getMessage());
