@@ -92,6 +92,12 @@ public class CameraActivity extends AppCompatActivity {
     
     private void initViews() {
 
+        iv_cross = findViewById(R.id.iv_cross);
+        iv_preview = findViewById(R.id.iv_preview);
+        ll_capture_section = findViewById(R.id.ll_capture_section);
+        tv_edit = findViewById(R.id.tv_edit);
+        tv_save = findViewById(R.id.tv_save);
+
         if (getIntent() != null) {
             requestID = getIntent().getStringExtra("REQUEST_ID");
             authToken = getIntent().getStringExtra("AUTH_TOKEN");
@@ -103,13 +109,16 @@ public class CameraActivity extends AppCompatActivity {
             // 1 > Signature
             // 0 > Initial
             /*isSignature*/
+            if (getIntent().hasExtra("bitmap")) {
+                mBitmap = getIntent().getParcelableExtra("bitmap");
+            }
+            if (mBitmap != null) {
+                ll_capture_section.setVisibility(View.GONE);
+                iv_preview.setVisibility(View.VISIBLE);
+                iv_preview.setImageBitmap(mBitmap);
+                imageInBytes = getIntent().getByteArrayExtra("resizedImageBytes");
+            }
         }
-
-        iv_cross = findViewById(R.id.iv_cross);
-        iv_preview = findViewById(R.id.iv_preview);
-        ll_capture_section = findViewById(R.id.ll_capture_section);
-        tv_edit = findViewById(R.id.tv_edit);
-        tv_save = findViewById(R.id.tv_save);
 
         iv_cross.setOnClickListener(new View.OnClickListener() {
             @Override

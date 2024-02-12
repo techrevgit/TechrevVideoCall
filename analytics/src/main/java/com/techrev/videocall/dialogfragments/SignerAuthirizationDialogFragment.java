@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.techrev.videocall.R;
 
@@ -84,6 +85,8 @@ public class SignerAuthirizationDialogFragment extends DialogFragment {
                 if (cb_authorization.isChecked()) {
                     mActionPerformed.onAuthorizationGiven();
                     dismiss();
+                } else {
+                    Toast.makeText(mActivity, "Please accept the consent", Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.suyati.telvin.drawingboard.DrawingBoard;
@@ -41,7 +43,7 @@ import retrofit2.Retrofit;
 public class WhiteBoardActivity extends AppCompatActivity {
 
     private static final String TAG = "WhiteBoardActivity";
-    private Activity mActivity = null;
+    private Activity mActivity = this;
     /*private DrawingBoard drawingBoard;*/
     private ImageView iv_cross;
     private TextView tv_clear, tv_save;
@@ -154,8 +156,16 @@ public class WhiteBoardActivity extends AppCompatActivity {
         //clearBoard();
         /*Send data from where it was invoked*/
 
-        clearBoard();
-        removeImageBackgroundAndAutoCrop(drawingBoard.getBitMapSignature());
+        // For testing
+        //ImageView iv_test = findViewById(R.id.testCapturedSignature);
+        //iv_test.setImageBitmap(drawingBoard.getBitMapSignature());
+        // For testing
+        if (drawingBoard.isDraw()) {
+            removeImageBackgroundAndAutoCrop(drawingBoard.getBitMapSignature());
+            clearBoard();
+        } else {
+            Toast.makeText(this, "Please draw your signature/initial", Toast.LENGTH_SHORT).show();
+        }
 
     }
 

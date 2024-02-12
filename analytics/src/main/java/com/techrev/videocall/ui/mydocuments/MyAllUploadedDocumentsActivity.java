@@ -431,7 +431,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                 selectedDocIdList.clear();
                 if(response != null){
                     Log.d(TAG , "Updated document response: \n"+new Gson().toJson(response.body()));
-                    if (response.body().getStatus().equalsIgnoreCase("1")) {
+                    if (response.body() != null && response.body().getStatus().equalsIgnoreCase("1")) {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Document(s) added successfully!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Something went wrong, please try again later!", Toast.LENGTH_SHORT).show();

@@ -1,4 +1,4 @@
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -39,49 +39,65 @@
 
     </RelativeLayout>
 
-    <com.suyati.telvin.drawingboard.DrawingBoard
-        android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:id="@+id/drawingboard"
-        android:layout_marginTop="10dp"
-        />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
         >
 
-        <TextView
-            android:id="@+id/tv_clear"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Clear"
-            android:textSize="16sp"
-            android:padding="10dp"
-            android:background="@drawable/gray_colored_round_corner_background"
-            android:textColor="@color/black"
-            android:gravity="center"
-            android:layout_marginRight="5dp"
+        <com.suyati.telvin.drawingboard.DrawingBoard
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:id="@+id/drawingboard"
+            android:layout_marginTop="10dp"
             />
 
-        <TextView
-            android:id="@+id/tv_save"
-            android:layout_width="0dp"
+        <!--<ImageView
+            android:id="@+id/testCapturedSignature"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            />-->
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Save"
-            android:textSize="16sp"
+            android:orientation="horizontal"
             android:padding="10dp"
-            android:background="@drawable/primary_colored_round_corner_background"
-            android:textColor="@color/white"
-            android:gravity="center"
-            android:layout_marginLeft="5dp"
-            />
+            android:gravity="center_vertical"
+            >
+
+            <TextView
+                android:id="@+id/tv_clear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Clear"
+                android:textSize="16sp"
+                android:padding="10dp"
+                android:background="@drawable/gray_colored_round_corner_background"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:layout_marginRight="5dp"
+                />
+
+            <TextView
+                android:id="@+id/tv_save"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Save"
+                android:textSize="16sp"
+                android:padding="10dp"
+                android:background="@drawable/primary_colored_round_corner_background"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:layout_marginLeft="5dp"
+                />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

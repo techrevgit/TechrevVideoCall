@@ -162,6 +162,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -511,7 +512,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private boolean IS_VIDEO_DISABLED = false;
 
     private static final int SIGNATURE_INITIAL_CAPTURE_CODE = 9999;
-
+    private final int CAMERA_REQUEST_FOR_SIGNATURE = 10191;
+    private final int CAMERA_REQUEST_FOR_INITIAL = 10192;
+    private final int REQUEST_CAMERA_CODE_FOR_SIGNATURE = 100981;
+    private final int REQUEST_CAMERA_CODE_FOR_INITIAL = 100982;
+    private boolean IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -3627,6 +3632,23 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }.execute();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CAMERA_CODE_FOR_SIGNATURE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Toast.makeText(CameraActivity.this, "Camera permission granted", Toast.LENGTH_LONG).show();
+                captureImageThroughCamera("Signature");
+            }
+        }
+        if (requestCode == REQUEST_CAMERA_CODE_FOR_INITIAL) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //Toast.makeText(CameraActivity.this, "Camera permission granted", Toast.LENGTH_LONG).show();
+                captureImageThroughCamera("Initial");
+            }
+        }
+    }
+
     @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -3693,10 +3715,68 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         }
                     }
                 }
+
+                if (requestCode == CAMERA_REQUEST_FOR_SIGNATURE && resultCode == Activity.RESULT_OK) {
+                    byte[] imageInBytes;
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    Bitmap resizedImage=getResizedBitmap(photo,500);
+                    /*Converting bitmap to byte array*/
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    resizedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    imageInBytes = stream.toByteArray();
+                    /*Converting bitmap to byte array*/
+                    Intent it = new Intent(mActivity, CameraActivity.class);
+                    it.putExtra("REQUEST_ID" , requestID);
+                    it.putExtra("AUTH_TOKEN" , authToken);
+                    it.putExtra("USER_ID" , userId);
+                    it.putExtra("TYPE" , "1");
+                    it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
+                    it.putExtra("bitmap", photo);
+                    it.putExtra("resizedImageBytes", imageInBytes);
+                    /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
+                    mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                }
+
+                if (requestCode == CAMERA_REQUEST_FOR_INITIAL && resultCode == Activity.RESULT_OK) {
+                    byte[] imageInBytes;
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    Bitmap resizedImage=getResizedBitmap(photo,500);
+                    /*Converting bitmap to byte array*/
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    resizedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    imageInBytes = stream.toByteArray();
+                    /*Converting bitmap to byte array*/
+                    Intent it = new Intent(mActivity, CameraActivity.class);
+                    it.putExtra("REQUEST_ID" , requestID);
+                    it.putExtra("AUTH_TOKEN" , authToken);
+                    it.putExtra("USER_ID" , userId);
+                    it.putExtra("TYPE" , "0");
+                    it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
+                    it.putExtra("bitmap", photo);
+                    it.putExtra("resizedImageBytes", imageInBytes);
+                    /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
+                    mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                }
+
                 return null;
             }
 
         }.execute();
+    }
+
+    public Bitmap getResizedBitmap(Bitmap image, int maxSize) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        float bitmapRatio = (float)width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width, height, true);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -4450,14 +4530,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
                                                 //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
-                                                Intent it = new Intent(mActivity, CameraActivity.class);
-                                                it.putExtra("REQUEST_ID" , requestID);
-                                                it.putExtra("AUTH_TOKEN" , authToken);
-                                                it.putExtra("USER_ID" , userId);
-                                                it.putExtra("TYPE" , "1");
-                                                it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
-                                                mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                                                if (ContextCompat.checkSelfPermission(VideoActivity.this, Manifest.permission.CAMERA)
+                                                        == PackageManager.PERMISSION_DENIED) {
+                                                    captureImageThroughCamera("Signature");
+                                                } else {
+                                                    ActivityCompat.requestPermissions(VideoActivity.this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_SIGNATURE);
+                                                }
                                             }
                                         })
                                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -4525,14 +4603,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         switch (which) {
                                             case DialogInterface.BUTTON_POSITIVE:
                                                 //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
-                                                Intent it = new Intent(mActivity, CameraActivity.class);
-                                                it.putExtra("REQUEST_ID" , requestID);
-                                                it.putExtra("AUTH_TOKEN" , authToken);
-                                                it.putExtra("USER_ID" , userId);
-                                                it.putExtra("TYPE" , "0");
-                                                it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
-                                                mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                                                if (ContextCompat.checkSelfPermission(VideoActivity.this, Manifest.permission.CAMERA)
+                                                        == PackageManager.PERMISSION_DENIED) {
+                                                    captureImageThroughCamera("Initial");
+                                                } else {
+                                                    ActivityCompat.requestPermissions(VideoActivity.this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_INITIAL);
+                                                }
                                                 break;
 
                                             case DialogInterface.BUTTON_NEGATIVE:
@@ -4599,49 +4675,63 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                 case "requestToReplaceSignature" :
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                    AlertDialog dialog = builder.setTitle("Confirmation to Add My Signature & Initial")
-                            .setMessage("I agree to replace Signature & Initial Tag with my Signature & Initial.")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
+                    if (!IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN) {
+                        IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = true;
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                        AlertDialog dialog = builder.setTitle("Confirmation to Add My Signature & Initial")
+                                .setMessage("I agree to replace Signature & Initial Tag with my Signature & Initial.")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
 
-                                    try {
-                                        JSONObject jsonObject = new JSONObject();
-                                        jsonObject.put("from", userMeetingIdentifier);
-                                        jsonObject.put("to", "All");
-                                        jsonObject.put("messageType", "AcceptedToReplaceMySignatureAndIntial");
-                                        jsonObject.put("content", "AcceptedToReplaceMySignatureAndIntial");
-                                        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                                    } catch (Exception e) {
-                                        Log.d("====Exception", "" + e.toString());
+                                        IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
+                                        try {
+                                            JSONObject jsonObject = new JSONObject();
+                                            jsonObject.put("from", userMeetingIdentifier);
+                                            jsonObject.put("to", "All");
+                                            jsonObject.put("messageType", "AcceptedToReplaceMySignatureAndIntial");
+                                            jsonObject.put("content", "AcceptedToReplaceMySignatureAndIntial");
+                                            videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                                        } catch (Exception e) {
+                                            Log.d("====Exception", "" + e.toString());
+                                        }
+
                                     }
+                                })
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
 
-                                }
-                            })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
+                                        IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
+                                        try {
+                                            JSONObject jsonObject = new JSONObject();
+                                            jsonObject.put("from", userMeetingIdentifier);
+                                            jsonObject.put("to", "All");
+                                            jsonObject.put("messageType", "DeniedToReplaceMySignatureAndIntial");
+                                            jsonObject.put("content", "DeniedToReplaceMySignatureAndIntial");
+                                            videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                                        } catch (Exception e) {
+                                            Log.d("====Exception", "" + e.toString());
+                                        }
 
-                                    try {
-                                        JSONObject jsonObject = new JSONObject();
-                                        jsonObject.put("from", userMeetingIdentifier);
-                                        jsonObject.put("to", "All");
-                                        jsonObject.put("messageType", "DeniedToReplaceMySignatureAndIntial");
-                                        jsonObject.put("content", "DeniedToReplaceMySignatureAndIntial");
-                                        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                                    } catch (Exception e) {
-                                        Log.d("====Exception", "" + e.toString());
                                     }
-
-                                }
-                            })
-                            .show();
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+                                })
+                                .show();
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+                    }
 
                     break;
             }
+        }
+    }
+
+    private void captureImageThroughCamera (String type) {
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        if (type.equalsIgnoreCase("Signature")) {
+            startActivityForResult(cameraIntent, CAMERA_REQUEST_FOR_SIGNATURE);
+        } else {
+            startActivityForResult(cameraIntent, CAMERA_REQUEST_FOR_INITIAL);
         }
     }
 
@@ -4651,7 +4741,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(VideoActivity.this, "Sending update to server...", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(VideoActivity.this, "Sending update to server...", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -5042,7 +5132,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         }
                         if (response.isSuccessful() && response.body() != null) {
                             // Handle successful response
-                            Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
                         } else {
                             // Handle unsuccessful response
                             Log.d("onResponse", "Unsuccessful response");
@@ -5522,9 +5612,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
         // New data track added By Rupesh for notifying the web that the customer has left the call
 
-        disconnectClickListener();
-        AddCoSignerActivity.getAddCoSignerActivityContext().exitFromTheRoom();
-        VideoActivity.this.finish();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                disconnectClickListener();
+                AddCoSignerActivity.getAddCoSignerActivityContext().exitFromTheRoom();
+                VideoActivity.this.finish();
+            }
+        });
     }
 
     private void sendMessage() {
@@ -6630,6 +6725,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    authorizationDialogFragment.setCancelable(false);
                                     authorizationDialogFragment.show(ft, "dialog");
                                 }
                             });

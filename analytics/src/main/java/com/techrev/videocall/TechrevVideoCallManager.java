@@ -1,5 +1,6 @@
 package com.techrev.videocall;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -14,7 +15,7 @@ public class TechrevVideoCallManager {
                                      String userId, boolean isCoSigner, String userDetails, String requestParticipantId, String clientId) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         Log.d("===Args","baseURL:"+baseURL);
         Log.d("===Args","token:"+token);
         Log.d("===Args","roomName:"+roomName);

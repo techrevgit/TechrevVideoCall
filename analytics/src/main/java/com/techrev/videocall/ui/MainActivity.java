@@ -16,5 +16,11 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(this , PermissionActivity.class);
         intent.putExtras(it);
         startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }
