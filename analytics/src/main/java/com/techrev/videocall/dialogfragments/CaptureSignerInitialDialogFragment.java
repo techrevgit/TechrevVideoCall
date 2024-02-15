@@ -2,9 +2,11 @@ package com.techrev.videocall.dialogfragments;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import androidx.cardview.widget.CardView;
 
 import com.techrev.videocall.R;
 import com.techrev.videocall.models.VideoCallModel;
+import com.techrev.videocall.ui.videocallroom.VideoActivity;
 
 import org.json.JSONObject;
 
@@ -162,23 +165,33 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
 
-                ProgressDialog dialog = new ProgressDialog(mActivity);
-                dialog.setMessage("Please wait");
-                dialog.setCancelable(false);
-                dialog.show();
-                try {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("from", userMeetingIdentifier);
-                    jsonObject.put("to", "All");
-                    jsonObject.put("messageType", "AcceptedToAuthorizeCaptureMyInitial");
-                    jsonObject.put("content", "AcceptedToAuthorizeCaptureMyInitial");
-                    videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                } catch (Exception e) {
-                    Log.d("====Exception", "" + e.toString());
-                }finally {
-                    dialog.dismiss();
-                    dismiss();
-                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                builder.setTitle("Authorize Notary to Capture Initial");
+                builder.setCancelable(false);
+                builder.setMessage("I am unable to capture my initial so I authorize Notary of eNotary On Call to capture on my behalf.");
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ProgressDialog progressDialog = new ProgressDialog(mActivity);
+                        progressDialog.setMessage("Please wait");
+                        progressDialog.setCancelable(false);
+                        progressDialog.show();
+                        try {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("from", userMeetingIdentifier);
+                            jsonObject.put("to", "All");
+                            jsonObject.put("messageType", "AcceptedToAuthorizeCaptureMyInitial");
+                            jsonObject.put("content", "AcceptedToAuthorizeCaptureMyInitial");
+                            videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                        } catch (Exception e) {
+                            Log.d("====Exception", "" + e.toString());
+                        }finally {
+                            progressDialog.dismiss();
+                            dismiss();
+                        }
+                    }
+                });
+                builder.show();
 
             }
         });

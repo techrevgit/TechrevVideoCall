@@ -29,6 +29,7 @@ public class SignerAuthirizationDialogFragment extends DialogFragment {
 
     public interface OnAuthorizationActionPerformed {
         void onAuthorizationGiven();
+        void onAuthorizationDenied();
     }
 
     public SignerAuthirizationDialogFragment() {
@@ -94,6 +95,7 @@ public class SignerAuthirizationDialogFragment extends DialogFragment {
         tv_no.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mActionPerformed.onAuthorizationDenied();
                 dismiss();
             }
         });

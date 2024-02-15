@@ -1,10 +1,14 @@
 package com.techrev.videocall.ui.whiteboard;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -46,7 +50,7 @@ public class WhiteBoardActivity extends AppCompatActivity {
     private Activity mActivity = this;
     /*private DrawingBoard drawingBoard;*/
     private ImageView iv_cross;
-    private TextView tv_clear, tv_save;
+    private TextView tv_clear, tv_save, tv_document_title;
     private DrawingBoard drawingBoard;
     private OnCapturedDrawing onCapturedDrawing;
 
@@ -60,16 +64,31 @@ public class WhiteBoardActivity extends AppCompatActivity {
     private String userMeetingIdentifier = "";
     private VideoCallModel videoCallModel;
     private byte[] imageInBytes;
-
-
     public interface OnCapturedDrawing {
         public void onFinishDrawing(Bitmap bitMapSignature);
     }
+
+    LocalBroadcastManager mLocalBroadcastManager;
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("com.enotaryoncall.customer.action.close")){
+                finish();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+        /*Added by Rupesh to close activity from service*/
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction("com.enotaryoncall.customer.action.close");
+        mLocalBroadcastManager.registerReceiver(mBroadcastReceiver, mIntentFilter);
+        /*Added by Rupesh to close activity from service*/
         /*Added By Ruepesh*/
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -109,6 +128,13 @@ public class WhiteBoardActivity extends AppCompatActivity {
         drawingBoard = findViewById(R.id.drawingboard);
         tv_clear = findViewById(R.id.tv_clear);
         tv_save = findViewById(R.id.tv_save);
+        tv_document_title = findViewById(R.id.tv_document_title);
+
+        if (isSignature.equalsIgnoreCase("1")) {
+            tv_document_title.setText("Draw Your Signature");
+        } else {
+            tv_document_title.setText("Draw Your Initial");
+        }
 
         drawingBoard.setCanvasColor(android.R.color.white);
         drawingBoard.setPenColor(R.color.color_primary);
@@ -331,7 +357,11 @@ public class WhiteBoardActivity extends AppCompatActivity {
                 if(dialog!=null){
                     dialog.dismiss();
                 }
-
+                if (isSignature.equalsIgnoreCase("1")) {
+                    Toast.makeText(WhiteBoardActivity.this, "Signature has been uploaded successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(WhiteBoardActivity.this, "Initial has been uploaded successfully", Toast.LENGTH_SHORT).show();
+                }
                 if (response.body() != null){
                     Log.d(TAG , "Response: "+new Gson().toJson(response.body()));
                 }

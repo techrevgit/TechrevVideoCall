@@ -83,7 +83,7 @@ afterEvaluate {
 
                 groupId = 'com.github.techrevgit'
                 artifactId = 'techrev-videocall'
-                version = '2.0.6'
+                version = '2.0.7'
 
             }
         }

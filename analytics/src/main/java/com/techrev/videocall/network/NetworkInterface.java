@@ -4,6 +4,7 @@ package com.techrev.videocall.network;
 import com.techrev.videocall.models.AttachedFileUploadResponseModel;
 import com.techrev.videocall.models.ClientActivePlanDetailsByClientIdModel;
 import com.techrev.videocall.models.CommonModel;
+import com.techrev.videocall.models.RequestDetailsModel;
 import com.techrev.videocall.ui.cosigner.CosignerDetailsModel;
 import com.techrev.videocall.ui.cosigner.CosignerVerificationModel;
 import com.techrev.videocall.models.CustomerDisagreeCountModel;
@@ -40,6 +41,10 @@ public interface NetworkInterface
     @Headers("Content-Type: application/json")
     @POST("getarequest")
     Call<MeetingDetailsModel> getAllMeetingDetails(@Header("Authorization") String token, @Body String body);
+
+    @Headers("Content-Type: application/json")
+    @POST("getRequestDetailsByRequestId")
+    Call<RequestDetailsModel> getRequestDetailsByRequestId(@Header("Authorization") String token, @Body String body);
 
     @Headers("Content-Type: application/json")
     @POST("getRequestparticipant")

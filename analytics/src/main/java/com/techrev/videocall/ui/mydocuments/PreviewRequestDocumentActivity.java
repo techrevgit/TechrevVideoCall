@@ -2,8 +2,13 @@ package com.techrev.videocall.ui.mydocuments;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
@@ -46,9 +51,26 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
     static Retrofit retrofitLocal = networkClass.callingURL();
     static NetworkInterface serviceLocal = retrofitLocal.create(NetworkInterface.class);
 
+    LocalBroadcastManager mLocalBroadcastManager;
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("com.enotaryoncall.customer.action.close")){
+                finish();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /*Added by Rupesh to close activity from service*/
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction("com.enotaryoncall.customer.action.close");
+        mLocalBroadcastManager.registerReceiver(mBroadcastReceiver, mIntentFilter);
+        /*Added by Rupesh to close activity from service*/
         /*Added By Rupesh*/
         requestWindowFeature(Window.FEATURE_NO_TITLE); //will hide the title
         //getSupportActionBar().hide(); // hide the title bar

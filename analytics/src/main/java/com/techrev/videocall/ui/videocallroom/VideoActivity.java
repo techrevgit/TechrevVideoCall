@@ -109,6 +109,7 @@ import com.google.gson.Gson;
 
 import com.techrev.videocall.dialogfragments.CaptureSignerInitialDialogFragment;
 import com.techrev.videocall.dialogfragments.CaptureSignerSignatureDialogFragment;
+import com.techrev.videocall.models.RequestDetailsModel;
 import com.techrev.videocall.services.APictureCapturingService;
 import com.techrev.videocall.ui.camera.CameraActivity;
 import com.techrev.videocall.ui.cosigner.AddCoSignerActivity;
@@ -517,6 +518,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private final int REQUEST_CAMERA_CODE_FOR_SIGNATURE = 100981;
     private final int REQUEST_CAMERA_CODE_FOR_INITIAL = 100982;
     private boolean IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
+    private boolean IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = false;
+    private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -698,7 +701,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 cancel(true);
             } else {
                 // Background thread for heavy initialization
-                activity.initViewsInBackground();
+                try {
+                    activity.initViewsInBackground();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
             return null;
         }
@@ -731,7 +738,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         new InitViewsTask(this).execute();
     }
 
-    private void initViewsInBackground() {
+    private void initViewsInBackground() throws JSONException {
         Log.d(TAG , "Thread Name in initViewsInBackground: "+Thread.currentThread().getName());
         Bundle extras = getIntent().getExtras();
         if (extras == null) {
@@ -925,6 +932,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
 
         initCamera();
+        getRequestDetailsByRequestId(requestID);
 
         pictureService = PictureCapturingServiceImpl.getInstance(this);
     }
@@ -968,6 +976,60 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
             }
         }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void getRequestDetailsByRequestId(String message_id) throws JSONException {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Show loading indicator
+                ProgressDialog dialog = new ProgressDialog(VideoActivity.this);
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+
+                Log.e(TAG, "Meeting ID: " + message_id);
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("RequestId", message_id);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+                String data = obj.toString();
+
+                Call<RequestDetailsModel> responseBodyCall = serviceLocal.getRequestDetailsByRequestId(authToken, data);
+                responseBodyCall.enqueue(new Callback<RequestDetailsModel>() {
+                    @Override
+                    public void onResponse(Call<RequestDetailsModel> call, Response<RequestDetailsModel> response) {
+                        // Dismiss loading indicator
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        if (response.isSuccessful() && response.body() != null) {
+                            // Handle successful response
+                            //Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
+                            if (response.body().getResults().getRequestCreatorTypeId() == 1) {
+                                IS_REQUEST_CREATED_BY_CUSTOMER = true;
+                            }
+                        } else {
+                            // Handle unsuccessful response
+                            Log.d("onResponse", "Unsuccessful response");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<RequestDetailsModel> call, Throwable t) {
+                        // Dismiss loading indicator
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        // Handle network failure
+                        Log.d("onFailure", "Network call failed: " + t.toString());
+                    }
+                });
+            }
+        });
     }
 
     //Added by Rupesh
@@ -4526,6 +4588,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
                                 AlertDialog dialog = builder.setTitle("Capture Signature")
                                         .setMessage("Are you sure, you want to capture your signature?")
+                                        .setCancelable(false)
                                         .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -4553,6 +4616,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
                                 AlertDialog dialog = builder.setTitle("Draw Signature")
                                         .setMessage("Are you sure, you want to draw your signature?")
+                                        .setCancelable(false)
                                         .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -4623,6 +4687,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         .setMessage("Are you sure, you want to capture your initial?")
                                         .setPositiveButton("Ok, Proceed", dialogClickListener)
                                         .setNegativeButton("Cancel", dialogClickListener)
+                                        .setCancelable(false)
                                         .show();
                                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
                                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
@@ -4657,6 +4722,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         .setMessage("Are you sure, you want to draw your initial?")
                                         .setPositiveButton("Ok, Proceed", dialogClickListener)
                                         .setNegativeButton("Cancel", dialogClickListener)
+                                        .setCancelable(false)
                                         .show();
                                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
                                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
@@ -4716,6 +4782,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                                     }
                                 })
+                                .setCancelable(false)
                                 .show();
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
                         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
@@ -4784,24 +4851,27 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     if (response.isSuccessful() && response.body() != null) {
                         // Handle the response on the UI thread
                         // Toast.makeText(VideoActivity.this, "Disagree count: " + response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount(), Toast.LENGTH_SHORT).show();
-                        DOCUMENT_ACCESS_DISAGREE_COUNT = Integer.parseInt(response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount());
 
-                        if (DOCUMENT_ACCESS_DISAGREE_COUNT == 0) {
-                            showDocumentAccessDialog("Document Access Required!", "By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.");
-                        } else {
-                            SpannableStringBuilder builder = new SpannableStringBuilder();
-                            String first = "By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.\n\n";
-                            String second = "Note: By clicking on 'I Disagree', the request will be cancelled automatically.";
+                        if (IS_REQUEST_CREATED_BY_CUSTOMER) {
+                            DOCUMENT_ACCESS_DISAGREE_COUNT = Integer.parseInt(response.body().getDisagreeCounts().get(0).getCustomerDisagreeCount());
 
-                            SpannableString blackSpannable = new SpannableString(first);
-                            blackSpannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, first.length(), 0);
-                            builder.append(blackSpannable);
+                            if (DOCUMENT_ACCESS_DISAGREE_COUNT == 0) {
+                                showDocumentAccessDialog("Document Access Required!", "By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.");
+                            } else {
+                                SpannableStringBuilder builder = new SpannableStringBuilder();
+                                String first = "By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.\n\n";
+                                String second = "Note: By clicking on 'I Disagree', the request will be cancelled automatically.";
 
-                            SpannableString redSpannable = new SpannableString(first);
-                            redSpannable.setSpan(new ForegroundColorSpan(Color.RED), 0, second.length(), 0);
-                            builder.append(redSpannable);
+                                SpannableString blackSpannable = new SpannableString(first);
+                                blackSpannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, first.length(), 0);
+                                builder.append(blackSpannable);
 
-                            showDocumentAccessConfirmationDialog("Document Access Required!", Html.fromHtml("<font color='#000000'>By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.<br><br>    </font><font color='#FF0000'>Note: By clicking on 'I Disagree', the request will be cancelled automatically.</font>"));
+                                SpannableString redSpannable = new SpannableString(first);
+                                redSpannable.setSpan(new ForegroundColorSpan(Color.RED), 0, second.length(), 0);
+                                builder.append(redSpannable);
+
+                                showDocumentAccessConfirmationDialog("Document Access Required!", Html.fromHtml("<font color='#000000'>By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.<br><br>    </font><font color='#FF0000'>Note: By clicking on 'I Disagree', the request will be cancelled automatically.</font>"));
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -4838,7 +4908,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             }
                             if (response.isSuccessful() && response.body() != null) {
                                 // Handle successful response
-                                Toast.makeText(VideoActivity.this, "Disagree count updated.", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(VideoActivity.this, "Disagree count updated.", Toast.LENGTH_SHORT).show();
                             } else {
                                 // Handle unsuccessful response
                                 Log.e("updateDisagreeCount", "Unsuccessful response");
@@ -4904,7 +4974,16 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                     object.put("CosignerList", response.body().getCosigners());
                                 }
 
-                                updateRequestStatusByCustomer(object);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            updateRequestStatusByCustomer(object);
+                                        } catch (JSONException e) {
+                                            Log.e(TAG ,e.toString());
+                                        }
+                                    }
+                                });
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -4957,11 +5036,16 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         @Override
                         protected Void doInBackground(Void... params) {
                             if (response.body().getStatus() == 1) {
-                                try {
-                                    notifyServiceProvider();
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            notifyServiceProvider();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
                             } else {
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -5226,11 +5310,16 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         e.printStackTrace();
                                     }
                                 } else {
-                                    try {
-                                        confirmDeleteRequest(requestID);
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                confirmDeleteRequest(requestID);
+                                            } catch (JSONException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        }
+                                    });
                                 }
                                 return null;
                             }
@@ -5334,11 +5423,16 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         e.printStackTrace();
                                     }
                                 } else {
-                                    try {
-                                        confirmDeleteRequest(requestID);
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                    }
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            try {
+                                                confirmDeleteRequest(requestID);
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
                                 }
                                 return null;
                             }
@@ -5575,6 +5669,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 AlertDialog dialog = builder.setMessage("Are you sure, you want to exit?")
                         .setPositiveButton("Yes", dialogClickListener)
                         .setNegativeButton("No", dialogClickListener)
+                        .setCancelable(false)
                         .show();
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getColor(R.color.color_primary));
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(getColor(R.color.red));
@@ -5615,6 +5710,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = false;
                 disconnectClickListener();
                 AddCoSignerActivity.getAddCoSignerActivityContext().exitFromTheRoom();
                 VideoActivity.this.finish();
@@ -6715,6 +6811,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         e.printStackTrace();
                                     }
                                 }
+
+                                @Override
+                                public void onAuthorizationDenied() {
+                                    IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = true;
+                                }
                             });
                             FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
                             Fragment prev = mActivity.getFragmentManager().findFragmentByTag("dialog");
@@ -6726,7 +6827,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 @Override
                                 public void run() {
                                     authorizationDialogFragment.setCancelable(false);
-                                    authorizationDialogFragment.show(ft, "dialog");
+                                    if (!IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY) {
+                                        authorizationDialogFragment.show(ft, "dialog");
+                                    }
                                 }
                             });
                         }

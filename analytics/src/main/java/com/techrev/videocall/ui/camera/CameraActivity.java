@@ -5,11 +5,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,6 +33,7 @@ import com.techrev.videocall.R;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
+import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
 
 import org.json.JSONException;
 
@@ -51,7 +56,7 @@ public class CameraActivity extends AppCompatActivity {
     private Activity mActivity = null;
     private ImageView iv_cross, iv_preview;
     private LinearLayout ll_capture_section;
-    private TextView tv_edit , tv_save;
+    private TextView tv_edit , tv_save, tv_document_name;
     private final int REQUEST_CAMERA_CODE = 100;
     private final int CAMERA_REQUEST = 101;
     static RetrofitNetworkClass networkClass = new RetrofitNetworkClass();
@@ -65,11 +70,27 @@ public class CameraActivity extends AppCompatActivity {
     private VideoCallModel videoCallModel;
     private Bitmap mBitmap = null;
     private byte[] imageInBytes;
+    LocalBroadcastManager mLocalBroadcastManager;
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals("com.enotaryoncall.customer.action.close")){
+                finish();
+            }
+        }
+    };
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /*Added by Rupesh to close activity from service*/
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction("com.enotaryoncall.customer.action.close");
+        mLocalBroadcastManager.registerReceiver(mBroadcastReceiver, mIntentFilter);
+        /*Added by Rupesh to close activity from service*/
         /*Added By Ruepesh*/
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
@@ -97,6 +118,7 @@ public class CameraActivity extends AppCompatActivity {
         ll_capture_section = findViewById(R.id.ll_capture_section);
         tv_edit = findViewById(R.id.tv_edit);
         tv_save = findViewById(R.id.tv_save);
+        tv_document_name = findViewById(R.id.tv_document_name);
 
         if (getIntent() != null) {
             requestID = getIntent().getStringExtra("REQUEST_ID");
@@ -109,6 +131,11 @@ public class CameraActivity extends AppCompatActivity {
             // 1 > Signature
             // 0 > Initial
             /*isSignature*/
+            if (isSignature.equalsIgnoreCase("1")) {
+                tv_document_name.setText("Capture Your Signature");
+            } else {
+                tv_document_name.setText("Capture Your Initial");
+            }
             if (getIntent().hasExtra("bitmap")) {
                 mBitmap = getIntent().getParcelableExtra("bitmap");
             }
@@ -306,7 +333,11 @@ public class CameraActivity extends AppCompatActivity {
                 if(dialog!=null){
                     dialog.dismiss();
                 }
-
+                if (isSignature.equalsIgnoreCase("1")) {
+                    Toast.makeText(CameraActivity.this, "Signature has been uploaded successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(CameraActivity.this, "Initial has been uploaded successfully", Toast.LENGTH_SHORT).show();
+                }
                 if (response.body() != null){
                     Log.d(TAG , "Response: "+new Gson().toJson(response.body()));
                 }

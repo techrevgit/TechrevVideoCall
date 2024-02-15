@@ -252,8 +252,9 @@ public class AddCoSignerActivity extends Activity {
             public void onResponse(Call<SearchUserResponse> call, Response<SearchUserResponse> response) {
                 progressBar.setVisibility(View.GONE);
                 Log.d("====onResponse", "Success");
-                Log.d("====onResponse", "Response:" + response.code());
-                Log.d("====onResponse", "Response:" + response.body());
+                Log.d("====onResponse", "Response Code: " + response.code());
+                Log.d("====onResponse", "Response Body: " + new Gson().toJson(response.body()));
+                Log.d("====onResponse", "Response Body Results: " + new Gson().toJson(response.body().getResults()));
                 SearchUserResponse searchUserResponse = response.body();
                 Log.d(TAG , "CO-SIGNER ID : "+cosignerID);
                 userListAdapter = new UserListAdapter(AddCoSignerActivity.this, new UserListAdapter.UserAddListener() {
