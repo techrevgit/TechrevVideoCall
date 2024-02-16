@@ -44,6 +44,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
     static Retrofit retrofitLocal = networkClass.callingURL();
     static NetworkInterface serviceLocal = retrofitLocal.create(NetworkInterface.class);
     private String userId = "";
+    private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -98,6 +99,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
             authToken = getIntent().getStringExtra("AUTH_TOKEN");
             requestID = getIntent().getStringExtra("REQUEST_ID");
             userId = getIntent().getStringExtra("USER_ID");
+            IS_REQUEST_CREATED_BY_CUSTOMER = getIntent().getBooleanExtra("IS_REQUEST_CREATED_BY_CUSTOMER" , false);
         }
         iv_back = findViewById(R.id.iv_back);
         tv_add_document = findViewById(R.id.tv_add_document);
@@ -143,7 +145,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
                 if(response != null){
                     Log.d(TAG , "Added Documents Data: \n"+new Gson().toJson(response.body()));
                     RequestDocListAdapter adapter = new RequestDocListAdapter(MyCurrentUploadedDocumentsActivity.this,
-                            response.body().getRequestDocuments(), authToken, new RequestDocListAdapter.OnDeleteDocument() {
+                            response.body().getRequestDocuments(), authToken, IS_REQUEST_CREATED_BY_CUSTOMER, new RequestDocListAdapter.OnDeleteDocument() {
                         @Override
                         public void onDeleteCompleted() {
                             try {

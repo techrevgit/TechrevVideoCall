@@ -30,6 +30,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
+import com.github.barteksc.pdfviewer.PDFView;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.R;
 import com.techrev.videocall.network.RetrofitNetworkClass;
@@ -52,7 +53,7 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
 
     private static final String TAG = "PreviewRequestDocument";
     private ImageView iv_back;
-    //private PDFView pdf_viewer;
+    private PDFView pdf_viewer;
     private String docID, authToken;
     //public static String BASE_URL_VAL = "https://apias.digitalnotarize.com/api/";
     public static String BASE_URL_VAL = "https://custtestmobileapi.digitalnotarize.com/";
@@ -99,7 +100,7 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
                 finish();
             }
         });
-        //pdf_viewer = findViewById(R.id.idPDFView);
+        pdf_viewer = findViewById(R.id.idPDFView);
         if (getIntent() != null) {
             docID = getIntent().getStringExtra("DOC_ID");
             pdfurl = pdfurl+docID;
@@ -152,14 +153,14 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
                         //pdfWebview.loadData(downloadedData, "application/pdf", "UTF-8");
                         String baseUrl = "about:blank"; // or any other suitable base URL
                         //pdfWebview.loadDataWithBaseURL(baseUrl, new String(downloadedData), "application/pdf", "UTF-8", null);
-                        /*pdf_viewer.fromBytes(downloadedData)
+                        pdf_viewer.fromBytes(downloadedData)
                                 .defaultPage(0)
                                 .enableSwipe(true)
                                 .swipeHorizontal(false)
                                 .enableAnnotationRendering(true)
-                                .load();*/
+                                .load();
                         //displayPDF(downloadedData);
-                        new WebViewLoaderTask(PreviewRequestDocumentActivity.this, pdfWebview).execute(downloadedData);
+                        //new WebViewLoaderTask(PreviewRequestDocumentActivity.this, pdfWebview).execute(downloadedData);
                     } catch (IOException e) {
                         Log.d(TAG, "onResponse: downloadAndPreviewPdf: Error while displaying the PDF!");
                         e.printStackTrace();

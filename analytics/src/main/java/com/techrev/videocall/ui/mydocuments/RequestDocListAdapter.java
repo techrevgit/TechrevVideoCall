@@ -42,6 +42,7 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
     private Activity mActivity;
     private List<RequestDocModel.RequestDocuments> mList;
     private String authToken, requestID;
+    private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
     static RetrofitNetworkClass networkClass = new RetrofitNetworkClass();
     static Retrofit retrofitLocal = networkClass.callingURL();
     static NetworkInterface serviceLocal = retrofitLocal.create(NetworkInterface.class);
@@ -52,10 +53,11 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
 
     private OnDeleteDocument onDeleteDocument;
 
-    public RequestDocListAdapter (Activity activity , List<RequestDocModel.RequestDocuments> list, String auth, OnDeleteDocument deleteDocument){
+    public RequestDocListAdapter (Activity activity , List<RequestDocModel.RequestDocuments> list, String auth, boolean isRequestCreatedByCustomer, OnDeleteDocument deleteDocument){
         this.mActivity = activity;
         this.mList = list;
         this.authToken = auth;
+        this.IS_REQUEST_CREATED_BY_CUSTOMER = isRequestCreatedByCustomer;
         this.onDeleteDocument = deleteDocument;
         Log.d(TAG, "RequestDocListAdapter: "+new Gson().toJson(mList));
     }
@@ -102,6 +104,12 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
         TextView tv_cancel = bottomSheetDialog.findViewById(R.id.tv_cancel);
 
         tv_document_name.setText(mList.get(position).getDocumentName()+".pdf");
+
+        if (IS_REQUEST_CREATED_BY_CUSTOMER && tv_delete_document != null) {
+            tv_delete_document.setVisibility(View.VISIBLE);
+        } else {
+            tv_delete_document.setVisibility(View.GONE);
+        }
 
         tv_view_document.setOnClickListener(new View.OnClickListener() {
             @Override

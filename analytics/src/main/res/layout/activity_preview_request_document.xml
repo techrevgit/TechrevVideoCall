@@ -75,18 +75,18 @@
     </LinearLayout>
 
     <!--PDF Viewer to display our PDF-->
-    <!--<com.github.barteksc.pdfviewer.PDFView
+    <com.github.barteksc.pdfviewer.PDFView
         android:id="@+id/idPDFView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible"
-        />-->
+        />
 
     <WebView
         android:id="@+id/pdfWebview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible"
+        android:visibility="gone"
         />
 
 </LinearLayout>

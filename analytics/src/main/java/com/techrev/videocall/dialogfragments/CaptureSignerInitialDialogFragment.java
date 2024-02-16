@@ -243,7 +243,8 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
         JSONObject obj = new JSONObject();
         obj.put("requestId", meetingId);
         obj.put("userId", userId);
-        obj.put("updateCapture", "1");
+        /*obj.put("updateCapture", "1");*/
+        obj.put("isSignature", "2");
         String data = obj.toString();
 
         // Wrap your network operations in an AsyncTask

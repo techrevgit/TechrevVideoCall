@@ -803,8 +803,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                     } else {
                         if (Constants.isCaptureImageEnable) {
-                            captureActionFab.setVisibility(View.VISIBLE);
-                            viewMeetingActionFab.setVisibility(View.VISIBLE);
+                            //captureActionFab.setVisibility(View.VISIBLE);
+                            //viewMeetingActionFab.setVisibility(View.VISIBLE);
                         } else {
                             captureActionFab.setVisibility(View.GONE);
                             viewMeetingActionFab.setVisibility(View.GONE);
@@ -868,8 +868,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             //imgRecording.setVisibility(View.GONE);
                         }
                         if (Constants.isCaptureImageEnable) {
-                            captureActionFab.setVisibility(View.VISIBLE);
-                            viewMeetingActionFab.setVisibility(View.VISIBLE);
+                            //captureActionFab.setVisibility(View.VISIBLE);
+                            //viewMeetingActionFab.setVisibility(View.VISIBLE);
                         } else {
                             captureActionFab.setVisibility(View.GONE);
                             viewMeetingActionFab.setVisibility(View.GONE);
@@ -2485,13 +2485,15 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     private void showHidePrimaryVideo(TechrevRemoteParticipant participant) {
         Log.d(TAG , "Thread Name in showHidePrimaryVideo: "+Thread.currentThread().getName());
-        if(participant.isTechRevScreenSelected()) {
-            removeRenderedVideo(participant);
-        }
-        else  if (participant.getTechRevVideoEnable()) {
-            addrevRenderedVideo(participant);
-        } else {
-            removeRenderedVideo(participant);
+        if (participant != null) {
+            if(participant.isTechRevScreenSelected()) {
+                removeRenderedVideo(participant);
+            }
+            else  if (participant.getTechRevVideoEnable()) {
+                addrevRenderedVideo(participant);
+            } else {
+                removeRenderedVideo(participant);
+            }
         }
     }
 
@@ -2711,19 +2713,24 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 VideoTrack remoteVideoTrack = (VideoTrack) participant.remoteParticipant.getVideoTracks().get(index).getVideoTrack();
                 if (remoteVideoTrack != null && "screen".equals(remoteVideoTrack.getName())) {
                     removePrevRenderedVideo();
-                    VideoView videoView = new VideoView(VideoActivity.this);
-                    videoView.setLayoutParams(layoutParamsPV);
-                    videoView.setZOrderOnTop(false);
-                    videoView.setZ(-1.0f);
-                    videoView.setMirror(false);
-                    video_view.addView(videoView);
-                    primaryVideoView = videoView;
-                    remoteVideoTrack.addRenderer(videoView);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            VideoView videoView = new VideoView(VideoActivity.this);
+                            videoView.setLayoutParams(layoutParamsPV);
+                            videoView.setZOrderOnTop(false);
+                            videoView.setZ(-1.0f);
+                            videoView.setMirror(false);
+                            video_view.addView(videoView);
+                            primaryVideoView = videoView;
+                            remoteVideoTrack.addRenderer(videoView);
 
-                    isRemoteViewRendered = true;
-                    participant_initial.setVisibility(View.GONE);
-                    video_view.setVisibility(View.VISIBLE);
-                    rl_recording_section.setVisibility(View.VISIBLE);
+                            isRemoteViewRendered = true;
+                            participant_initial.setVisibility(View.GONE);
+                            video_view.setVisibility(View.VISIBLE);
+                            rl_recording_section.setVisibility(View.VISIBLE);
+                        }
+                    });
                     return true;
                 }
             }
@@ -3093,6 +3100,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             intent.putExtra("REQUEST_ID", requestID);
             intent.putExtra("AUTH_TOKEN", authToken);
             intent.putExtra("USER_ID", userId);
+            intent.putExtra("IS_REQUEST_CREATED_BY_CUSTOMER", IS_REQUEST_CREATED_BY_CUSTOMER);
             return intent;
         }
 
