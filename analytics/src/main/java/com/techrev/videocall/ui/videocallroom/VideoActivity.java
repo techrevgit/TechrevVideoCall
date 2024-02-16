@@ -3052,6 +3052,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
         @Override
         protected Boolean doInBackground(Void... voids) {
+            if (isSpeakerOn) {
+                isSpeakerOn = false;
+            } else {
+                isSpeakerOn = true;
+            }
             return isSpeakerOn;
         }
 
