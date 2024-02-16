@@ -932,7 +932,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
 
         initCamera();
-        getRequestDetailsByRequestId(requestID);
 
         pictureService = PictureCapturingServiceImpl.getInstance(this);
     }
@@ -1548,7 +1547,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
 
                 // Added By Rupesh
-                exitFromTheRoom();
+                //exitFromTheRoom();
                 // Added By Rupesh
 
             }
@@ -1730,6 +1729,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
             }
 
+            getRequestDetailsByRequestId(requestID);
+
         }
         else if(eventModel.getEventType()== Constants.EVENTTYPE_DISCONNECTED_FROM_ROOM)
         {
@@ -1771,10 +1772,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
             }
         }
-
+        startLocationUpdates();
         if (member_Type == Constants.member_type_participant && Constants.isLocationEnable) {
             // getLocation(0); // commented by Pankaj because new code is written below
-            startLocationUpdates();
+            //startLocationUpdates();
             locationSharing.setVisibility(View.VISIBLE);
         } else {
             locationSharing.setVisibility(View.GONE);
@@ -4579,7 +4580,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 case "NotifySignerToCaptureSignature":
                     //Toast.makeText(this, "Request to capture initial image", Toast.LENGTH_SHORT).show();
                     // Show the capture signature dialog fragment
-                    CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
+                    CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
                         @Override
                         public void onOptionSelected(int selectedOption) {
                             //1 = Capture through camera & 2 = Draw through whiteboard
@@ -4637,6 +4638,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                                             }
                                         })
+                                        .setCancelable(false)
                                         .show();
                                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
                                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
@@ -4650,12 +4652,13 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         ft.remove(prev);
                     }
                     ft.addToBackStack(null);
+                    captureSignerSignatureDialogFragment.setCancelable(false);
                     captureSignerSignatureDialogFragment.show(ft,"signature_dialog");
                     break;
                 case "NotifySignerToCaptureInitial":
                     //Toast.makeText(this, "Request to capture signature image", Toast.LENGTH_SHORT).show();
                     // Show the capture initial dialog fragment
-                    CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
+                    CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
                         @Override
                         public void onOptionSelected(int selectedOption) {
                             //1 = Capture through camera & 2 = Draw through whiteboard
@@ -4736,6 +4739,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         ft1.remove(prev1);
                     }
                     ft1.addToBackStack(null);
+                    captureSignerInitialDialogFragment.setCancelable(false);
                     captureSignerInitialDialogFragment.show(ft1,"initial_dialog");
                     break;
 
@@ -4871,6 +4875,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 builder.append(redSpannable);
 
                                 showDocumentAccessConfirmationDialog("Document Access Required!", Html.fromHtml("<font color='#000000'>By clicking 'I Agree', you agree to allow access of your uploaded document(s) to the Notary.<br><br>    </font><font color='#FF0000'>Note: By clicking on 'I Disagree', the request will be cancelled automatically.</font>"));
+                            }
+                        } else {
+                            try {
+                                updateAgreeCount(requestID);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
@@ -6258,8 +6268,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             if (lastLocationSharedDateAndTime == null ||
                     lastLocationSharedDateAndTime.equalsIgnoreCase("NA") ||
+                    lastLocationSharedDateAndTime.equalsIgnoreCase("") ||
                     lastLocationSharedRequestID == null ||
-                    lastLocationSharedRequestID.equalsIgnoreCase("NA")) {
+                    lastLocationSharedRequestID.equalsIgnoreCase("NA")
+                    || lastLocationSharedRequestID.equalsIgnoreCase("")) {
                 String finalCurrentDateAndTime = currentDateAndTime;
                 new Thread(new Runnable() {
                     @Override

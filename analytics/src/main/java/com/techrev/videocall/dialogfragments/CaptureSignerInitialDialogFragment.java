@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,15 +25,27 @@ import androidx.annotation.Nullable;
 
 import androidx.cardview.widget.CardView;
 
+import com.google.gson.Gson;
 import com.techrev.videocall.R;
+import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.models.VideoCallModel;
+import com.techrev.videocall.network.NetworkInterface;
+import com.techrev.videocall.network.RetrofitNetworkClass;
 import com.techrev.videocall.ui.videocallroom.VideoActivity;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class CaptureSignerInitialDialogFragment extends DialogFragment {
 
-    private String authToken, requestId;
+    private static final String TAG = "CaptureSignerInitial";
+    private String authToken, requestID, userID;
     private Activity mActivity;
     private ImageView iv_cross, iv_camera, iv_whiteboard;
     private LinearLayout ll_capture_through_camera, ll_capture_through_whiteboard;
@@ -40,6 +53,9 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
     private String userMeetingIdentifier = "";
     private VideoCallModel videoCallModel;
     private OptionSelectionInterface optionSelectionInterface;
+    static RetrofitNetworkClass networkClass = new RetrofitNetworkClass();
+    static Retrofit retrofitLocal = networkClass.callingURL();
+    static NetworkInterface serviceLocal = retrofitLocal.create(NetworkInterface.class);
 
     public interface OptionSelectionInterface {
         public void onOptionSelected(int selectedOption);
@@ -50,12 +66,13 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
     }
 
     @SuppressLint("ValidFragment")
-    public CaptureSignerInitialDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestID, OptionSelectionInterface selectionInterface) {
+    public CaptureSignerInitialDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestId, String userId, OptionSelectionInterface selectionInterface) {
         this.mActivity = activity;
         this.userMeetingIdentifier = meetingIdetifier;
         this.videoCallModel = model;
         this.authToken = authToken;
-        this.requestId = requestID;
+        this.requestID = requestId;
+        this.userID = userId;
         this.optionSelectionInterface = selectionInterface;
     }
 
@@ -172,22 +189,10 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
                 builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ProgressDialog progressDialog = new ProgressDialog(mActivity);
-                        progressDialog.setMessage("Please wait");
-                        progressDialog.setCancelable(false);
-                        progressDialog.show();
                         try {
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("from", userMeetingIdentifier);
-                            jsonObject.put("to", "All");
-                            jsonObject.put("messageType", "AcceptedToAuthorizeCaptureMyInitial");
-                            jsonObject.put("content", "AcceptedToAuthorizeCaptureMyInitial");
-                            videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                        } catch (Exception e) {
-                            Log.d("====Exception", "" + e.toString());
-                        }finally {
-                            progressDialog.dismiss();
-                            dismiss();
+                            updateRequestParticipantCapture(requestID, userID);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -220,6 +225,72 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void updateRequestParticipantCapture(String meetingId, String userId) throws JSONException {
+        Log.d(TAG , "Thread Name in updateRequestParticipantCapture: "+Thread.currentThread().getName());
+        ProgressDialog dialog = new ProgressDialog(mActivity);
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();
+            }
+        });
+        Log.e(TAG, "Meeting ID: " + meetingId);
+        JSONObject obj = new JSONObject();
+        obj.put("requestId", meetingId);
+        obj.put("userId", userId);
+        obj.put("updateCapture", "1");
+        String data = obj.toString();
+
+        // Wrap your network operations in an AsyncTask
+        new AsyncTask<String, Void, CommonModel>() {
+            @Override
+            protected CommonModel doInBackground(String... params) {
+                try {
+                    Call<CommonModel> responseBodyCall = serviceLocal.updateRequestParticipantCapture(authToken, params[0]);
+                    Response<CommonModel> response = responseBodyCall.execute();
+                    if (response.isSuccessful()) {
+                        return response.body();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(CommonModel result) {
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog != null) {
+                            dialog.dismiss();
+                        }
+                    }
+                });
+
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("from", userMeetingIdentifier);
+                    jsonObject.put("to", "All");
+                    jsonObject.put("messageType", "AcceptedToAuthorizeCaptureMyInitial");
+                    jsonObject.put("content", "AcceptedToAuthorizeCaptureMyInitial");
+                    videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                } catch (Exception e) {
+                    Log.d("====Exception", "" + e.toString());
+                }finally {
+                    dismiss();
+                }
+
+                if (result != null) {
+                    Log.e(TAG, "Signer Signature/Initial Authorization Update Response Data: \n" + new Gson().toJson(result));
+                }
+            }
+        }.execute(data);
     }
 
 }

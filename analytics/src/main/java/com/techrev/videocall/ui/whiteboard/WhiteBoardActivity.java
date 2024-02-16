@@ -328,8 +328,8 @@ public class WhiteBoardActivity extends AppCompatActivity {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         resizedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
         imageInBytes = stream.toByteArray();
-        RequestBody rFile = RequestBody.create(MediaType.parse("image/jpeg"), imageInBytes);
-        MultipartBody.Part file = MultipartBody.Part.createFormData("file", Calendar.getInstance().getTimeInMillis()+"_image.jpg", rFile);
+        RequestBody rFile = RequestBody.create(MediaType.parse("image/png"), imageInBytes);
+        MultipartBody.Part file = MultipartBody.Part.createFormData("file", Calendar.getInstance().getTimeInMillis()+"_image.png", rFile);
         /*Preparing file to send to server*/
 
         /*JSONObject obj = new JSONObject();

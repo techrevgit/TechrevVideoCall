@@ -20,7 +20,6 @@ import com.techrev.videocall.models.UpdateRequestStatusResponse;
 import com.techrev.videocall.models.UploadImageModel;
 import com.techrev.videocall.ui.chat.ChatDataModel;
 import com.techrev.videocall.ui.mydocuments.DocumentsByRequestIdModel;
-import com.techrev.videocall.ui.mydocuments.RequesterDocumentModel;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -190,9 +189,10 @@ public interface NetworkInterface
                                                              @Part("isDewDoc") RequestBody isDewDoc,
                                                              @Part("uploadedBy") RequestBody uploadedBy);
 
+    @Headers("Content-Type: application/json")
     @POST("updateExistingRequestDocument")
     Call<CommonModel> updateExistingRequestDocument(@Header("Authorization") String token,
-                                                    @Body RequesterDocumentModel model);
+                                                    @Body String requestObject);
 
     @Headers("Content-Type: application/json")
     @POST("getRequestParticipantByReqIdAndUserId")

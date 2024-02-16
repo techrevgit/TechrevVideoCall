@@ -2,15 +2,22 @@ package com.techrev.videocall.ui.mydocuments;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -29,7 +36,11 @@ import com.techrev.videocall.network.RetrofitNetworkClass;
 
 import org.json.JSONException;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -100,6 +111,18 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
         WebSettings webSettings = pdfWebview.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setBuiltInZoomControls(true);
+        webSettings.setAllowFileAccessFromFileURLs(true);
+        webSettings.setAllowUniversalAccessFromFileURLs(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
+        pdfWebview.setWebViewClient(new WebViewClient() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                Log.e("PDF WebView Error: ", error.getDescription().toString());
+            }
+        });
         try {
             downloadAndPreviewPdf();
         } catch (JSONException e) {
@@ -135,7 +158,8 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
                                 .swipeHorizontal(false)
                                 .enableAnnotationRendering(true)
                                 .load();*/
-                        displayPDF(downloadedData);
+                        //displayPDF(downloadedData);
+                        new WebViewLoaderTask(PreviewRequestDocumentActivity.this, pdfWebview).execute(downloadedData);
                     } catch (IOException e) {
                         Log.d(TAG, "onResponse: downloadAndPreviewPdf: Error while displaying the PDF!");
                         e.printStackTrace();
@@ -160,8 +184,6 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
         // Create a data URI
         String dataUri = "data:application/pdf;base64," + base64;
         Log.d(TAG , "Data URI: "+dataUri);
-        // Load the data URI in WebView
-        pdfWebview.loadData(dataUri, "application/pdf", "base64");
         // Optional: Set a WebViewClient to handle redirects within the WebView
         pdfWebview.setWebViewClient(new WebViewClient() {
             @RequiresApi(api = Build.VERSION_CODES.M)
@@ -171,7 +193,93 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
                 Log.e("PDF WebView Error", error.getDescription().toString());
             }
         });
+        // Load the data URI in WebView
+        pdfWebview.loadData(dataUri, "application/pdf", "base64");
 
+    }
+
+    public class WebViewLoaderTask extends AsyncTask<byte[], Void, File> {
+        private static final int REQUEST_EXTERNAL_STORAGE = 1;
+        private Context mContext;
+        private WebView mWebView;
+
+        public WebViewLoaderTask(Context context, WebView webView) {
+            mContext = context;
+            mWebView = webView;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Check for external storage permission before executing the task
+            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                // Permission is not granted, request it
+                ActivityCompat.requestPermissions((Activity) mContext,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        REQUEST_EXTERNAL_STORAGE);
+            }
+        }
+
+        @Override
+        protected File doInBackground(byte[]... params) {
+            byte[] byteArray = params[0];
+            InputStream inputStream = new ByteArrayInputStream(byteArray);
+            File file = null;
+            FileOutputStream outputStream = null;
+
+            try {
+                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    /*File directory = new File(mContext.getExternalFilesDir(null), "Notarization_Docs"); // Specify the folder name
+                    if (!directory.exists()) {
+                        if (!directory.mkdirs()) {
+                            throw new IOException("Failed to create directory: " + directory.getAbsolutePath());
+                        }
+                    }*/
+                    File fileNew = new File(Environment
+                            .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                            + "/Notarization_Doc.pdf"); // Create a file object
+                    outputStream = new FileOutputStream(fileNew);
+
+                    // Write InputStream data to the file
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                    file = fileNew; // Assign the created file to the result
+                } else {
+                    // Permission not granted, return null file
+                    file = null;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (outputStream != null) {
+                        outputStream.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return file;
+        }
+
+        @Override
+        protected void onPostExecute(File file) {
+            if (file != null) {
+                // Load the file into WebView
+                String fileUrl = "file://" + file.getAbsolutePath();
+                Log.d("WebViewLoaderTask", "Loading file: " + fileUrl);
+                pdfWebview.loadUrl("https://docs.google.com/gview?embedded=true&url="+fileUrl);
+            } else {
+                // Handle permission denied
+                Log.d(TAG , "Error while rendering the pdf");
+            }
+        }
     }
 
 }

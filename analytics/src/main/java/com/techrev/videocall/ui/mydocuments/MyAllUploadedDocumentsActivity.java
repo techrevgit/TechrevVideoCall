@@ -41,6 +41,7 @@ import com.techrev.videocall.R;
 import com.techrev.videocall.network.RetrofitNetworkClass;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -411,14 +412,18 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         Log.d(TAG, "updateExistingRequestDocument: requestId: "+requestID);
         Log.d(TAG, "updateExistingRequestDocument: DocIds: "+new Gson().toJson(selectedDocIdList));
 
-        List<RequesterDocumentModel.DocIdObject> docIdObjects = new ArrayList<>();
-        for (String docId : selectedDocIdList) {
+        //List<RequesterDocumentModel.DocIdObject> docIdObjects = new ArrayList<>();
+        //docIdObjects.add(new RequesterDocumentModel.DocIdObject(docId));
+        /*for (String docId : selectedDocIdList) {
             docIdObjects.add(new RequesterDocumentModel.DocIdObject(docId));
-        }
-
-        RequesterDocumentModel request = new RequesterDocumentModel(requestID, docIdObjects);
-
-        Call<CommonModel> responseBodyCall = serviceLocal.updateExistingRequestDocument(authToken, request);
+        }*/
+        List<String> docIdObjects = new ArrayList<>(selectedDocIdList);
+        Log.d(TAG , "Selected docIdObjects data for API: "+new Gson().toJson(docIdObjects));
+        //RequesterDocumentModel request = new RequesterDocumentModel(requestID, docIdObjects);
+        RequesterDocumentModel request = new RequesterDocumentModel();
+        JSONObject requestObject = request.buildRequestObject(docIdObjects, requestID);
+        Log.d(TAG , "Selected request data for API: "+requestObject.toString());
+        Call<CommonModel> responseBodyCall = serviceLocal.updateExistingRequestDocument(authToken, requestObject.toString());
         responseBodyCall.enqueue(new Callback<CommonModel>() {
             @Override
             public void onResponse(Call<CommonModel> call, Response<CommonModel> response) {
