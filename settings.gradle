@@ -22,4 +22,3 @@ dependencyResolutionManagement {
 rootProject.name = "TechRevAnalytics"
 include ':app'
 include ':analytics'
-include ':pdfviewer'

@@ -222,7 +222,7 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
                 builder.setTitle("Authorize Notary to Capture Signature");
                 builder.setCancelable(false);
                 builder.setMessage("I am unable to capture my signature so I authorize Notary of eNotary On Call to capture on my behalf.");
-                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton("I Authorize", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         try {
@@ -231,6 +231,12 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
                             e.printStackTrace();
                         }
                     }
+                })
+                .setNegativeButton("Go Back", new DialogInterface.OnClickListener() {
+                      @Override
+                      public void onClick(DialogInterface dialogInterface, int i) {
+                          dialogInterface.cancel();
+                      }
                 });
                 builder.show();
             }
