@@ -1251,6 +1251,27 @@ public class VideoCallService extends Service {
                 case "SwitchOnOrOffVideo":
                     SwitchOnOrOffVideo(dModel);
                     break;
+                case "NotifySignerToCaptureSignature":
+                    if (APP_STATUS != Constants.APP_STATUS_FOREGROUND) {
+                        /*Added By Rupesh*/
+                        sharedPreference.setBoolean(Constants.SIGNATURE_CAPTURE_REQUEST_IN_BACKGROUND , true);
+                        /*Added By Rupesh*/
+                    }
+                    break;
+                case "NotifySignerToCaptureInitial":
+                    if (APP_STATUS != Constants.APP_STATUS_FOREGROUND) {
+                        /*Added By Rupesh*/
+                        sharedPreference.setBoolean(Constants.INITIAL_CAPTURE_REQUEST_IN_BACKGROUND , true);
+                        /*Added By Rupesh*/
+                    }
+                    break;
+                case "requestToReplaceSignature":
+                    if (APP_STATUS != Constants.APP_STATUS_FOREGROUND) {
+                        /*Added By Rupesh*/
+                        sharedPreference.setBoolean(Constants.SIGNATURE_INITIAL_REPLACE_REQUEST_IN_BACKGROUND , true);
+                        /*Added By Rupesh*/
+                    }
+                    break;
             }
 
 

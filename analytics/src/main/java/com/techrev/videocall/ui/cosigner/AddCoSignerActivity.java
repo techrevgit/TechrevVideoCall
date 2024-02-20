@@ -40,6 +40,7 @@ import com.techrev.videocall.network.RetrofitNetworkClass;
 import com.techrev.videocall.ui.videocallroom.VideoActivity;
 import com.techrev.videocall.utils.Constants;
 import com.techrev.videocall.utils.MySharedPreference;
+import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,6 +81,7 @@ public class AddCoSignerActivity extends Activity {
     private String userMeetingIdentifier = "";
     private ImageView ivBack;
     private VideoCallManager videoCallManager;
+    private String isPrimarySigner = "";
 
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -112,6 +114,7 @@ public class AddCoSignerActivity extends Activity {
             requestID = getIntent().getStringExtra("REQUEST_ID");
             userId = getIntent().getStringExtra("USER_ID");
             userMeetingIdentifier = getIntent().getStringExtra("USER_MEETING_IDENTIFIER");
+            isPrimarySigner = getIntent().getStringExtra("IS_PRIMARY_SIGNER");
         }
         networkClass = new RetrofitNetworkClass();
         retrofitLocal = networkClass.callingURL();
@@ -376,6 +379,10 @@ public class AddCoSignerActivity extends Activity {
                     progressBar.setVisibility(View.GONE);
                     cosignerCount++;
                     Toast.makeText(AddCoSignerActivity.this, "Invitation email sent to Co-Signer", Toast.LENGTH_LONG).show();
+                    NotarizationActionUpdateManger.updateNotarizationAction(
+                            AddCoSignerActivity.this, authToken,
+                            requestID, "1", userId, isPrimarySigner,
+                            "42", "1", "");
                     setResult(Activity.RESULT_OK);
                     finish();
                 }

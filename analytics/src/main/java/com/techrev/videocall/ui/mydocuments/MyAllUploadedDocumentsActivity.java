@@ -39,6 +39,8 @@ import com.techrev.videocall.models.MyAllDocListModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.R;
 import com.techrev.videocall.network.RetrofitNetworkClass;
+import com.techrev.videocall.ui.videocallroom.VideoActivity;
+import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,6 +79,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
     File directory;
     File mypath;
     private static String userId = "";
+    private String isPrimarySigner = "";
     List<String> selectedDocIdList = new ArrayList<>();
     private MyAllDocListAdapter adapter = null;
     LocalBroadcastManager mLocalBroadcastManager;
@@ -169,6 +172,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
             authToken = getIntent().getStringExtra("AUTH_TOKEN");
             requestID = getIntent().getStringExtra("REQUEST_ID");
             userId = getIntent().getStringExtra("USER_ID");
+            isPrimarySigner = getIntent().getStringExtra("IS_PRIMARY_SIGNER");
         }
         iv_back = findViewById(R.id.iv_back);
         tv_add_document = findViewById(R.id.tv_add_document);
@@ -417,6 +421,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         /*for (String docId : selectedDocIdList) {
             docIdObjects.add(new RequesterDocumentModel.DocIdObject(docId));
         }*/
+        String selectedDocIds = listToString(selectedDocIdList);
         List<String> docIdObjects = new ArrayList<>(selectedDocIdList);
         Log.d(TAG , "Selected docIdObjects data for API: "+new Gson().toJson(docIdObjects));
         //RequesterDocumentModel request = new RequesterDocumentModel(requestID, docIdObjects);
@@ -438,6 +443,10 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                     Log.d(TAG , "Updated document response: \n"+new Gson().toJson(response.body()));
                     if (response.body() != null && response.body().getStatus().equalsIgnoreCase("1")) {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Document(s) added successfully!", Toast.LENGTH_SHORT).show();
+                        NotarizationActionUpdateManger.updateNotarizationAction(
+                                MyAllUploadedDocumentsActivity.this, authToken,
+                                requestID, "1", userId, isPrimarySigner,
+                                "1", "1", selectedDocIds);
                     } else {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Something went wrong, please try again later!", Toast.LENGTH_SHORT).show();
                     }
@@ -458,6 +467,17 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public static String listToString(List<String> list) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String element : list) {
+            if (stringBuilder.length() > 0) {
+                stringBuilder.append(","); // Add comma and space separator
+            }
+            stringBuilder.append(element);
+        }
+        return stringBuilder.toString();
     }
 
     private void selectPDF()

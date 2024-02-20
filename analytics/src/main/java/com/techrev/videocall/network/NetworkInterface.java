@@ -4,6 +4,7 @@ package com.techrev.videocall.network;
 import com.techrev.videocall.models.AttachedFileUploadResponseModel;
 import com.techrev.videocall.models.ClientActivePlanDetailsByClientIdModel;
 import com.techrev.videocall.models.CommonModel;
+import com.techrev.videocall.models.NotarizationActionModel;
 import com.techrev.videocall.models.RequestDetailsModel;
 import com.techrev.videocall.ui.cosigner.CosignerDetailsModel;
 import com.techrev.videocall.ui.cosigner.CosignerVerificationModel;
@@ -223,5 +224,13 @@ public interface NetworkInterface
     @GET("downloadDewFile")
     @Streaming // Use Streaming to download large files
     Call<ResponseBody> downloadPdf(@Query("DocId") String docID);
+
+    @Headers("Content-Type: application/json")
+    @POST("getAllNotarizationAction")
+    Call<NotarizationActionModel> getAllNotarizationAction(@Header("Authorization") String token);
+
+    @Headers("Content-Type: application/json")
+    @POST("insertNotarizationAuditTrial")
+    Call<ResponseBody> insertNotarizationAuditTrial(@Header("Authorization") String token, @Body String data);
 
 }

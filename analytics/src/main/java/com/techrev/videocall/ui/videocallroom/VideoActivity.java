@@ -109,6 +109,7 @@ import com.google.gson.Gson;
 
 import com.techrev.videocall.dialogfragments.CaptureSignerInitialDialogFragment;
 import com.techrev.videocall.dialogfragments.CaptureSignerSignatureDialogFragment;
+import com.techrev.videocall.models.NotarizationActionModel;
 import com.techrev.videocall.models.RequestDetailsModel;
 import com.techrev.videocall.services.APictureCapturingService;
 import com.techrev.videocall.ui.camera.CameraActivity;
@@ -125,6 +126,7 @@ import com.techrev.videocall.models.EventModel;
 import com.techrev.videocall.models.MeetingDetailsModel;
 import com.techrev.videocall.ui.internet.NoInternetActivity;
 import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
+import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 import com.techrev.videocall.utils.PictureCapturingListener;
 import com.techrev.videocall.services.PictureCapturingServiceImpl;
 import com.techrev.videocall.R;
@@ -520,6 +522,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private boolean IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
     private boolean IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = false;
     private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
+    private List<NotarizationActionModel.NotarizationActions> mNotarizationModel = new ArrayList<NotarizationActionModel.NotarizationActions>();
+    private String isPrimarySigner, isWitness;
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -932,6 +936,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         });
 
         initCamera();
+        getAllNotarizationAction();
 
         pictureService = PictureCapturingServiceImpl.getInstance(this);
     }
@@ -1023,6 +1028,51 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         if (dialog != null && dialog.isShowing()) {
                             dialog.dismiss();
                         }
+                        // Handle network failure
+                        Log.d("onFailure", "Network call failed: " + t.toString());
+                    }
+                });
+            }
+        });
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    public void getAllNotarizationAction() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // Show loading indicator
+                /*ProgressDialog dialog = new ProgressDialog(VideoActivity.this);
+                dialog.setMessage("Please wait");
+                dialog.setCancelable(false);
+                dialog.show();*/
+
+                Call<NotarizationActionModel> responseBodyCall = serviceLocal.getAllNotarizationAction(authToken);
+                responseBodyCall.enqueue(new Callback<NotarizationActionModel>() {
+                    @Override
+                    public void onResponse(Call<NotarizationActionModel> call, Response<NotarizationActionModel> response) {
+                        // Dismiss loading indicator
+                        /*if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }*/
+                        if (response.isSuccessful() && response.body() != null) {
+                            // Handle successful response
+                            Log.d(TAG, "onResponse: getAllNotarizationAction: "+new Gson().toJson(response.body()));
+                            mNotarizationModel = response.body().getNotarizationActions();
+                            Log.d(TAG, "onResponse: mNotarizationModel data: "+new Gson().toJson(mNotarizationModel));
+                            NotarizationActionModel.getInstance().setNotarizationActions(mNotarizationModel);
+                        } else {
+                            // Handle unsuccessful response
+                            Log.d("onResponse", "Unsuccessful response");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<NotarizationActionModel> call, Throwable t) {
+                        // Dismiss loading indicator
+                        /*if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }*/
                         // Handle network failure
                         Log.d("onFailure", "Network call failed: " + t.toString());
                     }
@@ -1175,22 +1225,33 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
 
             if (participantsAdapter!=null){
-                participantsAdapter.notifyDataSetChanged();
-                if (isMyViewActive){
-                    participantsAdapter.refreshParticipants(-1);
-                    showThumbnailInPrimaryVideoSection();
+                try {
+                    //participantsAdapter.notifyDataSetChanged();
+                    if (isMyViewActive){
+                        participantsAdapter.refreshParticipants(-1);
+                        showThumbnailInPrimaryVideoSection();
+                    }
+                } catch (Exception e) {
+                    Log.d(TAG , "Exception: "+e);
+                    e.printStackTrace();
                 }
             }
         }
         if (member_Type == 1) {
             if (dialogViewHost != null && dialogViewHost.isShowing()) {
-                rVPadapter.notifyDataSetChanged();
+                if (rVPadapter != null) {
+                    rVPadapter.notifyDataSetChanged();
+                }
                 if (remoteParticipantList.size() > 0) {
                     rViewPopup.setVisibility(View.VISIBLE);
                     emptyView.setVisibility(View.GONE);
                 } else {
-                    rViewPopup.setVisibility(View.GONE);
-                    emptyView.setVisibility(View.VISIBLE);
+                    if (rViewPopup != null) {
+                        rViewPopup.setVisibility(View.GONE);
+                    }
+                    if (emptyView != null) {
+                        emptyView.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         }
@@ -1205,6 +1266,18 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         Log.d(TAG , "Thread Name in onResume: "+Thread.currentThread().getName());
         if (sharedPreference!=null && sharedPreference.getBoolean(Constants.CALL_ENDED_IN_BACKGROUND)){
             exitFromTheRoom();
+        }
+        if (sharedPreference!=null && sharedPreference.getBoolean(Constants.SIGNATURE_CAPTURE_REQUEST_IN_BACKGROUND)){
+            showSignatureCaptureDialog();
+            sharedPreference.setBoolean(Constants.SIGNATURE_CAPTURE_REQUEST_IN_BACKGROUND , false);
+        }
+        if (sharedPreference!=null && sharedPreference.getBoolean(Constants.INITIAL_CAPTURE_REQUEST_IN_BACKGROUND)){
+            showInitialCaptureDialog();
+            sharedPreference.setBoolean(Constants.INITIAL_CAPTURE_REQUEST_IN_BACKGROUND , false);
+        }
+        if (sharedPreference!=null && sharedPreference.getBoolean(Constants.SIGNATURE_INITIAL_REPLACE_REQUEST_IN_BACKGROUND)){
+            showReplaceSignatureInitialDialog();
+            sharedPreference.setBoolean(Constants.SIGNATURE_INITIAL_REPLACE_REQUEST_IN_BACKGROUND , false);
         }
 
         if (!isInternetAvailable()){
@@ -1660,7 +1733,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
             showOtherParticipants();
         }
-        else if(eventModel.getEventType()== Constants.EVENTTYPE_PARTICIPANT_DISCONNECTED_FROM_ROOM)
+        /*else if(eventModel.getEventType()== Constants.EVENTTYPE_PARTICIPANT_DISCONNECTED_FROM_ROOM)
         {
             String name = eventModel.getTechrevRemoteParticipant().remoteParticipant.getIdentity();
             List<String> splitString = Arrays.asList(name.split("\\-"));
@@ -1701,7 +1774,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
 
             }
-        }
+        }*/
 
         else if(eventModel.getEventType() == Constants.EVENTTYPE_CONNECTED_IN_ROOM)
         {
@@ -1720,13 +1793,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
             }
 
-            if (!isCoSigner) {
-                // Commented by Rupesh for temp period for videocall testing
-                try {
-                    checkIfUserAllowedNotaryToCaptureSignatureAndInitial(requestID , userId);
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                checkIfUserAllowedNotaryToCaptureSignatureAndInitial(requestID , userId);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
             }
 
             getRequestDetailsByRequestId(requestID);
@@ -2357,6 +2427,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     intent.putExtra("REQUEST_ID", requestID);
                     intent.putExtra("USER_ID", userId);
                     intent.putExtra("USER_MEETING_IDENTIFIER", userMeetingIdentifier);
+                    intent.putExtra("IS_PRIMARY_SIGNER", isPrimarySigner);
                     startActivityForResult(intent, FLAG_ACTIVITY_ADD_CO_SIGNER);
                 }
             }
@@ -3106,6 +3177,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             intent.putExtra("AUTH_TOKEN", authToken);
             intent.putExtra("USER_ID", userId);
             intent.putExtra("IS_REQUEST_CREATED_BY_CUSTOMER", IS_REQUEST_CREATED_BY_CUSTOMER);
+            intent.putExtra("IS_PRIMARY_SIGNER", isPrimarySigner);
             return intent;
         }
 
@@ -4591,221 +4663,276 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     break;
                 case "RemoveMessage":
                 case "NotifySignerToCaptureSignature":
-                    //Toast.makeText(this, "Request to capture initial image", Toast.LENGTH_SHORT).show();
-                    // Show the capture signature dialog fragment
-                    CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
-                        @Override
-                        public void onOptionSelected(int selectedOption) {
-                            //1 = Capture through camera & 2 = Draw through whiteboard
-                            if (selectedOption == 1) {
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                AlertDialog dialog = builder.setTitle("Capture Signature")
-                                        .setMessage("Are you sure, you want to capture your signature?")
-                                        .setCancelable(false)
-                                        .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
-                                                if (ContextCompat.checkSelfPermission(VideoActivity.this, Manifest.permission.CAMERA)
-                                                        == PackageManager.PERMISSION_DENIED) {
-                                                    captureImageThroughCamera("Signature");
-                                                } else {
-                                                    ActivityCompat.requestPermissions(VideoActivity.this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_SIGNATURE);
-                                                }
-                                            }
-                                        })
-                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                                            }
-                                        })
-                                        .show();
-                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-                                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
-
-                            } else {
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                AlertDialog dialog = builder.setTitle("Draw Signature")
-                                        .setMessage("Are you sure, you want to draw your signature?")
-                                        .setCancelable(false)
-                                        .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                //Toast.makeText(mActivity, "Opening whiteboard", Toast.LENGTH_SHORT).show();
-                                                Intent it = new Intent(mActivity, WhiteBoardActivity.class);
-                                                it.putExtra("REQUEST_ID" , requestID);
-                                                it.putExtra("AUTH_TOKEN" , authToken);
-                                                it.putExtra("USER_ID" , userId);
-                                                it.putExtra("TYPE" , "1");
-                                                it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
-                                                mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
-                                            }
-                                        })
-                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-
-                                            }
-                                        })
-                                        .setCancelable(false)
-                                        .show();
-                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-                                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
-
-                            }
-                        }
-                    });
-                    FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
-                    Fragment prev = mActivity.getFragmentManager().findFragmentByTag("signature_dialog");
-                    if (prev != null) {
-                        ft.remove(prev);
-                    }
-                    ft.addToBackStack(null);
-                    captureSignerSignatureDialogFragment.setCancelable(false);
-                    captureSignerSignatureDialogFragment.show(ft,"signature_dialog");
+                    showSignatureCaptureDialog();
                     break;
                 case "NotifySignerToCaptureInitial":
-                    //Toast.makeText(this, "Request to capture signature image", Toast.LENGTH_SHORT).show();
-                    // Show the capture initial dialog fragment
-                    CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
-                        @Override
-                        public void onOptionSelected(int selectedOption) {
-                            //1 = Capture through camera & 2 = Draw through whiteboard
-                            if (selectedOption == 1) {
-
-                                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        switch (which) {
-                                            case DialogInterface.BUTTON_POSITIVE:
-                                                //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
-                                                if (ContextCompat.checkSelfPermission(VideoActivity.this, Manifest.permission.CAMERA)
-                                                        == PackageManager.PERMISSION_DENIED) {
-                                                    captureImageThroughCamera("Initial");
-                                                } else {
-                                                    ActivityCompat.requestPermissions(VideoActivity.this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_INITIAL);
-                                                }
-                                                break;
-
-                                            case DialogInterface.BUTTON_NEGATIVE:
-                                                //No button clicked
-                                                break;
-                                        }
-                                    }
-                                };
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                AlertDialog dialog = builder.setTitle("Capture Initial")
-                                        .setMessage("Are you sure, you want to capture your initial?")
-                                        .setPositiveButton("Ok, Proceed", dialogClickListener)
-                                        .setNegativeButton("Cancel", dialogClickListener)
-                                        .setCancelable(false)
-                                        .show();
-                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-                                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
-
-                            } else {
-
-                                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        switch (which) {
-                                            case DialogInterface.BUTTON_POSITIVE:
-                                                //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
-                                                Intent it = new Intent(mActivity, WhiteBoardActivity.class);
-                                                it.putExtra("REQUEST_ID" , requestID);
-                                                it.putExtra("AUTH_TOKEN" , authToken);
-                                                it.putExtra("USER_ID" , userId);
-                                                it.putExtra("TYPE" , "0");
-                                                it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
-                                                /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
-                                                mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
-                                                break;
-
-                                            case DialogInterface.BUTTON_NEGATIVE:
-                                                //No button clicked
-                                                break;
-                                        }
-                                    }
-                                };
-
-                                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                                AlertDialog dialog = builder.setTitle("Draw Initial")
-                                        .setMessage("Are you sure, you want to draw your initial?")
-                                        .setPositiveButton("Ok, Proceed", dialogClickListener)
-                                        .setNegativeButton("Cancel", dialogClickListener)
-                                        .setCancelable(false)
-                                        .show();
-                                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
-                                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
-
-                            }
-                        }
-                    });
-                    FragmentTransaction ft1 = mActivity.getFragmentManager().beginTransaction();
-                    Fragment prev1 = mActivity.getFragmentManager().findFragmentByTag("initial_dialog");
-                    if (prev1 != null) {
-                        ft1.remove(prev1);
-                    }
-                    ft1.addToBackStack(null);
-                    captureSignerInitialDialogFragment.setCancelable(false);
-                    captureSignerInitialDialogFragment.show(ft1,"initial_dialog");
+                    showInitialCaptureDialog();
                     break;
 
                 case "requestToReplaceSignature" :
+                    showReplaceSignatureInitialDialog();
+                    break;
+            }
+        }
+    }
 
-                    if (!IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN) {
-                        IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = true;
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                        AlertDialog dialog = builder.setTitle("Confirmation to Add My Signature & Initial")
-                                .setMessage("I agree to replace Signature & Initial Tag with my Signature & Initial.")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
+    private void showSignatureCaptureDialog() {
+        //Toast.makeText(this, "Request to capture initial image", Toast.LENGTH_SHORT).show();
+        // Show the capture signature dialog fragment
+        CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
+            @Override
+            public void onOptionSelected(int selectedOption) {
+                //1 = Capture through camera & 2 = Draw through whiteboard
+                if (selectedOption == 1) {
 
-                                        IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
-                                        try {
-                                            JSONObject jsonObject = new JSONObject();
-                                            jsonObject.put("from", userMeetingIdentifier);
-                                            jsonObject.put("to", "All");
-                                            jsonObject.put("messageType", "AcceptedToReplaceMySignatureAndIntial");
-                                            jsonObject.put("content", "AcceptedToReplaceMySignatureAndIntial");
-                                            videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                                        } catch (Exception e) {
-                                            Log.d("====Exception", "" + e.toString());
-                                        }
-
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                    AlertDialog dialog = builder.setTitle("Capture Signature")
+                            .setMessage("Are you sure, you want to capture your signature?")
+                            .setCancelable(false)
+                            .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
+                                    if (ContextCompat.checkSelfPermission(VideoActivity.this, Manifest.permission.CAMERA)
+                                            == PackageManager.PERMISSION_DENIED) {
+                                        captureImageThroughCamera("Signature");
+                                    } else {
+                                        ActivityCompat.requestPermissions(VideoActivity.this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_SIGNATURE);
                                     }
-                                })
-                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
 
-                                        IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
-                                        try {
-                                            JSONObject jsonObject = new JSONObject();
-                                            jsonObject.put("from", userMeetingIdentifier);
-                                            jsonObject.put("to", "All");
-                                            jsonObject.put("messageType", "DeniedToReplaceMySignatureAndIntial");
-                                            jsonObject.put("content", "DeniedToReplaceMySignatureAndIntial");
-                                            videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
-                                        } catch (Exception e) {
-                                            Log.d("====Exception", "" + e.toString());
-                                        }
-
-                                    }
-                                })
-                                .setCancelable(false)
-                                .show();
+                                }
+                            })
+                            .show();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
                         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
                     }
 
-                    break;
+                } else {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                    AlertDialog dialog = builder.setTitle("Draw Signature")
+                            .setMessage("Are you sure, you want to draw your signature?")
+                            .setCancelable(false)
+                            .setPositiveButton("Ok, Proceed", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //Toast.makeText(mActivity, "Opening whiteboard", Toast.LENGTH_SHORT).show();
+                                    Intent it = new Intent(mActivity, WhiteBoardActivity.class);
+                                    it.putExtra("REQUEST_ID" , requestID);
+                                    it.putExtra("AUTH_TOKEN" , authToken);
+                                    it.putExtra("USER_ID" , userId);
+                                    it.putExtra("TYPE" , "1");
+                                    it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
+                                    /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
+                                    mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+
+                                }
+                            })
+                            .setCancelable(false)
+                            .show();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+                    }
+
+                }
+            }
+        });
+        FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
+        Fragment prev = mActivity.getFragmentManager().findFragmentByTag("signature_dialog");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        captureSignerSignatureDialogFragment.setCancelable(false);
+        captureSignerSignatureDialogFragment.show(ft,"signature_dialog");
+    }
+
+    private void showInitialCaptureDialog() {
+        //Toast.makeText(this, "Request to capture signature image", Toast.LENGTH_SHORT).show();
+        // Show the capture initial dialog fragment
+        CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
+            @Override
+            public void onOptionSelected(int selectedOption) {
+                //1 = Capture through camera & 2 = Draw through whiteboard
+                if (selectedOption == 1) {
+
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
+                                    if (ContextCompat.checkSelfPermission(VideoActivity.this, Manifest.permission.CAMERA)
+                                            == PackageManager.PERMISSION_DENIED) {
+                                        captureImageThroughCamera("Initial");
+                                    } else {
+                                        ActivityCompat.requestPermissions(VideoActivity.this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_INITIAL);
+                                    }
+                                    break;
+
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    //No button clicked
+                                    break;
+                            }
+                        }
+                    };
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                    AlertDialog dialog = builder.setTitle("Capture Initial")
+                            .setMessage("Are you sure, you want to capture your initial?")
+                            .setPositiveButton("Ok, Proceed", dialogClickListener)
+                            .setNegativeButton("Cancel", dialogClickListener)
+                            .setCancelable(false)
+                            .show();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+                    }
+
+                } else {
+
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which) {
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    //Toast.makeText(mActivity, "Opening camera", Toast.LENGTH_SHORT).show();
+                                    Intent it = new Intent(mActivity, WhiteBoardActivity.class);
+                                    it.putExtra("REQUEST_ID" , requestID);
+                                    it.putExtra("AUTH_TOKEN" , authToken);
+                                    it.putExtra("USER_ID" , userId);
+                                    it.putExtra("TYPE" , "0");
+                                    it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
+                                    /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
+                                    mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                                    break;
+
+                                case DialogInterface.BUTTON_NEGATIVE:
+                                    //No button clicked
+                                    break;
+                            }
+                        }
+                    };
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+                    AlertDialog dialog = builder.setTitle("Draw Initial")
+                            .setMessage("Are you sure, you want to draw your initial?")
+                            .setPositiveButton("Ok, Proceed", dialogClickListener)
+                            .setNegativeButton("Cancel", dialogClickListener)
+                            .setCancelable(false)
+                            .show();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+                        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
+                    }
+
+                }
+            }
+        });
+        FragmentTransaction ft1 = mActivity.getFragmentManager().beginTransaction();
+        Fragment prev1 = mActivity.getFragmentManager().findFragmentByTag("initial_dialog");
+        if (prev1 != null) {
+            ft1.remove(prev1);
+        }
+        ft1.addToBackStack(null);
+        captureSignerInitialDialogFragment.setCancelable(false);
+        captureSignerInitialDialogFragment.show(ft1,"initial_dialog");
+    }
+
+    private void showReplaceSignatureInitialDialog() {
+        if (!IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN) {
+            IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = true;
+            String signatureActionID = "";
+            String initialActionID = "";
+            String deniedActionID = "";
+            if (isWitness != null && !isWitness.equals("")) {
+                signatureActionID = "75";
+                initialActionID = "76";
+                deniedActionID = "74";
+            } else if (!isCoSigner) {
+                signatureActionID = "27";
+                initialActionID = "28";
+                deniedActionID = "34";
+            } else {
+                signatureActionID = "62";
+                initialActionID = "63";
+                deniedActionID = "65";
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+            String finalSignatureActionID = signatureActionID;
+            String finalInitialActionID = initialActionID;
+            String finalDeniedActionID = deniedActionID;
+            AlertDialog dialog = builder.setTitle("Confirmation to Add My Signature & Initial")
+                    .setMessage("I agree to replace Signature & Initial Tag with my Signature & Initial.")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
+                            try {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("from", userMeetingIdentifier);
+                                jsonObject.put("to", "All");
+                                jsonObject.put("messageType", "AcceptedToReplaceMySignatureAndIntial");
+                                jsonObject.put("content", "AcceptedToReplaceMySignatureAndIntial");
+                                videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+
+                                NotarizationActionUpdateManger.updateNotarizationAction(
+                                        VideoActivity.this, authToken,
+                                        requestID, "1", userId, isPrimarySigner,
+                                        finalSignatureActionID, "1", "");
+
+                                NotarizationActionUpdateManger.updateNotarizationAction(
+                                        VideoActivity.this, authToken,
+                                        requestID, "1", userId, isPrimarySigner,
+                                        finalInitialActionID, "1", "");
+
+                            } catch (Exception e) {
+                                Log.d("====Exception", "" + e.toString());
+                            }
+
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
+                            try {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("from", userMeetingIdentifier);
+                                jsonObject.put("to", "All");
+                                jsonObject.put("messageType", "DeniedToReplaceMySignatureAndIntial");
+                                jsonObject.put("content", "DeniedToReplaceMySignatureAndIntial");
+                                videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                                NotarizationActionUpdateManger.updateNotarizationAction(
+                                        VideoActivity.this, authToken,
+                                        requestID, "1", userId, isPrimarySigner,
+                                        finalDeniedActionID, "1", "");
+                            } catch (Exception e) {
+                                Log.d("====Exception", "" + e.toString());
+                            }
+
+                        }
+                    })
+                    .setCancelable(false)
+                    .show();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mActivity.getColor(R.color.color_primary));
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(mActivity.getColor(R.color.red));
             }
         }
     }
@@ -4932,6 +5059,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             if (response.isSuccessful() && response.body() != null) {
                                 // Handle successful response
                                 //Toast.makeText(VideoActivity.this, "Disagree count updated.", Toast.LENGTH_SHORT).show();
+                                NotarizationActionUpdateManger.updateNotarizationAction(
+                                        VideoActivity.this, authToken,
+                                        requestID, "1", userId, isPrimarySigner,
+                                        "51", "1", "");
                             } else {
                                 // Handle unsuccessful response
                                 Log.e("updateDisagreeCount", "Unsuccessful response");
@@ -5240,6 +5371,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         if (response.isSuccessful() && response.body() != null) {
                             // Handle successful response
                             //Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
+                            NotarizationActionUpdateManger.updateNotarizationAction(
+                                    VideoActivity.this, authToken,
+                                    requestID, "1", userId, isPrimarySigner,
+                                    "7", "1", "");
                         } else {
                             // Handle unsuccessful response
                             Log.d("onResponse", "Unsuccessful response");
@@ -5739,6 +5874,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 VideoActivity.this.finish();
             }
         });
+
+        NotarizationActionUpdateManger.updateNotarizationAction(
+                VideoActivity.this, authToken,
+                requestID, "1", userId, isPrimarySigner,
+                "18", "1", "");
+
     }
 
     private void sendMessage() {
@@ -6822,41 +6963,57 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                 if (result != null && result.getAuthorizationDetails() != null) {
                     Log.d(TAG, "Signer Signature/Initial Allow Data: \n" + new Gson().toJson(result));
-                    if (!result.getAuthorizationDetails().getHasAuthorizedForSignature().equalsIgnoreCase("1") ||
-                            !result.getAuthorizationDetails().getHasAuthorizedForInitial().equalsIgnoreCase("1")) {
+                    isPrimarySigner = result.getAuthorizationDetails().getIsPrimarySigner();
+                    isWitness = result.getAuthorizationDetails().getIsWitness();
+                    Log.d(TAG , "isPrimarySigner Value: "+isPrimarySigner);
+                    Log.d(TAG , "isWitness Value: "+isWitness);
 
-                        if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed()) {
-                            // Ask here for the authorization
-                            SignerAuthirizationDialogFragment authorizationDialogFragment = new SignerAuthirizationDialogFragment(mActivity, new SignerAuthirizationDialogFragment.OnAuthorizationActionPerformed() {
-                                @Override
-                                public void onAuthorizationGiven() {
-                                    try {
-                                        updateRequestParticipantCapture(requestID, userId);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                    NotarizationActionUpdateManger.updateNotarizationAction(
+                            VideoActivity.this, authToken,
+                            requestID, "1", userId, isPrimarySigner,
+                            "5", "1", "");
+
+                    if (!isCoSigner) {
+                        if (!result.getAuthorizationDetails().getHasAuthorizedForSignature().equalsIgnoreCase("1") ||
+                                !result.getAuthorizationDetails().getHasAuthorizedForInitial().equalsIgnoreCase("1")) {
+
+                            if (mActivity != null && !mActivity.isFinishing() && !mActivity.isDestroyed()) {
+                                // Ask here for the authorization
+                                SignerAuthirizationDialogFragment authorizationDialogFragment = new SignerAuthirizationDialogFragment(mActivity, new SignerAuthirizationDialogFragment.OnAuthorizationActionPerformed() {
+                                    @Override
+                                    public void onAuthorizationGiven() {
+                                        try {
+                                            updateRequestParticipantCapture(requestID, userId);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
 
-                                @Override
-                                public void onAuthorizationDenied() {
-                                    IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = true;
+                                    @Override
+                                    public void onAuthorizationDenied() {
+                                        IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = true;
+                                        NotarizationActionUpdateManger.updateNotarizationAction(
+                                                VideoActivity.this, authToken,
+                                                requestID, "1", userId, isPrimarySigner,
+                                                "33", "1", "");
+                                    }
+                                });
+                                FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
+                                Fragment prev = mActivity.getFragmentManager().findFragmentByTag("dialog");
+                                if (prev != null) {
+                                    ft.remove(prev);
                                 }
-                            });
-                            FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
-                            Fragment prev = mActivity.getFragmentManager().findFragmentByTag("dialog");
-                            if (prev != null) {
-                                ft.remove(prev);
+                                ft.addToBackStack(null);
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        authorizationDialogFragment.setCancelable(false);
+                                        if (!IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY) {
+                                            authorizationDialogFragment.show(ft, "dialog");
+                                        }
+                                    }
+                                });
                             }
-                            ft.addToBackStack(null);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    authorizationDialogFragment.setCancelable(false);
-                                    if (!IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY) {
-                                        authorizationDialogFragment.show(ft, "dialog");
-                                    }
-                                }
-                            });
                         }
                     }
                 }
@@ -6912,6 +7069,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                 if (result != null) {
                     Log.e(TAG, "Signer Signature/Initial Authorization Update Response Data: \n" + new Gson().toJson(result));
+                    NotarizationActionUpdateManger.updateNotarizationAction(
+                            VideoActivity.this, authToken,
+                            requestID, "1", userId, isPrimarySigner,
+                            "25", "1", "");
                 }
             }
         }.execute(data);

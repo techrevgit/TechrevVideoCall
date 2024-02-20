@@ -25,6 +25,8 @@ import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.models.RequestDocModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
+import com.techrev.videocall.ui.videocallroom.VideoActivity;
+import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,13 +54,17 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
     }
 
     private OnDeleteDocument onDeleteDocument;
+    private String userId = "";
+    private String isPrimarySigner = "";
 
-    public RequestDocListAdapter (Activity activity , List<RequestDocModel.RequestDocuments> list, String auth, boolean isRequestCreatedByCustomer, OnDeleteDocument deleteDocument){
+    public RequestDocListAdapter (Activity activity , List<RequestDocModel.RequestDocuments> list, String auth, boolean isRequestCreatedByCustomer, String userId, String isPrimarySigner, OnDeleteDocument deleteDocument){
         this.mActivity = activity;
         this.mList = list;
         this.authToken = auth;
         this.IS_REQUEST_CREATED_BY_CUSTOMER = isRequestCreatedByCustomer;
         this.onDeleteDocument = deleteDocument;
+        this.userId = userId;
+        this.isPrimarySigner = isPrimarySigner;
         Log.d(TAG, "RequestDocListAdapter: "+new Gson().toJson(mList));
     }
 
@@ -196,6 +202,10 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
                     Log.d(TAG , "Deleted document response: \n"+new Gson().toJson(response.body()));
                     if (response.body().getStatus().equalsIgnoreCase("1")) {
                         Toast.makeText(mActivity, "Document deleted successfully!", Toast.LENGTH_SHORT).show();
+                        NotarizationActionUpdateManger.updateNotarizationAction(
+                                mActivity, authToken,
+                                requestID, "1", userId, isPrimarySigner,
+                                "50", "1", "");
                         onDeleteDocument.onDeleteCompleted();
                     } else {
                         Toast.makeText(mActivity, "Something went wrong, please try again later!", Toast.LENGTH_SHORT).show();

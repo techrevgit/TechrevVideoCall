@@ -544,7 +544,7 @@
                     android:scaleType="fitCenter"
                     android:src="@drawable/location_sharing"
                     android:tint="@color/color_primary"
-                    tools:visibility="visible" />
+                    tools:visibility="gone" />
 
 
                 <ImageButton

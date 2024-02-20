@@ -45,6 +45,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
     static NetworkInterface serviceLocal = retrofitLocal.create(NetworkInterface.class);
     private String userId = "";
     private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
+    private String isPrimarySigner = "";
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -99,6 +100,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
             authToken = getIntent().getStringExtra("AUTH_TOKEN");
             requestID = getIntent().getStringExtra("REQUEST_ID");
             userId = getIntent().getStringExtra("USER_ID");
+            isPrimarySigner = getIntent().getStringExtra("IS_PRIMARY_SIGNER");
             IS_REQUEST_CREATED_BY_CUSTOMER = getIntent().getBooleanExtra("IS_REQUEST_CREATED_BY_CUSTOMER" , false);
         }
         iv_back = findViewById(R.id.iv_back);
@@ -119,6 +121,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
                 it.putExtra("REQUEST_ID" , requestID);
                 it.putExtra("AUTH_TOKEN" , authToken);
                 it.putExtra("USER_ID" , userId);
+                it.putExtra("IS_PRIMARY_SIGNER", isPrimarySigner);
                 startActivity(it);
             }
         });
@@ -145,7 +148,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
                 if(response != null){
                     Log.d(TAG , "Added Documents Data: \n"+new Gson().toJson(response.body()));
                     RequestDocListAdapter adapter = new RequestDocListAdapter(MyCurrentUploadedDocumentsActivity.this,
-                            response.body().getRequestDocuments(), authToken, IS_REQUEST_CREATED_BY_CUSTOMER, new RequestDocListAdapter.OnDeleteDocument() {
+                            response.body().getRequestDocuments(), authToken, IS_REQUEST_CREATED_BY_CUSTOMER, userId, isPrimarySigner, new RequestDocListAdapter.OnDeleteDocument() {
                         @Override
                         public void onDeleteCompleted() {
                             try {

@@ -38,6 +38,10 @@ public class SignerSignatureInitialAuthorizationModel {
         @SerializedName("hasAuthorizedForInitial")
         private String hasAuthorizedForInitial;
 
+        @Expose
+        @SerializedName("isWitness")
+        private String isWitness;
+
         public String getRequestParticipantId() {
             return requestParticipantId;
         }
@@ -86,6 +90,13 @@ public class SignerSignatureInitialAuthorizationModel {
             this.hasAuthorizedForInitial = hasAuthorizedForInitial;
         }
 
+        public String getIsWitness() {
+            return isWitness;
+        }
+
+        public void setIsWitness(String isWitness) {
+            this.isWitness = isWitness;
+        }
     }
 
 }
