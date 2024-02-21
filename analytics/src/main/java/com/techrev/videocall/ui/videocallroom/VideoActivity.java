@@ -523,7 +523,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private boolean IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = false;
     private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
     private List<NotarizationActionModel.NotarizationActions> mNotarizationModel = new ArrayList<NotarizationActionModel.NotarizationActions>();
-    private String isPrimarySigner, isWitness;
+    private String isPrimarySigner, isWitness, customerType;
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -3877,6 +3877,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     it.putExtra("REQUEST_ID" , requestID);
                     it.putExtra("AUTH_TOKEN" , authToken);
                     it.putExtra("USER_ID" , userId);
+                    it.putExtra("CUSTOMER_TYPE" , customerType);
                     it.putExtra("TYPE" , "1");
                     it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
                     it.putExtra("bitmap", photo);
@@ -3898,6 +3899,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     it.putExtra("REQUEST_ID" , requestID);
                     it.putExtra("AUTH_TOKEN" , authToken);
                     it.putExtra("USER_ID" , userId);
+                    it.putExtra("CUSTOMER_TYPE" , customerType);
                     it.putExtra("TYPE" , "0");
                     it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
                     it.putExtra("bitmap", photo);
@@ -4679,7 +4681,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private void showSignatureCaptureDialog() {
         //Toast.makeText(this, "Request to capture initial image", Toast.LENGTH_SHORT).show();
         // Show the capture signature dialog fragment
-        CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
+        CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, customerType, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
             @Override
             public void onOptionSelected(int selectedOption) {
                 //1 = Capture through camera & 2 = Draw through whiteboard
@@ -4727,6 +4729,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                     it.putExtra("REQUEST_ID" , requestID);
                                     it.putExtra("AUTH_TOKEN" , authToken);
                                     it.putExtra("USER_ID" , userId);
+                                    it.putExtra("CUSTOMER_TYPE" , customerType);
                                     it.putExtra("TYPE" , "1");
                                     it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
                                     /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
@@ -4762,7 +4765,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private void showInitialCaptureDialog() {
         //Toast.makeText(this, "Request to capture signature image", Toast.LENGTH_SHORT).show();
         // Show the capture initial dialog fragment
-        CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
+        CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, customerType, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
             @Override
             public void onOptionSelected(int selectedOption) {
                 //1 = Capture through camera & 2 = Draw through whiteboard
@@ -4813,6 +4816,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                     it.putExtra("REQUEST_ID" , requestID);
                                     it.putExtra("AUTH_TOKEN" , authToken);
                                     it.putExtra("USER_ID" , userId);
+                                    it.putExtra("CUSTOMER_TYPE" , customerType);
                                     it.putExtra("TYPE" , "0");
                                     it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
                                     /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
@@ -4892,12 +4896,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
-                                        requestID, "1", userId, isPrimarySigner,
+                                        requestID, "", userId, customerType,
                                         finalSignatureActionID, "1", "");
 
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
-                                        requestID, "1", userId, isPrimarySigner,
+                                        requestID, "", userId, customerType,
                                         finalInitialActionID, "1", "");
 
                             } catch (Exception e) {
@@ -4920,7 +4924,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
-                                        requestID, "1", userId, isPrimarySigner,
+                                        requestID, "", userId, customerType,
                                         finalDeniedActionID, "1", "");
                             } catch (Exception e) {
                                 Log.d("====Exception", "" + e.toString());
@@ -5061,7 +5065,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 //Toast.makeText(VideoActivity.this, "Disagree count updated.", Toast.LENGTH_SHORT).show();
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
-                                        requestID, "1", userId, isPrimarySigner,
+                                        requestID, "", userId, customerType,
                                         "51", "1", "");
                             } else {
                                 // Handle unsuccessful response
@@ -5373,7 +5377,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             //Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
                             NotarizationActionUpdateManger.updateNotarizationAction(
                                     VideoActivity.this, authToken,
-                                    requestID, "1", userId, isPrimarySigner,
+                                    requestID, "", userId, customerType,
                                     "7", "1", "");
                         } else {
                             // Handle unsuccessful response
@@ -5877,7 +5881,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
         NotarizationActionUpdateManger.updateNotarizationAction(
                 VideoActivity.this, authToken,
-                requestID, "1", userId, isPrimarySigner,
+                requestID, "", userId, customerType,
                 "18", "1", "");
 
     }
@@ -6968,9 +6972,15 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     Log.d(TAG , "isPrimarySigner Value: "+isPrimarySigner);
                     Log.d(TAG , "isWitness Value: "+isWitness);
 
+                    if (isWitness != null && !isWitness.equals("")) {
+                        customerType = isWitness;
+                    } else {
+                        customerType = isPrimarySigner;
+                    }
+
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             VideoActivity.this, authToken,
-                            requestID, "1", userId, isPrimarySigner,
+                            requestID, "", userId, customerType,
                             "5", "1", "");
 
                     if (!isCoSigner) {
@@ -6994,7 +7004,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = true;
                                         NotarizationActionUpdateManger.updateNotarizationAction(
                                                 VideoActivity.this, authToken,
-                                                requestID, "1", userId, isPrimarySigner,
+                                                requestID, "", userId, customerType,
                                                 "33", "1", "");
                                     }
                                 });
@@ -7071,7 +7081,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     Log.e(TAG, "Signer Signature/Initial Authorization Update Response Data: \n" + new Gson().toJson(result));
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             VideoActivity.this, authToken,
-                            requestID, "1", userId, isPrimarySigner,
+                            requestID, "", userId, customerType,
                             "25", "1", "");
                 }
             }

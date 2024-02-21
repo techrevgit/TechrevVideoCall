@@ -150,6 +150,7 @@
             android:label="PermissionActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
+            android:exported="true"
             />
         <activity
             android:name=".ui.videocallroom.VideoActivity"
@@ -157,23 +158,29 @@
             android:label="VideoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
+            android:exported="true"
             />
         <activity
             android:name=".ui.internet.NoInternetActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="NoInternetActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:exported="true"
+            />
         <activity
             android:name=".ui.cosigner.AddCoSignerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="AddCoSignerActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:exported="true"
+            />
 
         <service xmlns:tools="http://schemas.android.com/tools"
             android:name=".services.ScreenCapturerService"
             android:enabled="true"
+            android:exported="true"
             android:foregroundServiceType="mediaProjection"
             tools:targetApi="q" />
         <service xmlns:tools="http://schemas.android.com/tools"
@@ -189,25 +196,25 @@
             tools:ignore="Instantiatable" />
         <activity
             android:name=".ui.camera.CameraActivity"
-            android:exported="false"
+            android:exported="true"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
             />
         <activity
             android:name=".ui.whiteboard.WhiteBoardActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.mydocuments.PreviewRequestDocumentActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.mydocuments.MyCurrentUploadedDocumentsActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.mydocuments.MyAllUploadedDocumentsActivity"
             android:theme="@style/Theme.TechrevVideoCallPlugin"
-            android:exported="false" />
+            android:exported="true" />
 
         <activity
             android:name=".ui.MainActivity"

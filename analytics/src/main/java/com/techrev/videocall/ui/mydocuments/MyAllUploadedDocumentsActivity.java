@@ -445,7 +445,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Document(s) added successfully!", Toast.LENGTH_SHORT).show();
                         NotarizationActionUpdateManger.updateNotarizationAction(
                                 MyAllUploadedDocumentsActivity.this, authToken,
-                                requestID, "1", userId, isPrimarySigner,
+                                requestID, "", userId, isPrimarySigner,
                                 "1", "1", selectedDocIds);
                     } else {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Something went wrong, please try again later!", Toast.LENGTH_SHORT).show();

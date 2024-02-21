@@ -204,8 +204,8 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
                         Toast.makeText(mActivity, "Document deleted successfully!", Toast.LENGTH_SHORT).show();
                         NotarizationActionUpdateManger.updateNotarizationAction(
                                 mActivity, authToken,
-                                requestID, "1", userId, isPrimarySigner,
-                                "50", "1", "");
+                                requestID, "", userId, isPrimarySigner,
+                                "50", "1", mList.get(position).getReqDocId());
                         onDeleteDocument.onDeleteCompleted();
                     } else {
                         Toast.makeText(mActivity, "Something went wrong, please try again later!", Toast.LENGTH_SHORT).show();

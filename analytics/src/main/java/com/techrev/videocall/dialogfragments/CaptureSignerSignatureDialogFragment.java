@@ -33,6 +33,8 @@ import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
+import com.techrev.videocall.ui.videocallroom.VideoActivity;
+import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,7 +48,7 @@ import retrofit2.Retrofit;
 public class CaptureSignerSignatureDialogFragment extends DialogFragment {
 
     private static final String TAG = "CaptureSignerSignature";
-    private String authToken, requestID, userID;
+    private String authToken, requestID, userID, isPrimarySigner;
     private Activity mActivity;
     private ImageView iv_cross, iv_camera, iv_whiteboard;
     private LinearLayout ll_capture_through_camera, ll_capture_through_whiteboard;
@@ -67,13 +69,14 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
     }
 
     @SuppressLint("ValidFragment")
-    public CaptureSignerSignatureDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestId, String userId, OptionSelectionInterface selectionInterface) {
+    public CaptureSignerSignatureDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestId, String userId, String isPrimarySigner, OptionSelectionInterface selectionInterface) {
         this.mActivity = activity;
         this.userMeetingIdentifier = meetingIdetifier;
         this.videoCallModel = model;
         this.authToken = authToken;
         this.requestID = requestId;
         this.userID = userId;
+        this.isPrimarySigner = isPrimarySigner;
         this.optionSelectionInterface = selectionInterface;
     }
 
@@ -322,6 +325,12 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
                     jsonObject.put("messageType", "AcceptedToAuthorizeCaptureMySignature");
                     jsonObject.put("content", "AcceptedToAuthorizeCaptureMySignature");
                     videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+
+                    NotarizationActionUpdateManger.updateNotarizationAction(
+                            mActivity, authToken,
+                            requestID, "", userId, isPrimarySigner,
+                            "23", "1", "");
+
                 } catch (Exception e) {
                     Log.d("====Exception", "" + e.toString());
                 }finally {

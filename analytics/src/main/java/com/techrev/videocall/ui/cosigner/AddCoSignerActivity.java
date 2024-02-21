@@ -381,7 +381,7 @@ public class AddCoSignerActivity extends Activity {
                     Toast.makeText(AddCoSignerActivity.this, "Invitation email sent to Co-Signer", Toast.LENGTH_LONG).show();
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             AddCoSignerActivity.this, authToken,
-                            requestID, "1", userId, isPrimarySigner,
+                            requestID, "", userId, isPrimarySigner,
                             "42", "1", "");
                     setResult(Activity.RESULT_OK);
                     finish();

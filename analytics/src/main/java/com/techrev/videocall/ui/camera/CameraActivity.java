@@ -33,7 +33,9 @@ import com.techrev.videocall.R;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
+import com.techrev.videocall.ui.videocallroom.VideoActivity;
 import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
+import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;
 
@@ -66,6 +68,7 @@ public class CameraActivity extends AppCompatActivity {
     private static String requestID = "";
     private static String userId = "";
     private String isSignature = "";
+    private String customerType = "";
     private String userMeetingIdentifier = "";
     private VideoCallModel videoCallModel;
     private Bitmap mBitmap = null;
@@ -125,6 +128,7 @@ public class CameraActivity extends AppCompatActivity {
             authToken = getIntent().getStringExtra("AUTH_TOKEN");
             isSignature = getIntent().getStringExtra("TYPE");
             userId = getIntent().getStringExtra("USER_ID");
+            customerType = getIntent().getStringExtra("CUSTOMER_TYPE");
             userMeetingIdentifier = getIntent().getStringExtra("USER_MEETING_IDENTIFIER");
             /*videoCallModel = (VideoCallModel) getIntent().getSerializableExtra("VIDEO_CALL_MODEL_OBJ");*/
             /*isSignature*/
@@ -335,8 +339,16 @@ public class CameraActivity extends AppCompatActivity {
                 }
                 if (isSignature.equalsIgnoreCase("1")) {
                     Toast.makeText(CameraActivity.this, "Signature has been uploaded successfully", Toast.LENGTH_SHORT).show();
+                    NotarizationActionUpdateManger.updateNotarizationAction(
+                            CameraActivity.this, authToken,
+                            requestID, "", userId, customerType,
+                            "19", "1", "");
                 } else {
                     Toast.makeText(CameraActivity.this, "Initial has been uploaded successfully", Toast.LENGTH_SHORT).show();
+                    NotarizationActionUpdateManger.updateNotarizationAction(
+                            CameraActivity.this, authToken,
+                            requestID, "", userId, customerType,
+                            "20", "1", "");
                 }
                 if (response.body() != null){
                     Log.d(TAG , "Response: "+new Gson().toJson(response.body()));
