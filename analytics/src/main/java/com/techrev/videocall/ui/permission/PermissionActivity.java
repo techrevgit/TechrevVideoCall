@@ -73,8 +73,22 @@ public class PermissionActivity extends AppCompatActivity {
         /*Handle Permissions*/
         permissionsList = new ArrayList<String>();
         if (SDK_INT >= Build.VERSION_CODES.M) {
-            if (SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                //API level 33 and above
+            if (SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                //API level 34 and above
+                permissionsList.add(Manifest.permission.POST_NOTIFICATIONS);
+                permissionsList.add(Manifest.permission.BLUETOOTH);
+                permissionsList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+                permissionsList.add(Manifest.permission.BLUETOOTH_SCAN);
+                permissionsList.add(Manifest.permission.BLUETOOTH_CONNECT);
+                permissionsList.add(Manifest.permission.READ_MEDIA_AUDIO);
+                permissionsList.add(Manifest.permission.READ_MEDIA_IMAGES);
+                permissionsList.add(Manifest.permission.READ_MEDIA_VIDEO);
+                permissionsList.add(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED);
+                permissionsList.add(Manifest.permission.RECORD_AUDIO);
+                permissionsList.add(Manifest.permission.CAMERA);
+                permissionsList.add(Manifest.permission.CALL_PHONE);
+            } else if (SDK_INT == Build.VERSION_CODES.TIRAMISU) {
+                //API level 33
                 permissionsList.add(Manifest.permission.POST_NOTIFICATIONS);
                 permissionsList.add(Manifest.permission.BLUETOOTH);
                 permissionsList.add(Manifest.permission.ACCESS_FINE_LOCATION);

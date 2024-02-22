@@ -148,7 +148,7 @@ public class MyCurrentUploadedDocumentsActivity extends AppCompatActivity {
                 if(response != null){
                     Log.d(TAG , "Added Documents Data: \n"+new Gson().toJson(response.body()));
                     RequestDocListAdapter adapter = new RequestDocListAdapter(MyCurrentUploadedDocumentsActivity.this,
-                            response.body().getRequestDocuments(), authToken, IS_REQUEST_CREATED_BY_CUSTOMER, userId, isPrimarySigner, new RequestDocListAdapter.OnDeleteDocument() {
+                            response.body().getRequestDocuments(), authToken, IS_REQUEST_CREATED_BY_CUSTOMER, userId, isPrimarySigner, requestID, new RequestDocListAdapter.OnDeleteDocument() {
                         @Override
                         public void onDeleteCompleted() {
                             try {

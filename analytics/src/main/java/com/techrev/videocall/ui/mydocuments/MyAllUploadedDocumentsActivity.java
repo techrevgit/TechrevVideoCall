@@ -17,6 +17,7 @@ import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -261,10 +262,8 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                                     Manifest.permission
                                             .READ_EXTERNAL_STORAGE },
                             1);
-                }
-                else {
+                } else {
                     // When permission is granted
-                    // Create method
                     selectPDF();
                 }
             }
@@ -482,8 +481,13 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
 
     private void selectPDF()
     {
+        Intent intent = null;
         // Initialize intent
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        } else {
+            intent = new Intent(Intent.ACTION_GET_CONTENT);
+        }
         // set type
         intent.setType("application/pdf");
         // Launch intent
@@ -506,11 +510,10 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
             // When permission is granted
             // Call method
             selectPDF();
-        }
-        else {
+        } else {
             // When permission is denied
             // Display toast
-            Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Permission Not Granted", Toast.LENGTH_SHORT).show();
         }
     }
 

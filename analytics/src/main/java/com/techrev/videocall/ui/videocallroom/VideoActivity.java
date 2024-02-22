@@ -521,6 +521,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private final int REQUEST_CAMERA_CODE_FOR_INITIAL = 100982;
     private boolean IS_REPLACE_SIGNATURE_INITIAL_DIALOG_SHOWN = false;
     private boolean IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = false;
+    private boolean IS_AUDIT_JOIN_CALL_SENT_ALREADY = false;
     private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
     private List<NotarizationActionModel.NotarizationActions> mNotarizationModel = new ArrayList<NotarizationActionModel.NotarizationActions>();
     private String isPrimarySigner, isWitness, customerType;
@@ -5873,6 +5874,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             @Override
             public void run() {
                 IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = false;
+                IS_AUDIT_JOIN_CALL_SENT_ALREADY = false;
                 disconnectClickListener();
                 AddCoSignerActivity.getAddCoSignerActivityContext().exitFromTheRoom();
                 VideoActivity.this.finish();
@@ -6978,10 +6980,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         customerType = isPrimarySigner;
                     }
 
-                    NotarizationActionUpdateManger.updateNotarizationAction(
-                            VideoActivity.this, authToken,
-                            requestID, "", userId, customerType,
-                            "5", "1", "");
+                    if (!IS_AUDIT_JOIN_CALL_SENT_ALREADY) {
+                        Log.d(TAG , "SENDING AUDIT TRIAL REPORT FOR CONNECTED_IN_ROOM");
+                        IS_AUDIT_JOIN_CALL_SENT_ALREADY = true;
+                        NotarizationActionUpdateManger.updateNotarizationAction(
+                                VideoActivity.this, authToken,
+                                requestID, "", userId, customerType,
+                                "5", "1", "");
+                    }
 
                     if (!isCoSigner) {
                         if (!result.getAuthorizationDetails().getHasAuthorizedForSignature().equalsIgnoreCase("1") ||
