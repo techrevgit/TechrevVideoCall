@@ -483,11 +483,12 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
     {
         Intent intent = null;
         // Initialize intent
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         } else {
             intent = new Intent(Intent.ACTION_GET_CONTENT);
-        }
+        }*/
+        intent = new Intent(Intent.ACTION_GET_CONTENT);
         // set type
         intent.setType("application/pdf");
         // Launch intent
