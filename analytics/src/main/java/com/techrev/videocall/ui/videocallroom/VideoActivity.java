@@ -596,6 +596,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 //        primaryVideoView = findViewById(getResourceID("primary_video_view", "id"));
         thumbnailVideoView = findViewById(getResourceID("thumbnail_video_view", "id"));
         mainThumbnailView = findViewById(getResourceID("mainThumbnailView", "id"));
+        recyclerView = findViewById(getResourceID("participants_recycler_view", "id"));
         tvLocalParticipantName = findViewById(getResourceID("tvLocalParticipantName", "id"));
         card_view_thumbnailView = findViewById(getResourceID("card_view_thumbnailView", "id"));
         card_view_thumbnailView.setOnTouchListener(VideoActivity.this);
@@ -2143,7 +2144,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 }
             }
         };
-        recyclerView = findViewById(getResourceID("participants_recycler_view", "id"));
 
         participantsAdapter = new ParticipantsAdapter(remoteParticipantList, VideoActivity.this, onclickInterface, isMyViewActive);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -3043,20 +3043,30 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private void updateUIComponents(String participantName) {
         Log.d(TAG , "Thread Name in updateUIComponents: "+Thread.currentThread().getName());
         try {
+            Log.d(TAG , "Line 1");
             // Update UI components here
             card_view_thumbnailView.setVisibility(View.VISIBLE);
+            Log.d(TAG , "Line 2");
             thumbnailVideoView.setVisibility(View.VISIBLE);
-
+            Log.d(TAG , "Line 3");
             if (videoCallModel.getLocalVideoTrack() != null && thumbnailVideoView != null) {
+                Log.d(TAG , "Line 4");
                 videoCallModel.getLocalVideoTrack().removeRenderer(thumbnailVideoView);
+                Log.d(TAG , "Line 5");
                 videoCallModel.getLocalVideoTrack().addRenderer(thumbnailVideoView);
+                Log.d(TAG , "Line 6");
             }
-
+            Log.d(TAG , "Line 7");
             if (thumbnailVideoView != null) {
+                Log.d(TAG , "Line 8");
                 thumbnailVideoView.setMirror(false);
+                Log.d(TAG , "Line 9");
             }
+            Log.d(TAG , "Line 10");
             if (tvLocalParticipantName != null) {
+                Log.d(TAG , "Line 11");
                 tvLocalParticipantName.setText(participantName);
+                Log.d(TAG , "Line 12");
             }
         } catch (Exception e) {
             Log.d(TAG , "Exception in updateUIComponents");
@@ -3083,15 +3093,27 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
 
         private void updateUIComponents(Boolean hasParticipants) {
-            Log.d(TAG , "Thread Name in updateUIComponents: "+Thread.currentThread().getName());
-            if (hasParticipants) {
-                nootherparticipant.setVisibility(View.GONE);
-                showHidePrimaryVideo(selectedRemoteParticipant);
-            } else {
-                nootherparticipant.setVisibility(View.VISIBLE);
-                video_view.setVisibility(View.GONE);
-                participant_initial.setVisibility(View.GONE);
-                selectedRemoteParticipant = null;
+            Log.d(TAG , "Thread Name in updateUIComponents hasParticipants: "+Thread.currentThread().getName());
+            try {
+                Log.d(TAG , "hasParticipants: "+hasParticipants);
+                if (hasParticipants) {
+                    Log.d(TAG , "hasParticipants: inside if");
+                    nootherparticipant.setVisibility(View.GONE);
+                    Log.d(TAG , "hasParticipants: before showHidePrimaryVideo");
+                    showHidePrimaryVideo(selectedRemoteParticipant);
+                    Log.d(TAG , "hasParticipants: after showHidePrimaryVideo");
+                } else {
+                    Log.d(TAG , "hasParticipants: inside else");
+                    nootherparticipant.setVisibility(View.VISIBLE);
+                    Log.d(TAG , "hasParticipants: inside else line 2");
+                    video_view.setVisibility(View.GONE);
+                    Log.d(TAG , "hasParticipants: inside else line 3");
+                    participant_initial.setVisibility(View.GONE);
+                    Log.d(TAG , "hasParticipants: inside else line 4");
+                    selectedRemoteParticipant = null;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
@@ -4892,7 +4914,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             } else {
                 signatureActionID = "62";
                 initialActionID = "63";
-                deniedActionID = "65";
+                deniedActionID = "35";
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);

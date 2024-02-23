@@ -248,7 +248,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // check condition
-                if (ActivityCompat.checkSelfPermission(
+                /*if (ActivityCompat.checkSelfPermission(
                         MyAllUploadedDocumentsActivity.this,
                         Manifest.permission
                                 .READ_EXTERNAL_STORAGE)
@@ -265,7 +265,8 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                 } else {
                     // When permission is granted
                     selectPDF();
-                }
+                }*/
+                selectPDF();
             }
         });
 
@@ -483,8 +484,9 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
     {
         Intent intent = null;
         // Initialize intent
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
         } else {
             intent = new Intent(Intent.ACTION_GET_CONTENT);
         }

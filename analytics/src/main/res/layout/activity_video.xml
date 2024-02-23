@@ -376,7 +376,7 @@
                                     android:layout_height="match_parent"
                                     android:visibility="gone"
                                     app:tviMirror="true"
-                                    app:tviOverlaySurface="false" />
+                                    app:tviOverlaySurface="true" />
 
                             </LinearLayout>
 
@@ -405,7 +405,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="10dp"
                     android:layout_toRightOf="@+id/mainThumbnailView"
-                    android:scrollbars="horizontal" />
+                    android:scrollbars="none" />
 
             </RelativeLayout>
 
