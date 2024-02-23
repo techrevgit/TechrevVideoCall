@@ -1412,6 +1412,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
         exitFromTheRoom();
 
+        NotarizationActionUpdateManger.updateNotarizationAction(
+                VideoActivity.this, authToken,
+                requestID, "", userId, customerType,
+                "18", "1", "");
+
         super.onDestroy();
     }
 
@@ -1627,7 +1632,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             }
 
             if (!isMyViewActive){
-                participantsAdapter.refreshParticipants(0);
+                if (remoteParticipantList != null && remoteParticipantList.size() > 0) {
+                    participantsAdapter.refreshParticipants(0);
+                } else {
+                    participantsAdapter.refreshParticipants(-1);
+                }
             }
 
             if (sp_call_view.getSelectedItemPosition() == 1 && SCREEN_SUBSCRIBED){
@@ -1817,7 +1826,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 if(eventModel != null){
                     speakingParticipantDetailsEventModel = eventModel;
                 }
-                setSpeakerViewAsDefault(eventModel);
+                try {
+                    setSpeakerViewAsDefault(eventModel);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -2654,8 +2667,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private void updatePrimaryVideoUIComponents(TechrevRemoteParticipant participant, String participantName) {
         // Update UI components here
         Log.d(TAG , "Thread Name in updatePrimaryVideoUIComponents: "+Thread.currentThread().getName());
-        if (participant.remoteParticipant.getIdentity().equalsIgnoreCase(selectedRemoteParticipant.remoteParticipant.getIdentity())) {
-            if (selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
+        if (participant != null && participant.remoteParticipant.getIdentity().equalsIgnoreCase(selectedRemoteParticipant.remoteParticipant.getIdentity())) {
+            if (selectedRemoteParticipant != null && selectedRemoteParticipant.remoteParticipant.getRemoteVideoTracks().size() > 0) {
                 for (int index = 0; index < selectedRemoteParticipant.remoteParticipant.getVideoTracks().size(); index++) {
                     VideoTrack remoteVideoTrack = (VideoTrack) selectedRemoteParticipant.remoteParticipant.getVideoTracks().get(index).getVideoTrack();
                     if (remoteVideoTrack != null && !remoteVideoTrack.getName().equals("screen") && !selectedRemoteParticipant.isTechRevScreenSelected()) {
@@ -3002,7 +3015,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             String participantName = "";
             if (selectedRemoteParticipant != null && selectedRemoteParticipant.remoteParticipant != null) {
                 String s = selectedRemoteParticipant.remoteParticipant.getIdentity();
-                if (s != null && s.length() > 0) {
+                if (s.length() > 0) {
                     try {
                         List<String> splitString = Arrays.asList(s.split("\\-"));
 
@@ -3029,18 +3042,24 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     private void updateUIComponents(String participantName) {
         Log.d(TAG , "Thread Name in updateUIComponents: "+Thread.currentThread().getName());
-        // Update UI components here
-        card_view_thumbnailView.setVisibility(View.VISIBLE);
-        thumbnailVideoView.setVisibility(View.VISIBLE);
+        try {
+            // Update UI components here
+            card_view_thumbnailView.setVisibility(View.VISIBLE);
+            thumbnailVideoView.setVisibility(View.VISIBLE);
 
-        if (videoCallModel.getLocalVideoTrack() != null && thumbnailVideoView != null) {
-            videoCallModel.getLocalVideoTrack().removeRenderer(thumbnailVideoView);
-            videoCallModel.getLocalVideoTrack().addRenderer(thumbnailVideoView);
-        }
+            if (videoCallModel.getLocalVideoTrack() != null && thumbnailVideoView != null) {
+                videoCallModel.getLocalVideoTrack().removeRenderer(thumbnailVideoView);
+                videoCallModel.getLocalVideoTrack().addRenderer(thumbnailVideoView);
+            }
 
-        thumbnailVideoView.setMirror(false);
-        if (tvLocalParticipantName != null) {
-            tvLocalParticipantName.setText(participantName);
+            if (thumbnailVideoView != null) {
+                thumbnailVideoView.setMirror(false);
+            }
+            if (tvLocalParticipantName != null) {
+                tvLocalParticipantName.setText(participantName);
+            }
+        } catch (Exception e) {
+            Log.d(TAG , "Exception in updateUIComponents");
         }
     }
 
@@ -4895,15 +4914,17 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 jsonObject.put("content", "AcceptedToReplaceMySignatureAndIntial");
                                 videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
 
+                                String currentDocID = sharedPreference.getString(Constants.CURRENT_SIGNATURE_INITIAL_TAG_REPLACE_DOC_ID);
+                                // For Signature
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
                                         requestID, "", userId, customerType,
-                                        finalSignatureActionID, "1", "");
-
+                                        finalSignatureActionID, "1", currentDocID);
+                                // For Initial
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
                                         requestID, "", userId, customerType,
-                                        finalInitialActionID, "1", "");
+                                        finalInitialActionID, "1", currentDocID);
 
                             } catch (Exception e) {
                                 Log.d("====Exception", "" + e.toString());
@@ -5880,11 +5901,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 VideoActivity.this.finish();
             }
         });
-
-        NotarizationActionUpdateManger.updateNotarizationAction(
-                VideoActivity.this, authToken,
-                requestID, "", userId, customerType,
-                "18", "1", "");
 
     }
 
@@ -6877,49 +6893,53 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     /*Added by Rupesh*/
 
     private void startTimerInBackground(){
-        Log.d(TAG , "Thread Name in startTimerInBackground: "+Thread.currentThread().getName());
-        mCountDownTimerInBackground = new CountDownTimer(18000000, 1000) {
+        try {
+            Log.d(TAG , "Thread Name in startTimerInBackground: "+Thread.currentThread().getName());
+            mCountDownTimerInBackground = new CountDownTimer(18000000, 1000) {
 
-            public void onTick(long millisUntilFinished) {
-                if (!IS_APP_IN_BACKGROUND){
-                    if (mCountDownTimerInBackground != null) {
-                        mCountDownTimerInBackground.cancel();
-                    }
-                    mCountDownTimerInBackground = null;
-                    if (IS_VIDEO_DISABLED){
-                        IS_VIDEO_DISABLED = false;
-                        if (videoCallModel.getLocalVideoTrack() != null &&
-                                videoCallModel.getLocalParticipant() != null){
-                            //videoCallModel.getLocalVideoTrack().enable(true);
-                            videoCallModel.getLocalParticipant().unpublishTrack(videoCallModel.getLocalVideoTrack());
-                            videoCallModel.releaseVideoTrack();
-                            videoCallManager.resumeVideoTracks();
-                            moveLocalVideoToThumbnailView();
-                            videoCallManager.resumeVideoTrackPublish();
-                            if (isMyViewActive){
-                                thumbnailVideoView.performClick();
-                            }
-                            //videoCallModel.getLocalVideoTrack().enable(true);
+                public void onTick(long millisUntilFinished) {
+                    if (!IS_APP_IN_BACKGROUND){
+                        if (mCountDownTimerInBackground != null) {
+                            mCountDownTimerInBackground.cancel();
                         }
-                    }
-                }else {
-                    if (!IS_VIDEO_DISABLED){
+                        mCountDownTimerInBackground = null;
+                        if (IS_VIDEO_DISABLED){
+                            IS_VIDEO_DISABLED = false;
+                            if (videoCallModel.getLocalVideoTrack() != null &&
+                                    videoCallModel.getLocalParticipant() != null){
+                                //videoCallModel.getLocalVideoTrack().enable(true);
+                                videoCallModel.getLocalParticipant().unpublishTrack(videoCallModel.getLocalVideoTrack());
+                                videoCallModel.releaseVideoTrack();
+                                videoCallManager.resumeVideoTracks();
+                                moveLocalVideoToThumbnailView();
+                                videoCallManager.resumeVideoTrackPublish();
+                                if (isMyViewActive){
+                                    thumbnailVideoView.performClick();
+                                }
+                                //videoCallModel.getLocalVideoTrack().enable(true);
+                            }
+                        }
+                    }else {
+                        if (!IS_VIDEO_DISABLED){
                         /*Log.d(TAG , "IS CAMERA USED BY OTHER APPLICATION: "+isCameraUsedByOtherApp());
                         if (isCameraUsedByOtherApp()){
                             if (videoCallModel != null){
                                 //videoCallModel.getLocalVideoTrack().enable(false);
                             }
                         }*/
-                        IS_VIDEO_DISABLED = true;
+                            IS_VIDEO_DISABLED = true;
+                        }
                     }
                 }
-            }
 
-            public void onFinish() {
-                mCountDownTimerInBackground = null;
-            }
+                public void onFinish() {
+                    mCountDownTimerInBackground = null;
+                }
 
-        };
+            };
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @SuppressLint("StaticFieldLeak")

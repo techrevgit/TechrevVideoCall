@@ -1211,6 +1211,12 @@ public class VideoCallService extends Service {
                             dModel.setContent(messageValue);
                         }
 
+                        if (jsonObject.has("docid") && !jsonObject.isNull("docid")) {
+                            String docid = jsonObject.getString("docid");
+                            Log.d(TAG , "messageValue: "+docid);
+                            dModel.setDocid(docid);
+                        }
+
                     }catch (Exception e) {
                         Log.d(TAG , "Exception while converting data track to DataModel");
                         Log.d(TAG , "Exception Details: "+e.getMessage());
@@ -1222,9 +1228,11 @@ public class VideoCallService extends Service {
                     Log.d(TAG , "messageType: "+dModel.getMessageType());
                     Log.d(TAG , "content: "+dModel.getContent());
                     Log.d(TAG , "messageValue: "+dModel.getMessageValue());
+                    Log.d(TAG , "docid: "+dModel.getDocid());
                     if (dModel.getTo() != null && (dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier))) {
                         Log.d("===Inside", "ProcessRequest onMessageValue: IF ");
                         processRequest(dModel);
+                        sharedPreference.setString(Constants.CURRENT_SIGNATURE_INITIAL_TAG_REPLACE_DOC_ID , dModel.getDocid());
                         if(APP_STATUS== Constants.APP_STATUS_FOREGROUND) {
                             EventBus.getDefault().post(new EventModel(null, dModel, Constants.EVENTTYPE_PARTICIPANT_MESSAGE_COMING_FROM_ROOM));
                         }
