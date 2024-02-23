@@ -124,7 +124,7 @@ public class RequestDocListAdapter extends RecyclerView.Adapter<RequestDocListAd
                 bottomSheetDialog.cancel();
                 Intent it = new Intent(mActivity , PreviewRequestDocumentActivity.class);
                 it.putExtra("AUTH_TOKEN" , authToken);
-                it.putExtra("DOC_ID" , mList.get(position).getUploadedDocId());
+                it.putExtra("DOC_ID" , mList.get(position).getOriginalUploadedDocId());
                 mActivity.startActivity(it);
             }
         });

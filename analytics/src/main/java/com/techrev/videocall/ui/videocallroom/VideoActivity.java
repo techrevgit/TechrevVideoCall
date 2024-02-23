@@ -7009,7 +7009,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 "5", "1", "");
                     }
 
-                    if (!isCoSigner) {
+                    /*if (!isCoSigner) {*/
                         if (!result.getAuthorizationDetails().getHasAuthorizedForSignature().equalsIgnoreCase("1") ||
                                 !result.getAuthorizationDetails().getHasAuthorizedForInitial().equalsIgnoreCase("1")) {
 
@@ -7051,7 +7051,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 });
                             }
                         }
-                    }
+                    /*}*/
                 }
             }
         }.execute(data);

@@ -38,8 +38,10 @@ import com.techrev.videocall.utils.Constants;
 
 import org.json.JSONException;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -190,27 +192,7 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
                     try {
                         downloadedData = response.body().bytes();
                         Log.d(TAG, "onResponse: downloadAndPreviewPdf: PDF Data Length: "+ downloadedData.length);
-                        //pdfWebview.loadData(downloadedData, "application/pdf", "UTF-8");
-                        String baseUrl = "about:blank"; // or any other suitable base URL
-                        pdfWebview.loadDataWithBaseURL(baseUrl, new String(downloadedData), "application/pdf", "UTF-8", null);
-                        /*pdf_viewer.fromBytes(downloadedData)
-                                .defaultPage(0)
-                                .enableSwipe(true)
-                                .swipeHorizontal(false)
-                                .enableAnnotationRendering(true)
-                                .load();*/
-                        //displayPDF(downloadedData);
-                        //loadPdfData(downloadedData);
-                        //new WebViewLoaderTask(PreviewRequestDocumentActivity.this, pdfWebview).execute(downloadedData);
-                        // Check if permission is already granted
-                        if (ContextCompat.checkSelfPermission(PreviewRequestDocumentActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                != PackageManager.PERMISSION_GRANTED) {
-                            // Permission not granted, request it
-                            ActivityCompat.requestPermissions(PreviewRequestDocumentActivity.this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
-                        } else {
-                            // Permission already granted, save the PDF file
-                            savePdfToFile(downloadedData); // Call your savePdfToFile method here
-                        }
+                        savePdfToFile(downloadedData);
                     } catch (IOException e) {
                         Log.d(TAG, "onResponse: downloadAndPreviewPdf: Error while displaying the PDF!");
                         e.printStackTrace();
@@ -231,32 +213,23 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
 
     private void savePdfToFile(byte[] bytes) {
         Log.d(TAG, "savePdfToFile: Saving file...");
-        InputStream inputStream = new ByteArrayInputStream(bytes);
+        /*InputStream inputStream = new ByteArrayInputStream(bytes);
         FileOutputStream outputStream = null;
 
         try {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED) {
-                    /*File directory = new File(mContext.getExternalFilesDir(null), "Notarization_Docs"); // Specify the folder name
-                    if (!directory.exists()) {
-                        if (!directory.mkdirs()) {
-                            throw new IOException("Failed to create directory: " + directory.getAbsolutePath());
-                        }
-                    }*/
-                File fileNew = new File(Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                        + "/Notarization_Doc.pdf"); // Create a file object
-                outputStream = new FileOutputStream(fileNew);
+            File fileNew = new File(Environment
+                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                    + "/Notarization_Doc.pdf"); // Create a file object
+            outputStream = new FileOutputStream(fileNew);
 
-                // Write InputStream data to the file
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, length);
-                }
-                Log.d(TAG, "savePdfToFile: File saved successfully!");
-                loadPdfFile(fileNew);
+            // Write InputStream data to the file
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, length);
             }
+            Log.d(TAG, "savePdfToFile: File saved successfully!");
+            loadPdfFile(fileNew);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -267,13 +240,31 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
+        }*/
 
-    private void loadPdfUrl() {
-        String googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=" + pdfurl;
-        //String googleDocsUrl = "https://docs.google.com/viewer?embedded=true&url=" + pdfurl;
-        pdfWebview.loadUrl(googleDocsUrl);
+        /*New Code*/
+        File folder = new File(Constants.getPathPDF(PreviewRequestDocumentActivity.this));
+        folder.mkdirs();
+        File pdfFile = new File(folder, "Notarization_Doc.pdf");
+        try {
+            pdfFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BufferedOutputStream bos = null;
+        try {
+            bos = new BufferedOutputStream(new FileOutputStream(pdfFile));
+            bos.write(bytes);
+            bos.flush();
+            bos.close();
+            loadPdfFile(pdfFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        /*New Code*/
+
     }
 
     private void loadPdfFile(File file) {
@@ -289,112 +280,6 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
         } else {
             Log.e(TAG, "loadPdfFile: File does not exist");
         }
-    }
-
-    public class WebViewLoaderTask extends AsyncTask<byte[], Void, File> {
-        private static final int REQUEST_EXTERNAL_STORAGE = 1;
-        private Context mContext;
-        private WebView mWebView;
-
-        public WebViewLoaderTask(Context context, WebView webView) {
-            mContext = context;
-            mWebView = webView;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Check for external storage permission before executing the task
-            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                // Permission is not granted, request it
-                ActivityCompat.requestPermissions((Activity) mContext,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        REQUEST_EXTERNAL_STORAGE);
-            }
-        }
-
-        @Override
-        protected File doInBackground(byte[]... params) {
-            Log.d(TAG, "doInBackground: Saving File");
-            byte[] byteArray = params[0];
-            InputStream inputStream = new ByteArrayInputStream(byteArray);
-            File file = null;
-            FileOutputStream outputStream = null;
-
-            try {
-                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    /*File directory = new File(mContext.getExternalFilesDir(null), "Notarization_Docs"); // Specify the folder name
-                    if (!directory.exists()) {
-                        if (!directory.mkdirs()) {
-                            throw new IOException("Failed to create directory: " + directory.getAbsolutePath());
-                        }
-                    }*/
-                    File fileNew = new File(Environment
-                            .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                            + "/Notarization_Doc.pdf"); // Create a file object
-                    outputStream = new FileOutputStream(fileNew);
-
-                    // Write InputStream data to the file
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                    file = fileNew; // Assign the created file to the result
-                    Log.d(TAG, "doInBackground: File Saved Successfully");
-                    Log.d(TAG, "doInBackground: Path : "+file.getAbsolutePath());
-                } else {
-                    // Permission not granted, return null file
-                    file = null;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (outputStream != null) {
-                        outputStream.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return file;
-        }
-
-        @Override
-        protected void onPostExecute(File file) {
-            if (file != null) {
-                // Load the file into WebView
-                String fileUrl = "file://" + file.getAbsolutePath();
-                Log.d("onPostExecute", "Loading file: " + fileUrl);
-                Log.d(TAG, "onPostExecute: Path : "+fileUrl);
-                //pdfWebview.loadUrl("https://docs.google.com/gview?embedded=true&url="+fileUrl);
-                pdfWebview.loadUrl(fileUrl);
-            } else {
-                // Handle permission denied
-                Log.d(TAG , "Error while rendering the pdf");
-            }
-        }
-    }
-
-    private void loadPdfData(byte[] pdfData) {
-        // Convert PDF data to Base64 encoded string
-        String base64EncodedPdf = Base64.encodeToString(pdfData, Base64.DEFAULT);
-
-        // Build the HTML content with embedded PDF data
-        String htmlContent = "<!DOCTYPE html>" +
-                "<html lang=\"en\">" +
-                "<head><meta charset=\"UTF-8\"></head>" +
-                "<body style=\"margin:0;\">" +
-                "<embed width=\"100%\" height=\"100%\" " +
-                "src=\"data:application/pdf;base64," + base64EncodedPdf + "\" type=\"application/pdf\"/>" +
-                "</body></html>";
-
-        // Load the HTML content into the WebView
-        pdfWebview.loadData(htmlContent, "text/html", "UTF-8");
     }
 
 

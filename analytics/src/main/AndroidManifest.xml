@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.techrev.videocall">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
-    <meta-data
-        android:name="firebase_crashlytics_collection_enabled"
-        android:value="false" />
     <!-- Bluetooth -->
     <!-- Request legacy Bluetooth permissions on older devices. -->
     <uses-permission
@@ -92,6 +87,8 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--For API Level 34-->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
 
     <uses-feature
         android:name="android.hardware.location.gps"
@@ -119,7 +116,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <!-- To handle the reselection within the app on Android 14 (API level 34) -->
-    <!--<uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />-->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <!--<uses-permission android:name="android.permission.BLUETOOTH"
                      android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
@@ -145,6 +143,10 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />
+
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" />
 
         <activity
             android:name=".ui.permission.PermissionActivity"
@@ -179,18 +181,18 @@
             android:exported="true"
             />
 
-        <service xmlns:tools="http://schemas.android.com/tools"
+        <service
             android:name=".services.ScreenCapturerService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="mediaProjection"
             tools:targetApi="q" />
-        <service xmlns:tools="http://schemas.android.com/tools"
+        <service
             android:name=".ui.videocallroom.VideoCallService"
             android:enabled="true"
             android:exported="true"
             tools:targetApi="q" />
-        <service xmlns:tools="http://schemas.android.com/tools"
+        <service
             android:name=".services.APictureCapturingService"
             android:enabled="true"
             android:exported="true"

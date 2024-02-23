@@ -1,5 +1,7 @@
 package com.techrev.videocall.utils;
 
+import android.content.Context;
+
 public class Constants {
     public static String API_BASE_URL = "";
     public static int member_type_banker = 1;
@@ -46,5 +48,10 @@ public class Constants {
     public static String SIGNATURE_INITIAL_REPLACE_REQUEST_IN_BACKGROUND = "SIGNATURE_INITIAL_REPLACE_REQUEST_IN_BACKGROUND";
     public static String CURRENT_SIGNATURE_INITIAL_TAG_REPLACE_DOC_ID = "CURRENT_SIGNATURE_INITIAL_TAG_REPLACE_DOC_ID";
     /*Added By Rupesh*/
+
+    public static String getPathPDF(Context context) {
+        return context.getFilesDir().getAbsolutePath() + "/eNotary/eNotaryPdfFile";
+    }
+
 
 }
