@@ -89,6 +89,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!--For API Level 34-->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="true" />
@@ -187,12 +189,14 @@
             android:name=".ui.videocallroom.VideoCallService"
             android:enabled="true"
             android:exported="true"
+            android:foregroundServiceType="camera|microphone"
             tools:targetApi="q" />
         <service
             android:name=".services.APictureCapturingService"
             android:enabled="true"
             android:exported="true"
             tools:targetApi="q"
+            android:foregroundServiceType="camera"
             tools:ignore="Instantiatable" />
         <activity
             android:name=".ui.camera.CameraActivity"
