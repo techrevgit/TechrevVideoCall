@@ -486,7 +486,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         // Initialize intent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            //intent.addCategory(Intent.CATEGORY_OPENABLE);
         } else {
             intent = new Intent(Intent.ACTION_GET_CONTENT);
         }

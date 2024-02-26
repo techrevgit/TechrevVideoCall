@@ -774,6 +774,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             meetingDuration = extras.getString("MEETING_DURATION");
             userId = extras.getString("USER_ID");
             isCoSigner = extras.getBoolean("IS_CO_SIGNER", false);
+            if (isCoSigner) {
+                isPrimarySigner = "0";
+            } else {
+                isPrimarySigner = "1";
+            }
             userName = extras.getString("USER_DETAILS");
             reqeustParticipantId = extras.getString("REQUEST_PARTICIPANT_ID");
             JSONObject userObj = null;
@@ -7011,7 +7016,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                 if (result != null && result.getAuthorizationDetails() != null) {
                     Log.d(TAG, "Signer Signature/Initial Allow Data: \n" + new Gson().toJson(result));
-                    isPrimarySigner = result.getAuthorizationDetails().getIsPrimarySigner();
+                    //isPrimarySigner = result.getAuthorizationDetails().getIsPrimarySigner();
                     isWitness = result.getAuthorizationDetails().getIsWitness();
                     Log.d(TAG , "isPrimarySigner Value: "+isPrimarySigner);
                     Log.d(TAG , "isWitness Value: "+isWitness);
