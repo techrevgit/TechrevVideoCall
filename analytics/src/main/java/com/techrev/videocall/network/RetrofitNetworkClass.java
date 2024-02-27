@@ -57,24 +57,6 @@ public class RetrofitNetworkClass {
                     .connectTimeout(5, TimeUnit.MINUTES)
                     .readTimeout(5, TimeUnit.MINUTES)
                     .writeTimeout(5, TimeUnit.MINUTES)
-                    .addInterceptor(new Interceptor() {
-                        @NonNull
-                        @Override
-                        public Response intercept(@NonNull Chain chain) throws IOException {
-                            Request originalRequest = chain.request();
-                            HttpUrl originalHttpUrl = originalRequest.url();
-
-                            HttpUrl modifiedUrl = originalHttpUrl.newBuilder()
-                                    .addQueryParameter("Origin", "https://localhost") // Add your origin URL here
-                                    .build();
-
-                            Request modifiedRequest = originalRequest.newBuilder()
-                                    .url(modifiedUrl)
-                                    .build();
-
-                            return chain.proceed(modifiedRequest);
-                        }
-                    })
                     .addInterceptor(logging)
                     .build();
 

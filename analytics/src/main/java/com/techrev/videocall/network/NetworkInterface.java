@@ -38,38 +38,39 @@ import retrofit2.http.Streaming;
 
 public interface NetworkInterface
 {
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getarequest")
     Call<MeetingDetailsModel> getAllMeetingDetails(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestDetailsByRequestId")
     Call<RequestDetailsModel> getRequestDetailsByRequestId(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestparticipant")
     Call<ParticipantDetailsModel> getAllParticipantDetails(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getarequest")
     Call<ResponseBody> getRequestDetails(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getDocumentsByRequestId")
     Call<DocumentsByRequestIdModel> getDocumentsByRequestID(@Header("Authorization") String token, @Body String body);
 
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestForMeetingRoom")
     Call<RequestForMeetingRoomModel> getRequestForMeetingRoom(@Header("Authorization") String token, @Body String body);
 
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getClientActivePlanDetailsByClientId")
     Call<ClientActivePlanDetailsByClientIdModel> getClientActivePlanDetailsByClientId(@Header("Authorization") String token, @Body String body);
 
     // Newly Added for Multipart for upload files
     @Multipart
+    @Headers({"Origin: https://localhost"})
     @POST("insertRequestImages")
     Call<UploadImageModel> uploadFile(@Header("Authorization") String token,
                                       @Part MultipartBody.Part file,
@@ -79,6 +80,7 @@ public interface NetworkInterface
                                       @Part("requestId") String requestId);
 
     @Multipart
+    @Headers({"Origin: https://localhost"})
     @POST("uploadAttachmentFile")
     Call<AttachedFileUploadResponseModel> uploadAttachedFile(@Header("Authorization") String token,
                                                              @Part MultipartBody.Part file,
@@ -88,98 +90,97 @@ public interface NetworkInterface
                                                              @Part("uploadedBy") String requestId);
 
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("updateDocumentName")
     Call<ResponseBody> updateDocumentName(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("deleteFileName")
     Call<ResponseBody> deleteFileName(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @GET("downloadFile")
     @Streaming
     Call<ResponseBody> downloadImage(@Header("Authorization") String token,@Query("DocId") String docID);
 
-
-
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("updateRequestParticipant")
     Call<ResponseBody> locationData(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("insertCustomerSharedLocationMobile")
     Call<ResponseBody> shareLocationData(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getCustomer")
     Call<SearchUserResponse> searchUser(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("addCosignerDuringMeeting")
     Call<ResponseBody> addCosignerDuringMeeting(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestCosignerByRequestIdAndUserId")
     Call<SearchUserResponse> checkCosignerExist(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getAllMessagesByMeetingId")
     Call<ChatDataModel> getAllMessagesByMeetingId(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("insertMessageDetails")
     Call<ChatDataModel> saveNewMessage(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("deleteMyMessage")
     Call<DeleteMessageResponseModel> deleteMessage(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestCosignerByRequestId")
     Call<CosignerDetailsModel> getAllCoSignerDetailsByMeetingId(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getCustomerDisagreeCount")
     Call<CustomerDisagreeCountModel> getCustomerDisagreeCount(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("updateDisagreeCount")
     Call<CustomerDisagreeCountModel> updateDisagreeCount(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("updateIsCustomerAgreedDetails")
     Call<CustomerDisagreeCountModel> updateAgreeCount(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getUserAccessCodeAndIDMSessionIdByUserId")
     Call<CosignerVerificationModel> checkIfKBADoneOfUserByID(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestCosignerByRequestId")
     Call<CosignerDetailsModel> getCosignerDetailsByRequestId(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("updateRequestStatusByCustomer")
         Call<UpdateRequestStatusResponse> updateRequestStatusByCustomer(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("notifyServiceProvider")
     Call<UpdateRequestStatusResponse> notifyServiceProvider(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestDocumentsById")
     Call<RequestDocModel> getRequestDocumentsById(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @GET("getAllCustomerUploadedDocs")
     Call<MyAllDocListModel> getAllCustomerUploadedDocs(@Header("Authorization") String token);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("deleteRequestDocumentByReqDocId")
     Call<CommonModel> deleteRequestDocumentByReqDocId(@Header("Authorization") String token, @Body String body);
 
     @Multipart
+    @Headers({"Origin: https://localhost"})
     @POST("uploadRequesterDocument")
     Call<AttachedFileUploadResponseModel> uploadRequesterDocument(@Header("Authorization") String token,
                                                              @Part MultipartBody.Part file,
@@ -190,25 +191,27 @@ public interface NetworkInterface
                                                              @Part("isDewDoc") RequestBody isDewDoc,
                                                              @Part("uploadedBy") RequestBody uploadedBy);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("updateExistingRequestDocument")
     Call<CommonModel> updateExistingRequestDocument(@Header("Authorization") String token,
                                                     @Body String requestObject);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getRequestParticipantByReqIdAndUserId")
     Call<SignerSignatureInitialAuthorizationModel> getRequestParticipantByReqIdAndUserId(@Header("Authorization") String token, @Body String body);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("updateRequestParticipantCapture")
     Call<CommonModel> updateRequestParticipantCapture(@Header("Authorization") String token, @Body String body);
 
     @Multipart
+    @Headers({"Origin: https://localhost"})
     @POST("removeImageBackgroundAndAutoCrop")
     Call<ResponseBody> removeImageBackgroundAndAutoCrop(@Header("Authorization") String token,
                                                         @Part MultipartBody.Part image);
 
     @Multipart
+    @Headers({"Origin: https://localhost"})
     @POST("uploadCustomerImages")
     Call<ResponseBody> uploadCustomerImages(@Header("Authorization") String token,
                                             @Part MultipartBody.Part image,
@@ -222,14 +225,15 @@ public interface NetworkInterface
                                             );
 
     @GET("downloadDewFile")
+    @Headers({"Origin: https://localhost"})
     @Streaming // Use Streaming to download large files
     Call<ResponseBody> downloadPdf(@Query("DocId") String docID);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("getAllNotarizationAction")
     Call<NotarizationActionModel> getAllNotarizationAction(@Header("Authorization") String token);
 
-    @Headers("Content-Type: application/json")
+    @Headers({"Content-Type: application/json" , "Origin: https://localhost"})
     @POST("insertNotarizationAuditTrial")
     Call<ResponseBody> insertNotarizationAuditTrial(@Header("Authorization") String token, @Body String data);
 

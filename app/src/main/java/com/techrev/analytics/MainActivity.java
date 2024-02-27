@@ -10,11 +10,13 @@ import com.techrev.videocall.TechrevVideoCallManager;
 public class MainActivity extends AppCompatActivity {
 
     // DEV SERVER (Has to be used during development)
-    //private final String SERVER_BASE_URL = "https://cnapidev.digitalnotarize.com/";
+    private final String SERVER_BASE_URL = "https://cnapidev.digitalnotarize.com/";
     // INTERMEDIATE TEST SERVER (Has to be used when need to release particial test release)
-    private final String SERVER_BASE_URL = "https://cnapiv1.digitalnotarize.com/";
+    //private final String SERVER_BASE_URL = "https://cnapiv1.digitalnotarize.com/";
     // FINAL TEST SERVER (Has to be used for test release)
     //private final String SERVER_BASE_URL = "https://custtestmobileapi.digitalnotarize.com/";
+    // TRAINING SERVER
+    //private final String SERVER_BASE_URL = "https://custtrainingmobileapi.enotaryoncall.com/";
     // PROD SERVER (Has to be used while releasing the app to the playstore)
     //private final String SERVER_BASE_URL = "https://cnapi.enotaryoncall.com/";
     @Override
@@ -27,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
                 TechrevVideoCallManager.connectToRoom
                         (MainActivity.this,
                                 SERVER_BASE_URL,
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzljZWQ2ZjE3N2UwNWEwNmE4ZDM2MmE2MzRmZTA3MzE4LTE3MDkwNDc5NDkiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJwYXJ0aWNpcGFudC1SdXBlc2ggSmVuYS04NTAiLCJ2aWRlbyI6eyJyb29tIjoiUkVRQUpLTTcifX0sImlhdCI6MTcwOTA0Nzk0OSwiZXhwIjoxNzA5MDUxNTQ5LCJpc3MiOiJTSzljZWQ2ZjE3N2UwNWEwNmE4ZDM2MmE2MzRmZTA3MzE4Iiwic3ViIjoiQUM5ZTU4YTJjODA1MmEzODZhOTRmODVhYzcxZmFiMzNhYiJ9.Q9KyX1UUWQ4y1UPwUuIFi_80C2VtHhYhL_z3F9JbQIw",
+                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImN0eSI6InR3aWxpby1mcGE7dj0xIn0.eyJqdGkiOiJTSzljZWQ2ZjE3N2UwNWEwNmE4ZDM2MmE2MzRmZTA3MzE4LTE3MDkwNTY0NjIiLCJncmFudHMiOnsiaWRlbnRpdHkiOiJwYXJ0aWNpcGFudC1SdXBlc2ggSmVuYS04NTAiLCJ2aWRlbyI6eyJyb29tIjoiUkVRQUpLTTcifX0sImlhdCI6MTcwOTA1NjQ2MiwiZXhwIjoxNzA5MDYwMDYyLCJpc3MiOiJTSzljZWQ2ZjE3N2UwNWEwNmE4ZDM2MmE2MzRmZTA3MzE4Iiwic3ViIjoiQUM5ZTU4YTJjODA1MmEzODZhOTRmODVhYzcxZmFiMzNhYiJ9.Y0nQ-RPerItWoEbTuTWl4f8FbevRGoirXd3-rX1_s4E",
                                 "REQAJKM7",
                                 "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOnsidXNlcklkIjo1MCwidXNlck5hbWUiOiJ1c3JraWU0aWo5ODNsb24wOWZ3ZCIsImZpcnN0TmFtZSI6IlJ1cGVzaCIsImxhc3ROYW1lIjoiSmVuYSIsImVtYWlsIjoicmt1bWFyQHRlY2hyZXYudXMiLCJkaXNwbGF5TmFtZSI6bnVsbCwiaGFzQWRkcmVzcyI6bnVsbCwiaXNBY3RpdmUiOnRydWUsIkRvY0lkIjpudWxsLCJvcmlnaW5hbFByb2ZpbGVQaWNGaWxlTmFtZSI6bnVsbCwicHJvZmlsZVBpY01pbWVUeXBlIjpudWxsLCJjcmVhdGVkX2F0IjoiMjAyMy0xMS0wNlQxNDozNjoyNC44NjNaIiwidXBkYXRlZF9hdCI6IjIwMjMtMTEtMDZUMTQ6MzY6MjQuODYwWiIsIlNpZ25hdHVyZURvY0lkIjpudWxsLCJJZFByb29mRnJvbnREb2NJZCI6bnVsbCwiSWRQcm9vZkJhY2tEb2NJZCI6bnVsbCwiUGhvbmUiOiI4MDkzODMxNDM2IiwiTWlkZGxlTmFtZSI6Ikt1bWFyIiwiTm90YXJ5U2VhbERvY0lkIjpudWxsLCJpc05vdGFyeSI6MCwiTm90YXJ5T25Cb2FyZGluZ1N0YXR1cyI6MCwiaXNBZG1pbiI6MCwiTm90YXJ5Q2VydGlmaWNhdGVEb2NJZCI6bnVsbCwic29ja2V0SWQiOiJhd3VqRk80RmdpOFJHbHJjQUE5VCIsInJlcXVlc3RJZCI6bnVsbCwiUHJvZmlsZVBpY3R1cmVEb2NJZCI6bnVsbCwiZG9jUHJvb2ZUeXBlIjpudWxsLCJhZGRyZXNzSWQiOm51bGwsImlkUHJvb2ZOdW1iZXIiOm51bGwsImRvYiI6IjE5OTctMDctMDlUMTg6MzA6MDAuMDAwWiIsInBob25lUHJlZml4Q29kZSI6Iis5MSIsImd1aWQiOm51bGwsIlBhc3N3b3JkUmVzZXRUaW1lIjpudWxsLCJsYXN0Rm91ckRpZ2l0U1NOIjoiMTIzNCIsImlzVHdvU3RlcFZlcmlmaWNhdGlvbiI6MCwiQ3VzdG9tZXJQcm9maWxlSWQiOm51bGwsInVwZGF0ZWRCeSI6IjUwIiwibGFzdFNvY2tldFVwZGF0ZWREYXRlVGltZSI6IjIwMjQtMDItMjJUMDg6MjM6MjcuMzA2WiIsImlwYWRkcmVzcyI6bnVsbCwibGF0aXR1ZGUiOm51bGwsImxvbmdpdHVkZSI6bnVsbCwiaXNWZXJpZmljYXRpb25DaGFyZ2VzRGViaXRlZCI6MSwibGFzdFVwZGF0ZWRQYXltZW50UHJvZmlsZUlkIjoiUElkZktGZmFHUk52ZlNjRmNWQUNiMlJuIiwiYXZhaWxhYmxlRGlzY291bnQiOm51bGwsImF1dGhvcml6ZWRDYXJkU3RhdHVzIjowLCJ2ZXJpZmljYXRpb25NYWlsQ291bnQiOjAsImF1dGhvcml6ZU5ldEN1c3RvbWVyUHJvZmlsZUlkIjpudWxsLCJ1c2VyR2V0SWQiOiI4OTEwN2RhOS05ODVlLTQxMzItYjE3Mi1lY2FkOTdkNDZlNWYiLCJvbGRQaG9uZSI6bnVsbCwib2xkRW1haWwiOm51bGwsImlzRGVsZXRlZCI6bnVsbCwiY3VzdG9tZXJUeXBlIjpudWxsLCJmaW5peEN1c3RvbWVyUHJvZmlsZUlkIjoiSUQ1cFB3Y2F0Rmk2aEVQVVo4M0pQZ281IiwiZmluaXhDYXJkU3RhdHVzIjoxLCJpbnZpdGF0aW9uSWQiOm51bGwsImlzQ2VsbFBob25lTnVtYmVyVmVyaWZpZWQiOjEsImN1c3RvbWVyU2lnbnVwU291cmNlIjoiSW5zdGFncmFtIiwiaXNXaGF0c0FwcE5vdGlmaWNhdGlvbkVuYWJsZWQiOjEsImlzU2VsZWN0Q2FyZFN0ZXBCeVBhc3NlZCI6bnVsbCwiY2FyZEJ5cGFzc1JlYXNvbiI6bnVsbCwidXBkYXRlZEJ5VXNlclR5cGUiOjMsImlzUGVybWFuZW50bHlEZWxldGVkIjpmYWxzZSwiYXBwVHlwZSI6ImN1c3RvbWVyIn0sImlhdCI6MTcwODU5MDI0OSwiZXhwIjoxNzEzNzcwNjQ5fQ.VIAOiCbgiCzFwC_hpY88k7IlSPdlLZRqFK1GpgOGZSk",
                                 "0",
