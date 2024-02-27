@@ -525,6 +525,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private boolean IS_REQUEST_CREATED_BY_CUSTOMER = false;
     private List<NotarizationActionModel.NotarizationActions> mNotarizationModel = new ArrayList<NotarizationActionModel.NotarizationActions>();
     private String isPrimarySigner, isWitness, customerType;
+    private List<DataModel> dataModelList = new ArrayList<DataModel>();
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -4619,6 +4620,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         Log.d(TAG , "Thread Name in processRequest: "+Thread.currentThread().getName());
         Log.e(TAG, "Process request::: " + dModel);
         if (dModel != null) {
+            if (dModel.getMessageType().equalsIgnoreCase("requestToReplaceSignature")) {
+                dataModelList.add(dModel);
+            }
             Log.e(TAG, "Process request Type::: " + dModel.getMessageType());
             switch (dModel.getMessageType()) {
                 case "uploadedImage":
@@ -4942,16 +4946,24 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
 
                                 String currentDocID = sharedPreference.getString(Constants.CURRENT_SIGNATURE_INITIAL_TAG_REPLACE_DOC_ID);
-                                // For Signature
-                                NotarizationActionUpdateManger.updateNotarizationAction(
-                                        VideoActivity.this, authToken,
-                                        requestID, "", userId, customerType,
-                                        finalSignatureActionID, "1", currentDocID);
-                                // For Initial
-                                NotarizationActionUpdateManger.updateNotarizationAction(
-                                        VideoActivity.this, authToken,
-                                        requestID, "", userId, customerType,
-                                        finalInitialActionID, "1", currentDocID);
+                                Log.d(TAG , "Current DataModel List Data: "+new Gson().toJson(dataModelList));
+
+                                for (int position = 0; position < dataModelList.size() ; position++) {
+                                    if (dataModelList.get(position).getTagKey().equalsIgnoreCase("52")) {
+                                        // For Signature
+                                        NotarizationActionUpdateManger.updateNotarizationAction(
+                                                VideoActivity.this, authToken,
+                                                requestID, "", userId, customerType,
+                                                finalSignatureActionID, "1", currentDocID);
+                                    } else {
+                                        // For Initial
+                                        NotarizationActionUpdateManger.updateNotarizationAction(
+                                                VideoActivity.this, authToken,
+                                                requestID, "", userId, customerType,
+                                                finalInitialActionID, "1", currentDocID);
+                                    }
+                                }
+                                dataModelList.clear();
 
                             } catch (Exception e) {
                                 Log.d("====Exception", "" + e.toString());
@@ -5877,7 +5889,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             @Override
             public void run() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(VideoActivity.this);
-                AlertDialog dialog = builder.setMessage("Are you sure, you want to exit?")
+                AlertDialog dialog = builder.setMessage("Do you want to leave this meeting?")
                         .setPositiveButton("Yes", dialogClickListener)
                         .setNegativeButton("No", dialogClickListener)
                         .setCancelable(false)

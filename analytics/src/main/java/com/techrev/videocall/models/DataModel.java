@@ -7,6 +7,7 @@ public class DataModel {
     private String messageType;
     private String content;
     private String docid;
+    private String tagKey;
 
     //Newly Added for Boolean
     private Boolean messageValue;
@@ -58,5 +59,13 @@ public class DataModel {
 
     public void setDocid(String docid) {
         this.docid = docid;
+    }
+
+    public String getTagKey() {
+        return tagKey;
+    }
+
+    public void setTagKey(String tagKey) {
+        this.tagKey = tagKey;
     }
 }

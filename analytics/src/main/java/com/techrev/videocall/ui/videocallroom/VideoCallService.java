@@ -1213,8 +1213,14 @@ public class VideoCallService extends Service {
 
                         if (jsonObject.has("docid") && !jsonObject.isNull("docid")) {
                             String docid = jsonObject.getString("docid");
-                            Log.d(TAG , "messageValue: "+docid);
+                            Log.d(TAG , "docid: "+docid);
                             dModel.setDocid(docid);
+                        }
+
+                        if (jsonObject.has("tagKey") && !jsonObject.isNull("tagKey")) {
+                            String tagKey = jsonObject.getString("tagKey");
+                            Log.d(TAG , "tagKey: "+tagKey);
+                            dModel.setTagKey(tagKey);
                         }
 
                     }catch (Exception e) {
