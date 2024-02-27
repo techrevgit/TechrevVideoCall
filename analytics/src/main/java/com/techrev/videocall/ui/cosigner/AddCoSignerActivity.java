@@ -490,9 +490,11 @@ public class AddCoSignerActivity extends Activity {
     };
 
     public void openNoInternetScreen() {
-        Intent intent = new Intent(getApplicationContext(), NoInternetActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        if (!NoInternetActivity.isInstanceExists()) {
+            Intent intent = new Intent(getApplicationContext(), NoInternetActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
 
     public void closeNoInternetScreen(){
