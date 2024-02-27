@@ -49,7 +49,6 @@ public class NoInternetActivity extends Activity {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
-
         /*Added By Ruepsh*/
         setContentView(R.layout.activity_no_internet);
         activity=this;
