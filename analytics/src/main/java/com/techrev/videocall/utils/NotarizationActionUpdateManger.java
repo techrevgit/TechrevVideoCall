@@ -40,7 +40,8 @@ public class NotarizationActionUpdateManger {
                                                  String isPrimary,
                                                  String actionId,
                                                  String type,
-                                                 String docid) {
+                                                 String docid,
+                                                 String pageNumber) {
         // Show loading indicator
         /*ProgressDialog dialog = new ProgressDialog(context);
         dialog.setMessage("Please wait");
@@ -59,6 +60,7 @@ public class NotarizationActionUpdateManger {
             obj.put("actionId" , actionId);
             obj.put("type" , type);
             obj.put("docid" , docid);
+            obj.put("pageNumber" , pageNumber);
 
             String data = obj.toString();
             Call<ResponseBody> responseBodyCall = serviceLocal.insertNotarizationAuditTrial(authToken, data);

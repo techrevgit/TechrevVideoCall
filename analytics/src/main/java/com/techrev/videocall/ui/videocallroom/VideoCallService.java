@@ -1223,6 +1223,12 @@ public class VideoCallService extends Service {
                             dModel.setTagKey(tagKey);
                         }
 
+                        if (jsonObject.has("pageNumber") && !jsonObject.isNull("pageNumber")) {
+                            String pageNumber = jsonObject.getString("pageNumber");
+                            Log.d(TAG , "pageNumber: "+pageNumber);
+                            dModel.setPageNumber(pageNumber);
+                        }
+
                     }catch (Exception e) {
                         Log.d(TAG , "Exception while converting data track to DataModel");
                         Log.d(TAG , "Exception Details: "+e.getMessage());
@@ -1235,6 +1241,7 @@ public class VideoCallService extends Service {
                     Log.d(TAG , "content: "+dModel.getContent());
                     Log.d(TAG , "messageValue: "+dModel.getMessageValue());
                     Log.d(TAG , "docid: "+dModel.getDocid());
+                    Log.d(TAG , "pageNumber: "+dModel.getPageNumber());
                     if (dModel.getTo() != null && (dModel.getTo().equalsIgnoreCase("All") || dModel.getTo().equalsIgnoreCase(userMeetingIdentifier))) {
                         Log.d("===Inside", "ProcessRequest onMessageValue: IF ");
                         processRequest(dModel);

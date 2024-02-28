@@ -1021,7 +1021,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         if (response.isSuccessful() && response.body() != null) {
                             // Handle successful response
                             //Toast.makeText(VideoActivity.this, "Agree count updated.", Toast.LENGTH_SHORT).show();
-                            if (response.body().getResults().getRequestCreatorTypeId() == 1) {
+                            if (response.isSuccessful() && response.body().getResults() != null &&
+                                    response.body().getResults().getRequestCreatorTypeId() == 1) {
                                 IS_REQUEST_CREATED_BY_CUSTOMER = true;
                             }
                         } else {
@@ -1422,7 +1423,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         NotarizationActionUpdateManger.updateNotarizationAction(
                 VideoActivity.this, authToken,
                 requestID, "", userId, customerType,
-                "18", "1", "");
+                "18", "1", "", "");
 
         super.onDestroy();
     }
@@ -4954,13 +4955,15 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         NotarizationActionUpdateManger.updateNotarizationAction(
                                                 VideoActivity.this, authToken,
                                                 requestID, "", userId, customerType,
-                                                finalSignatureActionID, "1", currentDocID);
+                                                finalSignatureActionID, "1", dataModelList.get(position).getDocid(),
+                                                dataModelList.get(position).getPageNumber());
                                     } else {
                                         // For Initial
                                         NotarizationActionUpdateManger.updateNotarizationAction(
                                                 VideoActivity.this, authToken,
                                                 requestID, "", userId, customerType,
-                                                finalInitialActionID, "1", currentDocID);
+                                                finalInitialActionID, "1", dataModelList.get(position).getDocid(),
+                                                dataModelList.get(position).getPageNumber());
                                     }
                                 }
                                 dataModelList.clear();
@@ -4986,7 +4989,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
                                         requestID, "", userId, customerType,
-                                        finalDeniedActionID, "1", "");
+                                        finalDeniedActionID, "1", "", "");
+
+                                dataModelList.clear();
+
                             } catch (Exception e) {
                                 Log.d("====Exception", "" + e.toString());
                             }
@@ -5127,7 +5133,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 NotarizationActionUpdateManger.updateNotarizationAction(
                                         VideoActivity.this, authToken,
                                         requestID, "", userId, customerType,
-                                        "51", "1", "");
+                                        "51", "1", "", "");
                             } else {
                                 // Handle unsuccessful response
                                 Log.e("updateDisagreeCount", "Unsuccessful response");
@@ -5439,7 +5445,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             NotarizationActionUpdateManger.updateNotarizationAction(
                                     VideoActivity.this, authToken,
                                     requestID, "", userId, customerType,
-                                    "7", "1", "");
+                                    "7", "1", "", "");
                         } else {
                             // Handle unsuccessful response
                             Log.d("onResponse", "Unsuccessful response");
@@ -5935,6 +5941,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             public void run() {
                 IS_AUTHORIZATION_DIALOG_SHOWN_ALREADY = false;
                 IS_AUDIT_JOIN_CALL_SENT_ALREADY = false;
+                dataModelList.clear();
                 disconnectClickListener();
                 AddCoSignerActivity.getAddCoSignerActivityContext().exitFromTheRoom();
                 VideoActivity.this.finish();
@@ -7047,7 +7054,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         NotarizationActionUpdateManger.updateNotarizationAction(
                                 VideoActivity.this, authToken,
                                 requestID, "", userId, customerType,
-                                "5", "1", "");
+                                "5", "1", "", "");
                     }
 
                     /*if (!isCoSigner) {*/
@@ -7072,7 +7079,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                         NotarizationActionUpdateManger.updateNotarizationAction(
                                                 VideoActivity.this, authToken,
                                                 requestID, "", userId, customerType,
-                                                "33", "1", "");
+                                                "33", "1", "", "");
                                     }
                                 });
                                 FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
@@ -7149,7 +7156,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             VideoActivity.this, authToken,
                             requestID, "", userId, customerType,
-                            "25", "1", "");
+                            "25", "1", "", "");
                 }
             }
         }.execute(data);

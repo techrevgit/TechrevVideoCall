@@ -342,13 +342,13 @@ public class CameraActivity extends AppCompatActivity {
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             CameraActivity.this, authToken,
                             requestID, "", userId, customerType,
-                            "19", "1", "");
+                            "19", "1", "", "");
                 } else {
                     Toast.makeText(CameraActivity.this, "Initial has been uploaded successfully", Toast.LENGTH_SHORT).show();
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             CameraActivity.this, authToken,
                             requestID, "", userId, customerType,
-                            "20", "1", "");
+                            "20", "1", "", "");
                 }
                 if (response.body() != null){
                     Log.d(TAG , "Response: "+new Gson().toJson(response.body()));

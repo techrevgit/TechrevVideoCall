@@ -329,7 +329,7 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             mActivity, authToken,
                             requestID, "", userId, isPrimarySigner,
-                            "23", "1", "");
+                            "23", "1", "", "");
 
                 } catch (Exception e) {
                     Log.d("====Exception", "" + e.toString());

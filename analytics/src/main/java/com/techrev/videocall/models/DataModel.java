@@ -8,6 +8,7 @@ public class DataModel {
     private String content;
     private String docid;
     private String tagKey;
+    private String pageNumber;
 
     //Newly Added for Boolean
     private Boolean messageValue;
@@ -67,5 +68,13 @@ public class DataModel {
 
     public void setTagKey(String tagKey) {
         this.tagKey = tagKey;
+    }
+
+    public String getPageNumber() {
+        return pageNumber;
+    }
+
+    public void setPageNumber(String pageNumber) {
+        this.pageNumber = pageNumber;
     }
 }

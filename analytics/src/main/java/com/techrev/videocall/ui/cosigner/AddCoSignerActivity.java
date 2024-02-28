@@ -393,7 +393,7 @@ public class AddCoSignerActivity extends Activity {
                     NotarizationActionUpdateManger.updateNotarizationAction(
                             AddCoSignerActivity.this, authToken,
                             requestID, "", userId, isPrimarySigner,
-                            "42", "1", "");
+                            "42", "1", "", "");
                     setResult(Activity.RESULT_OK);
                     finish();
                 }

@@ -446,7 +446,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                         NotarizationActionUpdateManger.updateNotarizationAction(
                                 MyAllUploadedDocumentsActivity.this, authToken,
                                 requestID, "", userId, isPrimarySigner,
-                                "1", "1", selectedDocIds);
+                                "1", "1", selectedDocIds, "");
                     } else {
                         Toast.makeText(MyAllUploadedDocumentsActivity.this, "Something went wrong, please try again later!", Toast.LENGTH_SHORT).show();
                     }
@@ -485,7 +485,7 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
         Intent intent = null;
         // Initialize intent
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             //intent.addCategory(Intent.CATEGORY_OPENABLE);
         } else {
             intent = new Intent(Intent.ACTION_GET_CONTENT);
