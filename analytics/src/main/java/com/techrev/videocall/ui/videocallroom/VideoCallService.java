@@ -1509,15 +1509,19 @@ public class VideoCallService extends Service {
 
             // Create the local data track
             if(videoCallModel!=null) {
-
+                videoCallModel.getCameraCapturerCompat().releaseCamera();
                 // Share your camera
-                videoCallModel.setCameraCapturerCompat(new CameraCapturerCompat(this, getAvailableCameraSource()));
-                videoCallModel.setLocalVideoTrack(LocalVideoTrack.create(this,
-                        true,
-                        videoCallModel.getCameraCapturerCompat().getVideoCapturer(),
-                        LOCAL_VIDEO_TRACK_NAME));
-                CameraCapturer.CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
-                videoCallModel.setCameraSource(cameraSource);
+                if (getAvailableCameraSource()!=null) {
+                    videoCallModel.setCameraCapturerCompat(new CameraCapturerCompat(this, getAvailableCameraSource()));
+                    videoCallModel.setLocalVideoTrack(LocalVideoTrack.create(this, true, videoCallModel.getCameraCapturerCompat().getVideoCapturer(), LOCAL_VIDEO_TRACK_NAME));
+                    CameraCapturer.CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
+                    videoCallModel.setCameraSource(cameraSource);
+                }else{
+                    videoCallModel.setCameraCapturerCompat(new CameraCapturerCompat(this, CameraCapturer.CameraSource.FRONT_CAMERA));
+                    videoCallModel.setLocalVideoTrack(LocalVideoTrack.create(this, true, videoCallModel.getCameraCapturerCompat().getVideoCapturer(), LOCAL_VIDEO_TRACK_NAME));
+                    CameraCapturer.CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
+                    videoCallModel.setCameraSource(cameraSource);
+                }
 
             }
 

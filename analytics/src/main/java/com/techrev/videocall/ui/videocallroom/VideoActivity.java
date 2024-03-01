@@ -3266,24 +3266,26 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             // Update UI components on the main thread if needed
         }
 
-        private void switchCamera() {
-            Log.d(TAG , "Thread Name in switchCamera: "+Thread.currentThread().getName());
-            if (videoCallModel.getCameraCapturerCompat() != null) {
-                if (isControlMenuClickable) {
-                    CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
-                    videoCallModel.getCameraCapturerCompat().switchCamera();
-                    videoCallModel.setCameraSource(cameraSource);
-                    if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
-                        if (cameraSource == CameraSource.BACK_CAMERA) {
-                            CURRENT_CAMERA = 0;
-                        } else {
-                            CURRENT_CAMERA = 1;
-                        }
-                        Log.d(TAG, "CURRENT_CAMERA: " + CURRENT_CAMERA);
-                        thumbnailVideoView.setMirror(cameraSource == CameraSource.BACK_CAMERA);
+
+    }
+
+    private void switchCamera() {
+        Log.d(TAG , "Thread Name in switchCamera: "+Thread.currentThread().getName());
+        if (videoCallModel.getCameraCapturerCompat() != null) {
+            if (isControlMenuClickable) {
+                CameraSource cameraSource = videoCallModel.getCameraCapturerCompat().getCameraSource();
+                videoCallModel.getCameraCapturerCompat().switchCamera();
+                videoCallModel.setCameraSource(cameraSource);
+                if (thumbnailVideoView.getVisibility() == View.VISIBLE) {
+                    if (cameraSource == CameraSource.BACK_CAMERA) {
+                        CURRENT_CAMERA = 0;
                     } else {
-                        primaryVideoView.setMirror(cameraSource == CameraSource.BACK_CAMERA);
+                        CURRENT_CAMERA = 1;
                     }
+                    Log.d(TAG, "CURRENT_CAMERA: " + CURRENT_CAMERA);
+                    thumbnailVideoView.setMirror(cameraSource == CameraSource.BACK_CAMERA);
+                } else {
+                    primaryVideoView.setMirror(cameraSource == CameraSource.BACK_CAMERA);
                 }
             }
         }
@@ -3296,6 +3298,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             public void onClick(View view) {
                 // Execute the AsyncTask to move heavy operations to a background thread
                 new SwitchCameraClickListenerTask().execute();
+//                if (videoCallModel != null && isConnectedInRoom) {
+//                    switchCamera();
+//                }
             }
         };
     }

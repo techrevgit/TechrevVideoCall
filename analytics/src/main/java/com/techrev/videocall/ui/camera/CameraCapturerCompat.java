@@ -113,7 +113,7 @@ public class CameraCapturerCompat {
     }
 
     public void releaseCamera(){
-        //camera1Capturer.stopCapture();
+        camera1Capturer.stopCapture();
         camera1Capturer = null;
     }
 
