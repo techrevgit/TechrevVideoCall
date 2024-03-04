@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 
@@ -270,10 +271,30 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
         textView.setText(getInitial(name));
     }
 
-    public void refreshParticipants(int position){
+    public void refreshParticipants(int position, RecyclerView recyclerView, List<TechrevRemoteParticipant> newParticipantList){
+        // Update the dataset
+        remoteParticipantList = newParticipantList;
         rowIndex = position;
         notifyDataSetChanged();
+        /*if (position >= 0) {
+            rowIndex = position;
+            notifyDataSetChanged();
+        } else {
+            *//*rowIndex = 0;
+            notifyDataSetChanged();*//*
+            // Update the background of all participants directly
+            if (recyclerView != null) {
+                for (int i = 0; i < getItemCount(); i++) {
+                    MyViewHolder viewHolder = (MyViewHolder) recyclerView.findViewHolderForAdapterPosition(i);
+                    if (viewHolder != null) {
+                        // Update the background of the parent layout directly
+                        viewHolder.parentLayoutSection.setBackground(this.videoActivity.getDrawable(R.drawable.unselected_participant_background));
+                    }
+                }
+            }
+        }*/
     }
+
 
 }
 

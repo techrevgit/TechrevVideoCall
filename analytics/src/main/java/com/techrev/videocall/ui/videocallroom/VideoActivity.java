@@ -13,7 +13,6 @@ import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
@@ -24,7 +23,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.hardware.Camera;
@@ -44,7 +42,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -116,7 +113,6 @@ import com.techrev.videocall.ui.camera.CameraActivity;
 import com.techrev.videocall.ui.cosigner.AddCoSignerActivity;
 import com.techrev.videocall.models.AttachedFileUploadResponseModel;
 import com.techrev.videocall.ui.camera.CameraCapturerCompat;
-import com.techrev.videocall.models.ClientActivePlanDetailsByClientIdModel;
 import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.ui.cosigner.CosignerDetailsModel;
 import com.techrev.videocall.models.CustomerDisagreeCountModel;
@@ -130,7 +126,6 @@ import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 import com.techrev.videocall.utils.PictureCapturingListener;
 import com.techrev.videocall.services.PictureCapturingServiceImpl;
 import com.techrev.videocall.R;
-import com.techrev.videocall.models.RequestForMeetingRoomModel;
 import com.techrev.videocall.dialogfragments.SignerAuthirizationDialogFragment;
 import com.techrev.videocall.models.SignerSignatureInitialAuthorizationModel;
 import com.techrev.videocall.models.UpdateRequestStatusResponse;
@@ -936,7 +931,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     public void onClick(View view) {
                         isMyViewActive = true;
                         mainThumbnailView.setBackground(VideoActivity.this.getDrawable(R.drawable.selected_participant_background));
-                        participantsAdapter.refreshParticipants(-1);
+                        participantsAdapter.refreshParticipants(-1 , recyclerView, remoteParticipantList);
                         showThumbnailInPrimaryVideoSection();
                     }
                 });
@@ -1096,7 +1091,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                video_view.removeAllViews();
+                if (video_view != null) {
+                    //video_view.removeAllViews();
+                }
             }
         });
         VideoView videoView = new VideoView(this);
@@ -1210,60 +1207,66 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     public void notifytoOhterParticipants()
     {
-        Log.d(TAG , "Thread Name in notifytoOhterParticipants: "+Thread.currentThread().getName());
-        Log.e(TAG , "remote participant list size in notifytoOhterParticipants: "+remoteParticipantList.size());
-        if(participantsAdapter==null && remoteParticipantList!=null && remoteParticipantList.size()>1) {
-            participantsview.setVisibility(View.VISIBLE);
-            participantsAdapter = new ParticipantsAdapter(remoteParticipantList, VideoActivity.this, onclickInterface, isMyViewActive);
-            RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-            recyclerView.setLayoutManager(manager);
-            recyclerView.setAdapter(participantsAdapter);
-        }
-        else if(remoteParticipantList!=null && remoteParticipantList.size()>1)
-        {
-            //participantsview.setVisibility(View.VISIBLE);
-            participantsAdapter.notifyDataSetChanged();
-            if (isMyViewActive){
-                participantsAdapter.refreshParticipants(-1);
-                showThumbnailInPrimaryVideoSection();
-            }
-        }
-        else{
-            if (participantsview!=null){
-                //participantsview.setVisibility(View.GONE);
-            }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG , "Thread Name in notifytoOhterParticipants: "+Thread.currentThread().getName());
+                Log.e(TAG , "remote participant list size in notifytoOhterParticipants: "+remoteParticipantList.size());
 
-            if (participantsAdapter!=null){
-                try {
-                    //participantsAdapter.notifyDataSetChanged();
+                if(participantsAdapter==null && remoteParticipantList!=null && remoteParticipantList.size()>1) {
+                    participantsview.setVisibility(View.VISIBLE);
+                    participantsAdapter = new ParticipantsAdapter(remoteParticipantList, VideoActivity.this, onclickInterface, isMyViewActive);
+                    RecyclerView.LayoutManager manager = new LinearLayoutManager(VideoActivity.this, LinearLayoutManager.HORIZONTAL, false);
+                    recyclerView.setLayoutManager(manager);
+                    recyclerView.setAdapter(participantsAdapter);
+                }
+                else if(remoteParticipantList!=null && remoteParticipantList.size()>1)
+                {
+                    //participantsview.setVisibility(View.VISIBLE);
+                    participantsAdapter.notifyDataSetChanged();
                     if (isMyViewActive){
-                        participantsAdapter.refreshParticipants(-1);
+                        participantsAdapter.refreshParticipants(-1, recyclerView, remoteParticipantList);
                         showThumbnailInPrimaryVideoSection();
                     }
-                } catch (Exception e) {
-                    Log.d(TAG , "Exception: "+e);
-                    e.printStackTrace();
                 }
-            }
-        }
-        if (member_Type == 1) {
-            if (dialogViewHost != null && dialogViewHost.isShowing()) {
-                if (rVPadapter != null) {
-                    rVPadapter.notifyDataSetChanged();
-                }
-                if (remoteParticipantList.size() > 0) {
-                    rViewPopup.setVisibility(View.VISIBLE);
-                    emptyView.setVisibility(View.GONE);
-                } else {
-                    if (rViewPopup != null) {
-                        rViewPopup.setVisibility(View.GONE);
+                else{
+                    if (participantsview!=null){
+                        //participantsview.setVisibility(View.GONE);
                     }
-                    if (emptyView != null) {
-                        emptyView.setVisibility(View.VISIBLE);
+
+                    if (participantsAdapter!=null){
+                        try {
+                            participantsAdapter.notifyDataSetChanged();
+                            if (isMyViewActive){
+                                participantsAdapter.refreshParticipants(-1, recyclerView, remoteParticipantList);
+                                showThumbnailInPrimaryVideoSection();
+                            }
+                        } catch (Exception e) {
+                            Log.d(TAG , "Exception: "+e);
+                            e.printStackTrace();
+                        }
                     }
                 }
+                if (member_Type == 1) {
+                    if (dialogViewHost != null && dialogViewHost.isShowing()) {
+                        if (rVPadapter != null) {
+                            rVPadapter.notifyDataSetChanged();
+                        }
+                        if (remoteParticipantList.size() > 0) {
+                            rViewPopup.setVisibility(View.VISIBLE);
+                            emptyView.setVisibility(View.GONE);
+                        } else {
+                            if (rViewPopup != null) {
+                                rViewPopup.setVisibility(View.GONE);
+                            }
+                            if (emptyView != null) {
+                                emptyView.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                }
             }
-        }
+        });
     }
 
 
@@ -1579,6 +1582,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             //sharedPreference.setBoolean(Constants.isScreenShared , true);
             sp_call_view.setSelection(1);
             mVideoCallViewAdapter.setSelection(1);
+            participantsAdapter.refreshParticipants(mActiveParticipantIndex, recyclerView, remoteParticipantList);
             moveLocalVideoToThumbnailView(); // added By Rupesh Kumar Jena
             ScreenShareOn(eventModel.getTechrevRemoteParticipant().remoteParticipant);
             showParticipantScreenInFront(screenShowingParticipantPosition);
@@ -1641,9 +1645,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
             if (!isMyViewActive){
                 if (remoteParticipantList != null && remoteParticipantList.size() > 0) {
-                    participantsAdapter.refreshParticipants(0);
+                    participantsAdapter.refreshParticipants(0, recyclerView , remoteParticipantList);
                 } else {
-                    participantsAdapter.refreshParticipants(-1);
+                    participantsAdapter.refreshParticipants(-1, recyclerView, remoteParticipantList);
                 }
             }
 
@@ -2615,9 +2619,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                video_view.removeAllViews();
+                                if (video_view != null) {
+                                    //video_view.removeAllViews();
+                                    video_view.setVisibility(View.GONE);
+                                }
                                 participant_initial.setVisibility(View.VISIBLE);
-                                video_view.setVisibility(View.GONE);
                             }
                         });
                         setParticipantName(remoteParticipant.remoteParticipant.getIdentity());
@@ -2682,7 +2688,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                video_view.removeAllViews();
+                                if (video_view != null) {
+                                    //video_view.removeAllViews();
+                                }
                                 VideoView videoView = new VideoView(VideoActivity.this);
                                 video_view.addView(videoView);
                                 primaryVideoView = videoView;
@@ -2695,7 +2703,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         });
 
                         if (participantsAdapter != null && !isMyViewActive) {
-                            participantsAdapter.refreshParticipants(mActiveParticipantIndex);
+                            isMyViewActive = false;
+                            mainThumbnailView.setBackground(VideoActivity.this.getDrawable(R.drawable.unselected_participant_background));
+                            participantsAdapter.refreshParticipants(mActiveParticipantIndex, recyclerView, remoteParticipantList);
                         }
 
                         break;
@@ -2903,7 +2913,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            video_view.removeAllViews();
+                            if (video_view != null) {
+                                //video_view.removeAllViews();
+                            }
                         }
                     });
                 }
