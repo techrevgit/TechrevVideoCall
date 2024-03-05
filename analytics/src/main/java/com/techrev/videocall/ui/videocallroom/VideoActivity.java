@@ -930,6 +930,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     @Override
                     public void onClick(View view) {
                         isMyViewActive = true;
+                        if (participantsAdapter != null) {
+                            participantsAdapter.notifyDataSetChanged();
+                        }
                         mainThumbnailView.setBackground(VideoActivity.this.getDrawable(R.drawable.selected_participant_background));
                         participantsAdapter.refreshParticipants(-1 , recyclerView, remoteParticipantList);
                         showThumbnailInPrimaryVideoSection();
@@ -1223,7 +1226,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 else if(remoteParticipantList!=null && remoteParticipantList.size()>1)
                 {
                     //participantsview.setVisibility(View.VISIBLE);
-                    participantsAdapter.notifyDataSetChanged();
+                    if (participantsAdapter != null) {
+                        participantsAdapter.notifyDataSetChanged();
+                    }
                     if (isMyViewActive){
                         participantsAdapter.refreshParticipants(-1, recyclerView, remoteParticipantList);
                         showThumbnailInPrimaryVideoSection();
@@ -1236,7 +1241,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                     if (participantsAdapter!=null){
                         try {
-                            participantsAdapter.notifyDataSetChanged();
+                            if (participantsAdapter != null) {
+                                participantsAdapter.notifyDataSetChanged();
+                            }
                             if (isMyViewActive){
                                 participantsAdapter.refreshParticipants(-1, recyclerView, remoteParticipantList);
                                 showThumbnailInPrimaryVideoSection();

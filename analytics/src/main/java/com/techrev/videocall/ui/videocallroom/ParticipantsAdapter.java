@@ -273,9 +273,9 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
 
     public void refreshParticipants(int position, RecyclerView recyclerView, List<TechrevRemoteParticipant> newParticipantList){
         // Update the dataset
-        remoteParticipantList = newParticipantList;
+        /*remoteParticipantList = newParticipantList;
         rowIndex = position;
-        notifyDataSetChanged();
+        notifyDataSetChanged();*/
         /*if (position >= 0) {
             rowIndex = position;
             notifyDataSetChanged();
@@ -293,6 +293,37 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
                 }
             }
         }*/
+
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return remoteParticipantList.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return newParticipantList.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                TechrevRemoteParticipant oldParticipant = remoteParticipantList.get(oldItemPosition);
+                TechrevRemoteParticipant newParticipant = newParticipantList.get(newItemPosition);
+                return oldParticipant.equals(newParticipant);
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                TechrevRemoteParticipant oldParticipant = remoteParticipantList.get(oldItemPosition);
+                TechrevRemoteParticipant newParticipant = newParticipantList.get(newItemPosition);
+                // Compare fields to determine if the content has changed
+                return oldParticipant.equals(newParticipant);
+            }
+        });
+
+        remoteParticipantList = newParticipantList;
+        rowIndex = position;
+        diffResult.dispatchUpdatesTo(this);
     }
 
 
