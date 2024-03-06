@@ -42,6 +42,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -521,6 +522,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private List<NotarizationActionModel.NotarizationActions> mNotarizationModel = new ArrayList<NotarizationActionModel.NotarizationActions>();
     private String isPrimarySigner, isWitness, customerType;
     private List<DataModel> dataModelList = new ArrayList<DataModel>();
+    private boolean ONECLICK = false;
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -929,13 +931,23 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 thumbnailVideoView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        isMyViewActive = true;
-                        if (participantsAdapter != null) {
-                            participantsAdapter.notifyDataSetChanged();
+                        if(!ONECLICK) {
+                            ONECLICK=true;
+                            isMyViewActive = true;
+                            if (participantsAdapter != null) {
+                                participantsAdapter.notifyDataSetChanged();
+                            }
+                            mainThumbnailView.setBackground(VideoActivity.this.getDrawable(R.drawable.selected_participant_background));
+                            participantsAdapter.refreshParticipants(-1 , recyclerView, remoteParticipantList);
+                            showThumbnailInPrimaryVideoSection();
                         }
-                        mainThumbnailView.setBackground(VideoActivity.this.getDrawable(R.drawable.selected_participant_background));
-                        participantsAdapter.refreshParticipants(-1 , recyclerView, remoteParticipantList);
-                        showThumbnailInPrimaryVideoSection();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                ONECLICK=false;
+
+                            }
+                        },2000);
                     }
                 });
             }
@@ -1095,7 +1107,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             @Override
             public void run() {
                 if (video_view != null) {
-                    //video_view.removeAllViews();
+                    try {
+                        video_view.removeAllViews();
+                    } catch (Exception e) {
+                        Log.e(TAG , "Exception while removing all views from the primary video section");
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -2627,7 +2644,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             public void run() {
                                 if (video_view != null) {
-                                    //video_view.removeAllViews();
+                                    try {
+                                        video_view.removeAllViews();
+                                    } catch (Exception e) {
+                                        Log.e(TAG , "Exception while removing all views from the primary video section");
+                                        e.printStackTrace();
+                                    }
                                     video_view.setVisibility(View.GONE);
                                 }
                                 participant_initial.setVisibility(View.VISIBLE);
@@ -2696,7 +2718,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             public void run() {
                                 if (video_view != null) {
-                                    //video_view.removeAllViews();
+                                    try {
+                                        video_view.removeAllViews();
+                                    } catch (Exception e) {
+                                        Log.e(TAG , "Exception while removing all views from the primary video section");
+                                        e.printStackTrace();
+                                    }
                                 }
                                 VideoView videoView = new VideoView(VideoActivity.this);
                                 video_view.addView(videoView);
@@ -2921,7 +2948,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                         @Override
                         public void run() {
                             if (video_view != null) {
-                                //video_view.removeAllViews();
+                                try {
+                                    video_view.removeAllViews();
+                                } catch (Exception e) {
+                                    Log.e(TAG , "Exception while removing all views from the primary video section");
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     });

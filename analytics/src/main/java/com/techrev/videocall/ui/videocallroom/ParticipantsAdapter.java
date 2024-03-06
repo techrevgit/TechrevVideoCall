@@ -2,6 +2,7 @@ package com.techrev.videocall.ui.videocallroom;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
     onClickInterface onClickInterface;
     private int rowIndex = 0;
     private boolean isMyViewActive;
+    private boolean ONECLICK = false;
 
     public ParticipantsAdapter(ArrayList<TechrevRemoteParticipant> remoteParticipantList, VideoActivity videoActivity, onClickInterface onClickInterface, boolean viewActive) {
         this.remoteParticipantList = remoteParticipantList;
@@ -123,7 +125,17 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
                         rowIndex = i;
                         notifyDataSetChanged();
                         //((MyViewHolder) holder).parentLayoutSection.setBackground(videoActivity.getDrawable(R.drawable.selected_participant_background));
-                        onClickInterface.onClickVideo(i , viewHolder.name.getText().toString());
+                        if(!ONECLICK) {
+                            ONECLICK=true;
+                            onClickInterface.onClickVideo(i , viewHolder.name.getText().toString());
+                        }
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                ONECLICK=false;
+
+                            }
+                        },2000);
                     }
                 }
         );
@@ -134,7 +146,17 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
                         rowIndex = i;
                         notifyDataSetChanged();
                         //((MyViewHolder) holder).parentLayoutSection.setBackground(videoActivity.getDrawable(R.drawable.selected_participant_background));
-                        onClickInterface.onClickVideo(i , viewHolder.name.getText().toString());
+                        if(!ONECLICK) {
+                            ONECLICK=true;
+                            onClickInterface.onClickVideo(i , viewHolder.name.getText().toString());
+                        }
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                ONECLICK=false;
+
+                            }
+                        },2000);
                     }
                 }
         );
@@ -147,7 +169,17 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
                         rowIndex = i;
                         notifyDataSetChanged();
                         //((MyViewHolder) holder).parentLayoutSection.setBackground(videoActivity.getDrawable(R.drawable.selected_participant_background));
-                        onClickInterface.onClickScreen(i , viewHolder.name.getText().toString());
+                        if(!ONECLICK) {
+                            ONECLICK=true;
+                            onClickInterface.onClickScreen(i , viewHolder.name.getText().toString());
+                        }
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                ONECLICK=false;
+
+                            }
+                        },2000);
                     }
                 }
         );
