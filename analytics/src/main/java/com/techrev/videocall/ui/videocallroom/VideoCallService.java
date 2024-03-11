@@ -1,5 +1,7 @@
 package com.techrev.videocall.ui.videocallroom;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
+
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Notification;
@@ -10,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -19,7 +22,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.gson.Gson;
@@ -162,6 +167,7 @@ public class VideoCallService extends Service {
         super.onCreate();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // Start tasks on a background thread
@@ -1412,6 +1418,7 @@ public class VideoCallService extends Service {
 
 
     }
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public void startForeground() {
         NotificationChannel chan = new NotificationChannel(CHANNEL_ID,
                 CHANNEL_NAME,
@@ -1427,7 +1434,7 @@ public class VideoCallService extends Service {
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .build();
-        startForeground(notificationId, notification);
+        ServiceCompat.startForeground(this, notificationId, notification, FOREGROUND_SERVICE_TYPE_CAMERA);
         //EventBus.getDefault().register(this);
         APP_STATUS= Constants.APP_STATUS_FOREGROUND;
         executorService.execute(() -> {

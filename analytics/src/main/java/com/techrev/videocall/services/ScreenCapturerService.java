@@ -1,5 +1,7 @@
 package com.techrev.videocall.services;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION;
+
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -10,6 +12,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
 
 @TargetApi(29)
 public class ScreenCapturerService extends Service {
@@ -55,7 +58,7 @@ public class ScreenCapturerService extends Service {
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .build();
-        startForeground(notificationId, notification);
+        ServiceCompat.startForeground(this , notificationId, notification , FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
     }
 
     public void endForeground() {

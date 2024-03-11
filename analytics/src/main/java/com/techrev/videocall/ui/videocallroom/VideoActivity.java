@@ -945,7 +945,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                             @Override
                             public void run() {
                                 ONECLICK=false;
-
                             }
                         },2000);
                     }

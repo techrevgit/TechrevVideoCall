@@ -174,10 +174,10 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
                         if (response.body().getResults().get(0).isKbaVerified() == 1 &&
                                 response.body().getResults().get(0).isDocumentVerified() == 1){
                             userAddListener.onUserAdded(searchUser);
-                        }else {
+                        } else {
                             Toast.makeText(context, "This user has not completed KBA & ID Verification so you can not add as Co-Signer.", Toast.LENGTH_LONG).show();
                         }
-                    }else {
+                    } else {
                         Toast.makeText(context, "This user has not completed KBA & ID Verification so you can not add as Co-Signer.", Toast.LENGTH_LONG).show();
                     }
                 }

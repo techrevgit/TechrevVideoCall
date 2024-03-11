@@ -133,7 +133,6 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
                             @Override
                             public void run() {
                                 ONECLICK=false;
-
                             }
                         },2000);
                     }
@@ -154,7 +153,6 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
                             @Override
                             public void run() {
                                 ONECLICK=false;
-
                             }
                         },2000);
                     }
@@ -177,7 +175,6 @@ public class ParticipantsAdapter extends RecyclerView.Adapter {
                             @Override
                             public void run() {
                                 ONECLICK=false;
-
                             }
                         },2000);
                     }
