@@ -213,34 +213,6 @@ public class PreviewRequestDocumentActivity extends AppCompatActivity {
 
     private void savePdfToFile(byte[] bytes) {
         Log.d(TAG, "savePdfToFile: Saving file...");
-        /*InputStream inputStream = new ByteArrayInputStream(bytes);
-        FileOutputStream outputStream = null;
-
-        try {
-            File fileNew = new File(Environment
-                    .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    + "/Notarization_Doc.pdf"); // Create a file object
-            outputStream = new FileOutputStream(fileNew);
-
-            // Write InputStream data to the file
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, length);
-            }
-            Log.d(TAG, "savePdfToFile: File saved successfully!");
-            loadPdfFile(fileNew);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
 
         /*New Code*/
         File folder = new File(Constants.getPathPDF(PreviewRequestDocumentActivity.this));

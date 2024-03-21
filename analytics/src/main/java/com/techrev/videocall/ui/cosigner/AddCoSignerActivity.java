@@ -270,23 +270,23 @@ public class AddCoSignerActivity extends Activity {
                 Log.d("====onResponse", "Response Body: " + new Gson().toJson(response.body()));
                 Log.d("====onResponse", "Response Body Results: " + new Gson().toJson(response.body().getResults()));
                 SearchUserResponse searchUserResponse = response.body();
-                Log.d(TAG , "CO-SIGNER ID : "+cosignerID);
-                userListAdapter = new UserListAdapter(AddCoSignerActivity.this, new UserListAdapter.UserAddListener() {
-                    @Override
-                    public void onUserAdded(SearchUserResponse.SearchUser searchUser) {
-                        if (userId.equalsIgnoreCase(searchUser.getUserId())) {
-                            Toast.makeText(AddCoSignerActivity.this, "You can't add your self as a Co-Signer", Toast.LENGTH_LONG).show();
-                        } else if (userAddedListAdapter.isUserExist(searchUser)) {
-                            Toast.makeText(AddCoSignerActivity.this, "User already added in the list", Toast.LENGTH_LONG).show();
-                        } else {
-                            checkCosignerExist(searchUser);
-                        }
-                    }
-                }, authToken, cosignerID);
                 if (response.body().getResults() != null && response.body().getResults().size() > 0){
                     recyclerView.setVisibility(View.VISIBLE);
                     tvEmpty.setVisibility(View.GONE);
                     cosignerID = response.body().getResults().get(0).getUserId();
+                    Log.d(TAG , "CO-SIGNER ID : "+cosignerID);
+                    userListAdapter = new UserListAdapter(AddCoSignerActivity.this, new UserListAdapter.UserAddListener() {
+                        @Override
+                        public void onUserAdded(SearchUserResponse.SearchUser searchUser) {
+                            if (userId.equalsIgnoreCase(searchUser.getUserId())) {
+                                Toast.makeText(AddCoSignerActivity.this, "You can't add your self as a Co-Signer", Toast.LENGTH_LONG).show();
+                            } else if (userAddedListAdapter.isUserExist(searchUser)) {
+                                Toast.makeText(AddCoSignerActivity.this, "User already added in the list", Toast.LENGTH_LONG).show();
+                            } else {
+                                checkCosignerExist(searchUser);
+                            }
+                        }
+                    }, authToken, cosignerID);
                 }else {
                     recyclerView.setVisibility(View.GONE);
                     tvEmpty.setVisibility(View.VISIBLE);
@@ -384,7 +384,7 @@ public class AddCoSignerActivity extends Activity {
         responseBodyCall1.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response!=null){
+                if(response.isSuccessful()){
                     Log.d("====onResponse", "success" + response.code());
                     Log.d("====onResponse", "success" + response.body().toString());
                     progressBar.setVisibility(View.GONE);
