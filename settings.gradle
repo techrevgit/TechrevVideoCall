@@ -5,17 +5,20 @@ dependencyResolutionManagement {
         mavenCentral()
         gradlePluginPortal()
         jcenter() // Warning: this repository is going to shut down soon
-        // This is added for maven to access the private repository
+
+        /*CONFIGURATIONS FOR JITPACK.IO PUBLICATION*/
         maven {
             url "https://jitpack.io"
-            credentials {
+            // CREDENTIALS FOR PUBLIC REPO IN GITHUB
+            /*credentials {
                 username = "techrevgit"
                 password = "Techrev@2023"
-                // For private repo
-                credentials { username authToken }
-                // For private repo
-            }
+            }*/
+            // CREDENTIALS FOR PRIVATE REPO IN GITHUB
+            credentials { username authToken }
         }
+        /*CONFIGURATIONS FOR JITPACK.IO PUBLICATION*/
+
         maven { url 'https://sdk.withpersona.com/android/releases' }
     }
 }
