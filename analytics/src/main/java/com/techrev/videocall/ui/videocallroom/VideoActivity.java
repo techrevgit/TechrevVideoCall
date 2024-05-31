@@ -1303,12 +1303,20 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             exitFromTheRoom();
         }
         if (sharedPreference!=null && sharedPreference.getBoolean(Constants.SIGNATURE_CAPTURE_REQUEST_IN_BACKGROUND)){
-            showSignatureCaptureDialog();
-            sharedPreference.setBoolean(Constants.SIGNATURE_CAPTURE_REQUEST_IN_BACKGROUND , false);
+            try {
+                showSignatureCaptureDialog();
+                sharedPreference.setBoolean(Constants.SIGNATURE_CAPTURE_REQUEST_IN_BACKGROUND , false);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         if (sharedPreference!=null && sharedPreference.getBoolean(Constants.INITIAL_CAPTURE_REQUEST_IN_BACKGROUND)){
-            showInitialCaptureDialog();
-            sharedPreference.setBoolean(Constants.INITIAL_CAPTURE_REQUEST_IN_BACKGROUND , false);
+            try {
+                showInitialCaptureDialog();
+                sharedPreference.setBoolean(Constants.INITIAL_CAPTURE_REQUEST_IN_BACKGROUND , false);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         if (sharedPreference!=null && sharedPreference.getBoolean(Constants.SIGNATURE_INITIAL_REPLACE_REQUEST_IN_BACKGROUND)){
             showReplaceSignatureInitialDialog();
@@ -4777,7 +4785,6 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 case "NotifySignerToCaptureInitial":
                     showInitialCaptureDialog();
                     break;
-
                 case "requestToReplaceSignature" :
                     showReplaceSignatureInitialDialog();
                     break;
@@ -4785,7 +4792,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
-    private void showSignatureCaptureDialog() {
+    private void showSignatureCaptureDialog() throws JSONException {
         //Toast.makeText(this, "Request to capture initial image", Toast.LENGTH_SHORT).show();
         // Show the capture signature dialog fragment
         CaptureSignerSignatureDialogFragment captureSignerSignatureDialogFragment = new CaptureSignerSignatureDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, customerType, new CaptureSignerSignatureDialogFragment.OptionSelectionInterface() {
@@ -4867,9 +4874,17 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         ft.addToBackStack(null);
         captureSignerSignatureDialogFragment.setCancelable(false);
         captureSignerSignatureDialogFragment.show(ft,"signature_dialog");
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("from", userMeetingIdentifier);
+        jsonObject.put("to", "All");
+        jsonObject.put("messageType", "SignatureDialogAlreadyOpen");
+        jsonObject.put("content", "SignatureDialogAlreadyOpen");
+        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+
     }
 
-    private void showInitialCaptureDialog() {
+    private void showInitialCaptureDialog() throws JSONException {
         //Toast.makeText(this, "Request to capture signature image", Toast.LENGTH_SHORT).show();
         // Show the capture initial dialog fragment
         CaptureSignerInitialDialogFragment captureSignerInitialDialogFragment = new CaptureSignerInitialDialogFragment(mActivity, userMeetingIdentifier, videoCallModel, authToken, requestID, userId, customerType, new CaptureSignerInitialDialogFragment.OptionSelectionInterface() {
@@ -4960,6 +4975,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         ft1.addToBackStack(null);
         captureSignerInitialDialogFragment.setCancelable(false);
         captureSignerInitialDialogFragment.show(ft1,"initial_dialog");
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("from", userMeetingIdentifier);
+        jsonObject.put("to", "All");
+        jsonObject.put("messageType", "InitialDialogAlreadyOpen");
+        jsonObject.put("content", "InitialDialogAlreadyOpen");
+        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+
     }
 
     private void showReplaceSignatureInitialDialog() {
