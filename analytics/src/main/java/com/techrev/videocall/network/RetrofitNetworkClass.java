@@ -1,21 +1,11 @@
 //package .TechRevVideoConferenceWrapper;
 package com.techrev.videocall.network;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-
-import androidx.annotation.NonNull;
 
 import com.techrev.videocall.utils.Constants;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

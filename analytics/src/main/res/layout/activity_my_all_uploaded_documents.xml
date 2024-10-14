@@ -104,6 +104,7 @@
                 android:paddingLeft="5dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
+                android:buttonTint="@color/color_primary"
                 />
 
             <LinearLayout
@@ -141,12 +142,12 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_uploaded_documents"
             android:layout_below="@id/header_title_section"
+            android:layout_above="@id/tv_add_document"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
+            android:layout_height="match_parent"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="6dp"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="10dp"
             tools:listitem="@layout/add_document_item_view"
             />
 
@@ -154,7 +155,7 @@
             android:id="@+id/tv_add_document"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add More Documents"
+            android:text="Add Documents"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:padding="10dp"

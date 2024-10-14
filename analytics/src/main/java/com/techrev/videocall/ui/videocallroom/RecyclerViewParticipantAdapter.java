@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.techrev.videocall.R;
 import com.techrev.videocall.utils.Constants;
 
@@ -35,13 +34,13 @@ public class RecyclerViewParticipantAdapter extends RecyclerView.Adapter<Recycle
 
     @NonNull
     @Override
-    public RecyclerViewParticipantAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.popup_participant_cardview, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerViewParticipantAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Log.d("====remoteParticipant", "Size" + remoteParticipantList.size());
 
         try {

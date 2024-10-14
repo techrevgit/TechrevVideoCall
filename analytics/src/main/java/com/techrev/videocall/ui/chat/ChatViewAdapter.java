@@ -35,8 +35,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.Headers;
-import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.R;
+import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
 
 import org.json.JSONException;

@@ -90,6 +90,7 @@ import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
@@ -103,44 +104,43 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
-
-
+import com.techrev.videocall.R;
 import com.techrev.videocall.dialogfragments.CaptureSignerInitialDialogFragment;
 import com.techrev.videocall.dialogfragments.CaptureSignerSignatureDialogFragment;
-import com.techrev.videocall.models.NotarizationActionModel;
-import com.techrev.videocall.models.RequestDetailsModel;
-import com.techrev.videocall.services.APictureCapturingService;
-import com.techrev.videocall.ui.camera.CameraActivity;
-import com.techrev.videocall.ui.cosigner.AddCoSignerActivity;
+import com.techrev.videocall.dialogfragments.RejoinCallDialogFragment;
+import com.techrev.videocall.dialogfragments.SignerAuthirizationDialogFragment;
 import com.techrev.videocall.models.AttachedFileUploadResponseModel;
-import com.techrev.videocall.ui.camera.CameraCapturerCompat;
 import com.techrev.videocall.models.CommonModel;
-import com.techrev.videocall.ui.cosigner.CosignerDetailsModel;
 import com.techrev.videocall.models.CustomerDisagreeCountModel;
 import com.techrev.videocall.models.DataModel;
 import com.techrev.videocall.models.DeleteMessageResponseModel;
 import com.techrev.videocall.models.EventModel;
 import com.techrev.videocall.models.MeetingDetailsModel;
-import com.techrev.videocall.ui.internet.NoInternetActivity;
-import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
-import com.techrev.videocall.utils.NotarizationActionUpdateManger;
-import com.techrev.videocall.utils.PictureCapturingListener;
-import com.techrev.videocall.services.PictureCapturingServiceImpl;
-import com.techrev.videocall.R;
-import com.techrev.videocall.dialogfragments.SignerAuthirizationDialogFragment;
+import com.techrev.videocall.models.NotarizationActionModel;
+import com.techrev.videocall.models.RequestDetailsModel;
 import com.techrev.videocall.models.SignerSignatureInitialAuthorizationModel;
 import com.techrev.videocall.models.UpdateRequestStatusResponse;
 import com.techrev.videocall.models.UploadImageModel;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
+import com.techrev.videocall.services.APictureCapturingService;
+import com.techrev.videocall.services.PictureCapturingServiceImpl;
+import com.techrev.videocall.ui.camera.CameraActivity;
+import com.techrev.videocall.ui.camera.CameraCapturerCompat;
 import com.techrev.videocall.ui.chat.ChatDataModel;
 import com.techrev.videocall.ui.chat.ChatMessageInterface;
 import com.techrev.videocall.ui.chat.ChatViewAdapter;
+import com.techrev.videocall.ui.cosigner.AddCoSignerActivity;
+import com.techrev.videocall.ui.cosigner.CosignerDetailsModel;
+import com.techrev.videocall.ui.internet.NoInternetActivity;
 import com.techrev.videocall.ui.mydocuments.DocumentsByRequestIdModel;
 import com.techrev.videocall.ui.mydocuments.MyCurrentUploadedDocumentsActivity;
+import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
 import com.techrev.videocall.utils.Constants;
 import com.techrev.videocall.utils.MySharedPreference;
+import com.techrev.videocall.utils.NotarizationActionUpdateManger;
+import com.techrev.videocall.utils.PictureCapturingListener;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.CameraCapturer.CameraSource;
 import com.twilio.video.LocalDataTrack;
@@ -523,6 +523,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private String isPrimarySigner, isWitness, customerType;
     private List<DataModel> dataModelList = new ArrayList<DataModel>();
     private boolean ONECLICK = false;
+    private boolean IS_SIGNATURE_CAPTURE_IN_PROGRESS = false;
+    private boolean IS_INITIAL_CAPTURE_IN_PROGRESS = false;
     LocalBroadcastManager mLocalBroadcastManager;
     BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
 
@@ -972,8 +974,8 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             });
         }
         else {
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(VideoActivity.this, new String[]{android.Manifest.permission.CAMERA}, 50);
+            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(VideoActivity.this, new String[]{Manifest.permission.CAMERA}, 50);
             }else {
                 cameraId = findFrontFacingCamera();
                 if (cameraId < 0) {
@@ -1842,6 +1844,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 showParticipantScreenInFront(screenShowingParticipantPosition);
             }else {
                 if (!isMyViewActive){
+                    //showRejoinCallDialog(); // For testing purpose
                     showNewParticipantVideoInFront(eventModel);
                 }
             }
@@ -4780,13 +4783,49 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     break;
                 case "RemoveMessage":
                 case "NotifySignerToCaptureSignature":
-                    showSignatureCaptureDialog();
+                    if (IS_SIGNATURE_CAPTURE_IN_PROGRESS) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("from", userMeetingIdentifier);
+                        jsonObject.put("to", "All");
+                        jsonObject.put("messageType", "SignatureDialogAlreadyOpen");
+                        jsonObject.put("content", "SignatureDialogAlreadyOpen");
+                        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                    } else if (IS_INITIAL_CAPTURE_IN_PROGRESS) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("from", userMeetingIdentifier);
+                        jsonObject.put("to", "All");
+                        jsonObject.put("messageType", "InitialDialogAlreadyOpen");
+                        jsonObject.put("content", "InitialDialogAlreadyOpen");
+                        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                    } else {
+                        showSignatureCaptureDialog();
+                    }
                     break;
                 case "NotifySignerToCaptureInitial":
-                    showInitialCaptureDialog();
+                    if (IS_SIGNATURE_CAPTURE_IN_PROGRESS) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("from", userMeetingIdentifier);
+                        jsonObject.put("to", "All");
+                        jsonObject.put("messageType", "SignatureDialogAlreadyOpen");
+                        jsonObject.put("content", "SignatureDialogAlreadyOpen");
+                        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                    } else if (IS_INITIAL_CAPTURE_IN_PROGRESS) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("from", userMeetingIdentifier);
+                        jsonObject.put("to", "All");
+                        jsonObject.put("messageType", "InitialDialogAlreadyOpen");
+                        jsonObject.put("content", "InitialDialogAlreadyOpen");
+                        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+                    } else {
+                        showInitialCaptureDialog();
+                    }
                     break;
                 case "requestToReplaceSignature" :
                     showReplaceSignatureInitialDialog();
+                    break;
+                case "customerDataTrackMissing":
+                    Log.e(TAG, "Inside customerDataTrackMissing case");
+                    showRejoinCallDialog();
                     break;
             }
         }
@@ -4813,7 +4852,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                             == PackageManager.PERMISSION_DENIED) {
                                         captureImageThroughCamera("Signature");
                                     } else {
-                                        ActivityCompat.requestPermissions(VideoActivity.this, new String[] {Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_SIGNATURE);
+                                        ActivityCompat.requestPermissions(VideoActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_CODE_FOR_SIGNATURE);
                                     }
                                 }
                             })
@@ -4840,14 +4879,14 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     //Toast.makeText(mActivity, "Opening whiteboard", Toast.LENGTH_SHORT).show();
                                     Intent it = new Intent(mActivity, WhiteBoardActivity.class);
-                                    it.putExtra("REQUEST_ID" , requestID);
-                                    it.putExtra("AUTH_TOKEN" , authToken);
-                                    it.putExtra("USER_ID" , userId);
-                                    it.putExtra("CUSTOMER_TYPE" , customerType);
-                                    it.putExtra("TYPE" , "1");
-                                    it.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
+                                    it.putExtra("REQUEST_ID", requestID);
+                                    it.putExtra("AUTH_TOKEN", authToken);
+                                    it.putExtra("USER_ID", userId);
+                                    it.putExtra("CUSTOMER_TYPE", customerType);
+                                    it.putExtra("TYPE", "1");
+                                    it.putExtra("USER_MEETING_IDENTIFIER", userMeetingIdentifier);
                                     /*it.putExtra("VIDEO_CALL_MODEL_OBJ" , videoCallModel);*/
-                                    mActivity.startActivityForResult(it , SIGNATURE_INITIAL_CAPTURE_CODE);
+                                    mActivity.startActivityForResult(it, SIGNATURE_INITIAL_CAPTURE_CODE);
                                 }
                             })
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -4865,6 +4904,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                 }
             }
+        }, new CaptureSignerSignatureDialogFragment.DialogStateInterface() {
+            @Override
+            public void onDialogClosed(boolean isClosed) {
+                IS_SIGNATURE_CAPTURE_IN_PROGRESS = false;
+            }
         });
         FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
         Fragment prev = mActivity.getFragmentManager().findFragmentByTag("signature_dialog");
@@ -4874,13 +4918,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         ft.addToBackStack(null);
         captureSignerSignatureDialogFragment.setCancelable(false);
         captureSignerSignatureDialogFragment.show(ft,"signature_dialog");
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("from", userMeetingIdentifier);
-        jsonObject.put("to", "All");
-        jsonObject.put("messageType", "SignatureDialogAlreadyOpen");
-        jsonObject.put("content", "SignatureDialogAlreadyOpen");
-        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+        IS_SIGNATURE_CAPTURE_IN_PROGRESS = true;
 
     }
 
@@ -4966,6 +5004,11 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
                 }
             }
+        }, new CaptureSignerInitialDialogFragment.DialogStateInterface() {
+            @Override
+            public void onDialogClosed(boolean isClosed) {
+                IS_INITIAL_CAPTURE_IN_PROGRESS = false;
+            }
         });
         FragmentTransaction ft1 = mActivity.getFragmentManager().beginTransaction();
         Fragment prev1 = mActivity.getFragmentManager().findFragmentByTag("initial_dialog");
@@ -4975,13 +5018,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         ft1.addToBackStack(null);
         captureSignerInitialDialogFragment.setCancelable(false);
         captureSignerInitialDialogFragment.show(ft1,"initial_dialog");
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("from", userMeetingIdentifier);
-        jsonObject.put("to", "All");
-        jsonObject.put("messageType", "InitialDialogAlreadyOpen");
-        jsonObject.put("content", "InitialDialogAlreadyOpen");
-        videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
+        IS_INITIAL_CAPTURE_IN_PROGRESS = true;
 
     }
 
@@ -5086,8 +5123,27 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         }
     }
 
+    private void showRejoinCallDialog() {
+        RejoinCallDialogFragment rejoinCallDialogFragment = new RejoinCallDialogFragment(this, new RejoinCallDialogFragment.DialogStateInterface() {
+            @Override
+            public void onDialogClosed(boolean isClosed) {
+                exitFromTheRoom();
+            }
+        });
+
+        FragmentTransaction ft1 = mActivity.getFragmentManager().beginTransaction();
+        Fragment prev1 = mActivity.getFragmentManager().findFragmentByTag("rejoin_call_dialog");
+        if (prev1 != null) {
+            ft1.remove(prev1);
+        }
+        ft1.addToBackStack(null);
+        rejoinCallDialogFragment.setCancelable(false);
+        rejoinCallDialogFragment.show(ft1,"rejoin_call_dialog");
+
+    }
+
     private void captureImageThroughCamera (String type) {
-        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (type.equalsIgnoreCase("Signature")) {
             startActivityForResult(cameraIntent, CAMERA_REQUEST_FOR_SIGNATURE);
         } else {

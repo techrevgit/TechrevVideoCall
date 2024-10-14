@@ -4,15 +4,10 @@ import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Build;
-
-
-import android.util.Log;
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.twilio.video.Camera2Capturer;

@@ -36,6 +36,7 @@
         android:paddingLeft="5dp"
         android:layout_gravity="center_vertical"
         android:visibility="visible"
+        android:buttonTint="@color/color_primary"
         />
 
     <ImageView

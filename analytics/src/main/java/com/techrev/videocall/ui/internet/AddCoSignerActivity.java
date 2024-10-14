@@ -1,4 +1,4 @@
-package com.techrev.videocall.ui.cosigner;
+package com.techrev.videocall.ui.internet;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -35,7 +35,7 @@ import com.techrev.videocall.adapters.UserListAdapter;
 import com.techrev.videocall.models.SearchUserResponse;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
-import com.techrev.videocall.ui.internet.NoInternetActivity;
+import com.techrev.videocall.ui.cosigner.CosignerDetailsModel;
 import com.techrev.videocall.ui.videocallroom.VideoActivity;
 import com.techrev.videocall.ui.videocallroom.VideoCallManager;
 import com.techrev.videocall.utils.Constants;
@@ -70,7 +70,7 @@ public class AddCoSignerActivity extends Activity {
     private TextView tvBtnAdd;
 
     //Added by Rupesh
-    private ArrayList<CosignerDetailsModel.Cosigners> cosignersList;
+    private ArrayList<com.techrev.videocall.ui.cosigner.CosignerDetailsModel.Cosigners> cosignersList;
     private int cosignerCount = 0;
     private static final String TAG = "AddCoSignerActivity";
     private String cosignerID = "";
@@ -331,10 +331,10 @@ public class AddCoSignerActivity extends Activity {
         obj.put("requestId" , meeting_id);
 
         String data = obj.toString();
-        Call<CosignerDetailsModel> responseBodyCall = serviceLocal.getAllCoSignerDetailsByMeetingId(authToken, data);
-        responseBodyCall.enqueue(new Callback<CosignerDetailsModel>() {
+        Call<com.techrev.videocall.ui.cosigner.CosignerDetailsModel> responseBodyCall = serviceLocal.getAllCoSignerDetailsByMeetingId(authToken, data);
+        responseBodyCall.enqueue(new Callback<com.techrev.videocall.ui.cosigner.CosignerDetailsModel>() {
             @Override
-            public void onResponse(Call<CosignerDetailsModel> call, Response<CosignerDetailsModel> response) {
+            public void onResponse(Call<com.techrev.videocall.ui.cosigner.CosignerDetailsModel> call, Response<com.techrev.videocall.ui.cosigner.CosignerDetailsModel> response) {
                 if(dialog!=null){
                     dialog.dismiss();
                 }

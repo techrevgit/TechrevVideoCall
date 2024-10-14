@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.gson.JsonObject;
 import com.techrev.videocall.R;
 import com.techrev.videocall.models.MyAllDocListModel;
 
@@ -35,17 +34,14 @@ public class MyAllDocListAdapter extends RecyclerView.Adapter<MyAllDocListAdapte
     }
 
     private OnDocsSelected onDocsSelected;
-    JsonObject obj;
     private String authToken;
-    private MyViewHolder mViewHolder;
-    private int mPosition;
 
-    public MyAllDocListAdapter (Activity activity , String token, List<MyAllDocListModel.AllDocs> list, OnDocsSelected docsSelected) {
+    public MyAllDocListAdapter (Activity activity, String token, List<MyAllDocListModel.AllDocs> list, OnDocsSelected docsSelected) {
         this.mActivity = activity;
         this.authToken = token;
         this.mList = list;
+        this.selectedDocIdList = new ArrayList<>();
         this.onDocsSelected = docsSelected;
-        //Log.d(TAG, "MyAllDocListAdapter: "+new Gson().toJson(mList));
     }
 
     @NonNull
@@ -58,67 +54,48 @@ public class MyAllDocListAdapter extends RecyclerView.Adapter<MyAllDocListAdapte
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        Log.d(TAG, "onBindViewHolder: POSITION: " + position + " & DOC NAME: " + mList.get(position).getDocumentName());
 
-        Log.d(TAG, "onBindViewHolder: POSITION: "+position+" & DOC NAME: "+mList.get(position).getDocumentName());
-        selectedDocIdList = new ArrayList<>();
-        MyViewHolder viewHolder = (MyViewHolder) holder;
-        mViewHolder = viewHolder;
-        mPosition = position;
-        viewHolder.tv_document_title.setVisibility(View.GONE);
-        viewHolder.cb_document_title.setVisibility(View.VISIBLE);
-        viewHolder.cb_document_title.setText(mList.get(position).getDocumentName());
-        viewHolder.cb_document_title.setChecked(mList.get(position).isSelected());
-        viewHolder.cb_document_title.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        holder.cb_document_title.setVisibility(View.VISIBLE);
+        holder.tv_document_title.setVisibility(View.GONE);
+
+        // Set the document name to the checkbox text
+        holder.cb_document_title.setText(mList.get(position).getDocumentName());
+        holder.cb_document_title.setOnCheckedChangeListener(null); // Remove previous listener to avoid unintended calls
+
+        // Set the checked state based on the model's selected state
+        holder.cb_document_title.setChecked(mList.get(position).isSelected());
+
+        // Handle individual checkbox selection/deselection
+        holder.cb_document_title.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                /*obj = new JsonObject();
-                if (b) {
-                    obj.addProperty("DocId" , mList.get(position).getDocId());
-                    selectedDocIdList.add(mList.get(position).getDocId());
-                } else {
-                    selectedDocIdList.remove(mList.get(position).getDocId());
-                }
-                Log.d(TAG, "onCheckedChanged: "+selectedDocIdList.size());
-                onDocsSelected.onDocumentsSelected(selectedDocIdList);*/
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (position != RecyclerView.NO_POSITION) {
-                    mList.get(position).setSelected(b); // Update selected state of the document
+                    mList.get(position).setSelected(isChecked); // Update selected state of the document
 
-                    if (b) {
+                    if (isChecked) {
                         selectedDocIdList.add(mList.get(position).getDocId());
                     } else {
                         selectedDocIdList.remove(mList.get(position).getDocId());
                     }
 
+                    // Notify the callback with the updated list
                     onDocsSelected.onDocumentsSelected(selectedDocIdList);
                 }
             }
         });
-        viewHolder.iv_more.setOnClickListener(new View.OnClickListener() {
+
+        // Handle more options button click
+        holder.iv_more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showMoreOptionsInBottomSheet(position);
             }
         });
-
-        /*obj = new JsonObject();
-        if (isSelectAll) {
-            viewHolder.cb_document_title.setChecked(true);
-            obj.addProperty("DocId" , mList.get(position).getDocId());
-            selectedDocIdList.add(mList.get(position).getDocId());
-            Log.d(TAG, "onBindViewHolder: inside if"+selectedDocIdList.size());
-            onDocsSelected.onDocumentsSelected(selectedDocIdList);
-        } else {
-            viewHolder.cb_document_title.setChecked(false);
-            selectedDocIdList.remove(mList.get(position).getDocId());
-            Log.d(TAG, "onBindViewHolder: inside else"+selectedDocIdList.size());
-            onDocsSelected.onDocumentsSelected(selectedDocIdList);
-        }*/
-
     }
 
     @Override
     public int getItemCount() {
-        Log.d(TAG, "getItemCount: "+mList.size());
         return mList.size();
     }
 
@@ -136,7 +113,6 @@ public class MyAllDocListAdapter extends RecyclerView.Adapter<MyAllDocListAdapte
     }
 
     private void showMoreOptionsInBottomSheet(int position) {
-
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(mActivity);
         bottomSheetDialog.setContentView(R.layout.request_doc_list_more_bottom_sheet);
 
@@ -146,15 +122,15 @@ public class MyAllDocListAdapter extends RecyclerView.Adapter<MyAllDocListAdapte
         TextView tv_cancel = bottomSheetDialog.findViewById(R.id.tv_cancel);
 
         tv_delete_document.setVisibility(View.GONE);
-        tv_document_name.setText(mList.get(position).getDocumentName()+".pdf");
+        tv_document_name.setText(mList.get(position).getDocumentName() + ".pdf");
 
         tv_view_document.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 bottomSheetDialog.cancel();
-                Intent it = new Intent(mActivity , PreviewRequestDocumentActivity.class);
-                it.putExtra("AUTH_TOKEN" , authToken);
-                it.putExtra("DOC_ID" , mList.get(position).getDocId());
+                Intent it = new Intent(mActivity, PreviewRequestDocumentActivity.class);
+                it.putExtra("AUTH_TOKEN", authToken);
+                it.putExtra("DOC_ID", mList.get(position).getDocId());
                 mActivity.startActivity(it);
             }
         });
@@ -167,15 +143,11 @@ public class MyAllDocListAdapter extends RecyclerView.Adapter<MyAllDocListAdapte
         });
 
         bottomSheetDialog.show();
-
     }
 
-    public void clearSelectedDocIdList() {
-        selectedDocIdList.clear();
-    }
-
+    // Select or deselect all documents
     public void isAllDocsSelected(boolean isSelectAll) {
-        selectedDocIdList.clear();
+        selectedDocIdList.clear(); // Clear the selected document list before operation
 
         // Iterate through all items in the list
         for (MyAllDocListModel.AllDocs doc : mList) {
@@ -187,8 +159,22 @@ public class MyAllDocListAdapter extends RecyclerView.Adapter<MyAllDocListAdapte
         }
 
         notifyDataSetChanged(); // Notify adapter that the dataset has changed
-        Log.d(TAG, "isAllDocsSelected Selected Doc List: "+selectedDocIdList.size());
+        Log.d(TAG, "isAllDocsSelected Selected Doc List: " + selectedDocIdList.size());
         onDocsSelected.onDocumentsSelected(selectedDocIdList);
     }
 
+    // Check all documents without modifying the selectedDocIdList
+    public void checkAllDocuments(boolean isCheckAll) {
+        // Iterate through all items in the list
+        for (MyAllDocListModel.AllDocs doc : mList) {
+            doc.setSelected(isCheckAll); // Update the selected state for each item
+        }
+
+        notifyDataSetChanged(); // Notify adapter that the dataset has changed
+    }
+
+    // Clear the selected document list
+    public void clearSelectedDocIdList() {
+        selectedDocIdList.clear();
+    }
 }

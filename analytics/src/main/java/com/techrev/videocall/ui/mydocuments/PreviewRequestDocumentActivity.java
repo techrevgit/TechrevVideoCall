@@ -1,24 +1,14 @@
 package com.techrev.videocall.ui.mydocuments;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -30,21 +20,23 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.pdfview.PDFView;
-import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.R;
+import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
 import com.techrev.videocall.utils.Constants;
 
 import org.json.JSONException;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

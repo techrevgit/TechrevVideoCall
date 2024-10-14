@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -21,11 +22,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.app.DialogFragment;
-
-/*import com.developer.kalert.KAlertDialog;*/
 import androidx.cardview.widget.CardView;
-
 
 import com.google.gson.Gson;
 import com.techrev.videocall.R;
@@ -33,7 +30,6 @@ import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
-import com.techrev.videocall.ui.videocallroom.VideoActivity;
 import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;
@@ -56,6 +52,7 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
     private String userMeetingIdentifier = "";
     private VideoCallModel videoCallModel;
     private OptionSelectionInterface optionSelectionInterface;
+    private DialogStateInterface dialogStateInterface;
     static RetrofitNetworkClass networkClass = new RetrofitNetworkClass();
     static Retrofit retrofitLocal = networkClass.callingURL();
     static NetworkInterface serviceLocal = retrofitLocal.create(NetworkInterface.class);
@@ -64,12 +61,16 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
         public void onOptionSelected(int selectedOption);
     }
 
+    public interface DialogStateInterface {
+        void onDialogClosed(boolean isClosed);
+    }
+
     public CaptureSignerSignatureDialogFragment() {
 
     }
 
     @SuppressLint("ValidFragment")
-    public CaptureSignerSignatureDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestId, String userId, String isPrimarySigner, OptionSelectionInterface selectionInterface) {
+    public CaptureSignerSignatureDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestId, String userId, String isPrimarySigner, OptionSelectionInterface selectionInterface, DialogStateInterface dialogStateInterface) {
         this.mActivity = activity;
         this.userMeetingIdentifier = meetingIdetifier;
         this.videoCallModel = model;
@@ -78,6 +79,7 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
         this.userID = userId;
         this.isPrimarySigner = isPrimarySigner;
         this.optionSelectionInterface = selectionInterface;
+        this.dialogStateInterface = dialogStateInterface;
     }
 
     @NonNull
@@ -110,6 +112,7 @@ public class CaptureSignerSignatureDialogFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 mActivity.getFragmentManager().popBackStack();
+                dialogStateInterface.onDialogClosed(true);
             }
         });
 

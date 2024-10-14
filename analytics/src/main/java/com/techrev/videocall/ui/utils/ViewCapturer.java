@@ -1,4 +1,4 @@
-package com.techrev.videocall.utils;
+package com.techrev.videocall.ui.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

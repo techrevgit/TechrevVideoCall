@@ -1,12 +1,5 @@
 package com.techrev.videocall.ui.camera;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -28,13 +21,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.google.gson.Gson;
 import com.techrev.videocall.R;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
-import com.techrev.videocall.ui.videocallroom.VideoActivity;
-import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
 import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;

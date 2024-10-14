@@ -1,6 +1,7 @@
 package com.techrev.videocall.models;
 
 import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class NotarizationActionModel {

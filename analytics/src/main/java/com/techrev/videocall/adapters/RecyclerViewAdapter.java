@@ -9,7 +9,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.techrev.videocall.R;
 import com.techrev.videocall.ui.videocallroom.ParticipantDetailsModel;
 

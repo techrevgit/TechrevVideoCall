@@ -22,7 +22,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import androidx.cardview.widget.CardView;
 
 import com.google.gson.Gson;
@@ -31,7 +30,6 @@ import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
-import com.techrev.videocall.ui.videocallroom.VideoActivity;
 import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;
@@ -54,6 +52,7 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
     private String userMeetingIdentifier = "";
     private VideoCallModel videoCallModel;
     private OptionSelectionInterface optionSelectionInterface;
+    private DialogStateInterface dialogStateInterface;
     static RetrofitNetworkClass networkClass = new RetrofitNetworkClass();
     static Retrofit retrofitLocal = networkClass.callingURL();
     static NetworkInterface serviceLocal = retrofitLocal.create(NetworkInterface.class);
@@ -62,12 +61,16 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
         public void onOptionSelected(int selectedOption);
     }
 
+    public interface DialogStateInterface {
+        void onDialogClosed(boolean isClosed);
+    }
+
     public CaptureSignerInitialDialogFragment() {
 
     }
 
     @SuppressLint("ValidFragment")
-    public CaptureSignerInitialDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestId, String userId, String isPrimarySigner, OptionSelectionInterface selectionInterface) {
+    public CaptureSignerInitialDialogFragment(Activity activity, String meetingIdetifier, VideoCallModel  model, String authToken, String requestId, String userId, String isPrimarySigner, OptionSelectionInterface selectionInterface, DialogStateInterface dialogStateInterface) {
         this.mActivity = activity;
         this.userMeetingIdentifier = meetingIdetifier;
         this.videoCallModel = model;
@@ -76,6 +79,7 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
         this.userID = userId;
         this.isPrimarySigner = isPrimarySigner;
         this.optionSelectionInterface = selectionInterface;
+        this.dialogStateInterface = dialogStateInterface;
     }
 
     @NonNull
@@ -109,6 +113,7 @@ public class CaptureSignerInitialDialogFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 mActivity.getFragmentManager().popBackStack();
+                dialogStateInterface.onDialogClosed(true);
             }
         });
 

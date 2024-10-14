@@ -25,7 +25,6 @@ import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.models.RequestDocModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
-import com.techrev.videocall.ui.videocallroom.VideoActivity;
 import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;

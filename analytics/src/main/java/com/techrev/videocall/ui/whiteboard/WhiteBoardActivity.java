@@ -1,8 +1,5 @@
 package com.techrev.videocall.ui.whiteboard;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -11,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,13 +18,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.google.gson.Gson;
 import com.suyati.telvin.drawingboard.DrawingBoard;
 import com.techrev.videocall.R;
 import com.techrev.videocall.models.VideoCallModel;
 import com.techrev.videocall.network.NetworkInterface;
 import com.techrev.videocall.network.RetrofitNetworkClass;
-import com.techrev.videocall.ui.camera.CameraActivity;
 import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;

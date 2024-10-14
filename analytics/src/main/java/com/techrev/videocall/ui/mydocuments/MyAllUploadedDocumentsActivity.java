@@ -1,19 +1,11 @@
 package com.techrev.videocall.ui.mydocuments;
 
-import android.content.*;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -32,15 +24,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.techrev.videocall.R;
 import com.techrev.videocall.models.AttachedFileUploadResponseModel;
 import com.techrev.videocall.models.CommonModel;
 import com.techrev.videocall.models.MyAllDocListModel;
 import com.techrev.videocall.network.NetworkInterface;
-import com.techrev.videocall.R;
 import com.techrev.videocall.network.RetrofitNetworkClass;
-import com.techrev.videocall.ui.videocallroom.VideoActivity;
 import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 
 import org.json.JSONException;
@@ -537,14 +537,11 @@ public class MyAllUploadedDocumentsActivity extends AppCompatActivity {
                 if(response != null){
                     Log.d(TAG , "My Uploaded Documents Data: \n"+new Gson().toJson(response.body()));
                     adapter = new MyAllDocListAdapter(MyAllUploadedDocumentsActivity.this, authToken,
-                            response.body().getAllDocs(), new MyAllDocListAdapter.OnDocsSelected() {
-                        @Override
-                        public void onDocumentsSelected(List<String> docIdList) {
-                            selectedDocIdList = docIdList;
-                            Log.d(TAG, "onDocumentsSelected: selected item size: "+selectedDocIdList.size());
-                            Log.d(TAG , "Selected Doc IDs List Data: "+new Gson().toJson(selectedDocIdList));
-                        }
-                    });
+                            response.body().getAllDocs(), docIdList -> {
+                                selectedDocIdList = docIdList;
+                                Log.d(TAG, "onDocumentsSelected: selected item size: "+selectedDocIdList.size());
+                                Log.d(TAG , "Selected Doc IDs List Data: "+new Gson().toJson(selectedDocIdList));
+                            });
                     RecyclerView.LayoutManager manager = new LinearLayoutManager(MyAllUploadedDocumentsActivity.this, LinearLayoutManager.VERTICAL, false);
                     rv_uploaded_documents.setLayoutManager(manager);
                     rv_uploaded_documents.setAdapter(adapter);

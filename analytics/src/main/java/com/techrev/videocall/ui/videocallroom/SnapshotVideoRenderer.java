@@ -1,5 +1,7 @@
 package com.techrev.videocall.ui.videocallroom;
 
+import static android.graphics.ImageFormat.NV21;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -12,14 +14,12 @@ import android.widget.ImageView;
 import com.twilio.video.I420Frame;
 import com.twilio.video.VideoRenderer;
 
-import tvi.webrtc.RendererCommon;
-import tvi.webrtc.YuvConverter;
-
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static android.graphics.ImageFormat.NV21;
+import tvi.webrtc.RendererCommon;
+import tvi.webrtc.YuvConverter;
 
 /**
  * SnapshotVideoRenderer demonstrates how to implement a custom {@link VideoRenderer}. Caches the

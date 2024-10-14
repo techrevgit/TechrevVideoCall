@@ -1,6 +1,7 @@
 package com.techrev.videocall.ui.permission;
 
 import static android.os.Build.VERSION.SDK_INT;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;

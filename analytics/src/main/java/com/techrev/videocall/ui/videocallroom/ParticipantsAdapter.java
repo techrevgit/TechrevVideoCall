@@ -18,7 +18,6 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.techrev.videocall.R;
 import com.twilio.video.VideoTrack;
 import com.twilio.video.VideoView;
