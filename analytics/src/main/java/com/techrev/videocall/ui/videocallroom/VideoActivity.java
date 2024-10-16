@@ -6042,7 +6042,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     private void exitFromTheRoom() {
         Log.d(TAG , "Thread Name in exitFromTheRoom: "+Thread.currentThread().getName());
-        if (member_Type == 1) {
+        /*if (member_Type == 1) {*/
             // Newly Added start
             try {
                 JSONObject jsonObject = new JSONObject();
@@ -6055,10 +6055,10 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 Log.d("====Exception", "" + e.toString());
             }
             // Newly Added End
-        }
+        /*}*/
 
         // New data track added By Rupesh for notifying the web that the customer has left the call
-        try {
+        /*try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("from", userMeetingIdentifier);
             jsonObject.put("to", "All");
@@ -6067,7 +6067,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
         } catch (Exception e) {
             Log.d("====Exception", "" + e.toString());
-        }
+        }*/
         // New data track added By Rupesh for notifying the web that the customer has left the call
 
         runOnUiThread(new Runnable() {
