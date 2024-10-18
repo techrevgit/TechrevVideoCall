@@ -76,7 +76,7 @@ afterEvaluate {
 
                 groupId = 'com.github.techrevgit'
                 artifactId = 'techrev-videocall'
-                version = '4.2.2' // Increase this while releasing latest version
+                version = '4.2.3' // Increase this while releasing latest version
 
             }
         }

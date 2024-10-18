@@ -4844,7 +4844,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                     break;
                 case "customerDataTrackMissing":
                     Log.e(TAG, "Inside customerDataTrackMissing case");
-                    showRejoinCallDialog();
+                    //showRejoinCallDialog();
                     break;
             }
         }
