@@ -138,6 +138,7 @@ import com.techrev.videocall.ui.mydocuments.DocumentsByRequestIdModel;
 import com.techrev.videocall.ui.mydocuments.MyCurrentUploadedDocumentsActivity;
 import com.techrev.videocall.ui.whiteboard.WhiteBoardActivity;
 import com.techrev.videocall.utils.Constants;
+import com.techrev.videocall.utils.DataManager;
 import com.techrev.videocall.utils.MySharedPreference;
 import com.techrev.videocall.utils.NotarizationActionUpdateManger;
 import com.techrev.videocall.utils.PictureCapturingListener;
@@ -258,6 +259,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
     private String passcode = "";
     private String maxImageCaptureLimit = "";
     private String userMeetingIdentifier = "";
+    private String hostMeetingIdentifier = "";
     FrameLayout video_view;
     private RelativeLayout participantsview;
     private String clientId = "";
@@ -1436,6 +1438,7 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             videoCallManager.endForeground();
             videoCallManager.unbindService();
             videoCallManager=null;
+            Log.d(TAG , "ROOM_CHECK: Calling onDestroy() from VideoActivity");
         }
         if(lmdAudioSwitch!=null)
         {
@@ -1718,6 +1721,9 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 dialogNoHost.dismiss();
             }
             String name = eventModel.getTechrevRemoteParticipant().remoteParticipant.getIdentity();
+            if (name.contains("hoster-")) {
+                hostMeetingIdentifier = name;
+            }
             List<String> splitString = Arrays.asList(name.split("\\-"));
             String participantName = "";
             if (splitString.size() > 0){
@@ -2481,12 +2487,18 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
             public void onClick(View v) {
                 if (isControlMenuClickable){
                     sharedPreference.setBoolean(Constants.COSIGNER_ACTIVITY_IN_FOREGROUND , true);
+                    DataManager.getInstance().setDataModelList(dataModelList);
+                    DataManager.getInstance().setVideoCallModel(videoCallModel);
+
                     Intent intent = new Intent(getApplicationContext(), AddCoSignerActivity.class);
                     intent.putExtra("AUTHORIZATION_TOKEN", authToken);
                     intent.putExtra("REQUEST_ID", requestID);
                     intent.putExtra("USER_ID", userId);
                     intent.putExtra("USER_MEETING_IDENTIFIER", userMeetingIdentifier);
                     intent.putExtra("IS_PRIMARY_SIGNER", isPrimarySigner);
+                    intent.putExtra("IS_WITNESS", isWitness);
+                    intent.putExtra("CUSTOMER_TYPE", customerType);
+                    intent.putExtra("IS_COSIGNER", isCoSigner);
                     startActivityForResult(intent, FLAG_ACTIVITY_ADD_CO_SIGNER);
                 }
             }
@@ -3282,12 +3294,19 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
         @Override
         protected Intent doInBackground(Void... voids) {
             // Perform any background operations if needed
+            DataManager.getInstance().setDataModelList(dataModelList);
+            DataManager.getInstance().setVideoCallModel(videoCallModel);
+
             Intent intent = new Intent(VideoActivity.this, MyCurrentUploadedDocumentsActivity.class);
             intent.putExtra("REQUEST_ID", requestID);
             intent.putExtra("AUTH_TOKEN", authToken);
             intent.putExtra("USER_ID", userId);
             intent.putExtra("IS_REQUEST_CREATED_BY_CUSTOMER", IS_REQUEST_CREATED_BY_CUSTOMER);
             intent.putExtra("IS_PRIMARY_SIGNER", isPrimarySigner);
+            intent.putExtra("IS_WITNESS", isWitness);
+            intent.putExtra("CUSTOMER_TYPE", customerType);
+            intent.putExtra("IS_COSIGNER", isCoSigner);
+            intent.putExtra("USER_MEETING_IDENTIFIER" , userMeetingIdentifier);
             return intent;
         }
 
@@ -6042,12 +6061,12 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
 
     private void exitFromTheRoom() {
         Log.d(TAG , "Thread Name in exitFromTheRoom: "+Thread.currentThread().getName());
-        /*if (member_Type == 1) {*/
+        if (member_Type == 1) {
             // Newly Added start
             try {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("from", userMeetingIdentifier);
-                jsonObject.put("to", "All");
+                jsonObject.put("to", hostMeetingIdentifier);
                 jsonObject.put("messageType", "LeaveFromRoom");
                 jsonObject.put("content", "Thank you for your time.");
                 videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
@@ -6055,19 +6074,19 @@ public class VideoActivity extends Activity implements View.OnTouchListener , Ch
                 Log.d("====Exception", "" + e.toString());
             }
             // Newly Added End
-        /*}*/
+        }
 
         // New data track added By Rupesh for notifying the web that the customer has left the call
-        /*try {
+        try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("from", userMeetingIdentifier);
-            jsonObject.put("to", "All");
+            jsonObject.put("to", hostMeetingIdentifier);
             jsonObject.put("messageType", "CustomerLeaveFromRoom");
             jsonObject.put("content", "Thank you for your time.");
             videoCallModel.getLocalDataTrackPublicationGlobal().getLocalDataTrack().send(jsonObject.toString());
         } catch (Exception e) {
             Log.d("====Exception", "" + e.toString());
-        }*/
+        }
         // New data track added By Rupesh for notifying the web that the customer has left the call
 
         runOnUiThread(new Runnable() {

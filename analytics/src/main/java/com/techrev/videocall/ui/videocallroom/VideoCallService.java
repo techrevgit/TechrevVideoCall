@@ -11,6 +11,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -424,6 +425,7 @@ public class VideoCallService extends Service {
             if (room == null) {
                 Log.d(TAG , "room = null");
                 room = Video.connect(this, connectOptionsBuilder.build(), roomListener());
+                Log.d(TAG , "ROOM_CHECK: ROOM CONNECTED SUCCESSFULLY!");
             } else {
                 Log.d(TAG , "room != null");
             }
@@ -585,8 +587,7 @@ public class VideoCallService extends Service {
                 if (name.contains("hoster-")){
                     LocalBroadcastManager localBroadcastManager = LocalBroadcastManager
                             .getInstance(VideoCallService.this);
-                    localBroadcastManager.sendBroadcast(new Intent(
-                            "com.enotaryoncall.customer.action.close"));
+                    localBroadcastManager.sendBroadcast(new Intent("com.enotaryoncall.customer.action.close"));
 
                     /*Added by Rupesh to close foreground screens*/
                     localBroadcastManager.sendBroadcast(new Intent("com.enotaryoncall.customer.action.close.notary_ended_call"));
@@ -1269,6 +1270,9 @@ public class VideoCallService extends Service {
 
     private void processRequest(DataModel dModel) {
 
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager
+                .getInstance(VideoCallService.this);
+
         if (dModel != null) {
             switch (dModel.getMessageType()) {
 
@@ -1284,6 +1288,10 @@ public class VideoCallService extends Service {
                         sharedPreference.setBoolean(Constants.SIGNATURE_CAPTURE_REQUEST_IN_BACKGROUND , true);
                         /*Added By Rupesh*/
                     }
+
+                    // To send signature capture signal to all screens in the app
+                    //localBroadcastManager.sendBroadcast(new Intent("com.enotaryoncall.customer.action.signature_capture_request"));
+
                     break;
                 case "NotifySignerToCaptureInitial":
                     if (APP_STATUS != Constants.APP_STATUS_FOREGROUND) {
@@ -1291,6 +1299,10 @@ public class VideoCallService extends Service {
                         sharedPreference.setBoolean(Constants.INITIAL_CAPTURE_REQUEST_IN_BACKGROUND , true);
                         /*Added By Rupesh*/
                     }
+
+                    // To send initial capture signal to all screens in the app
+                    //localBroadcastManager.sendBroadcast(new Intent("com.enotaryoncall.customer.action.initial_capture_request"));
+
                     break;
                 case "requestToReplaceSignature":
                     if (APP_STATUS != Constants.APP_STATUS_FOREGROUND) {
@@ -1298,6 +1310,17 @@ public class VideoCallService extends Service {
                         sharedPreference.setBoolean(Constants.SIGNATURE_INITIAL_REPLACE_REQUEST_IN_BACKGROUND , true);
                         /*Added By Rupesh*/
                     }
+
+                    // To send signature/initial replace signal to all screens in the app
+                    //localBroadcastManager.sendBroadcast(new Intent("com.enotaryoncall.customer.action.signature_initial_replace_request"));
+
+                    break;
+                case "LeaveFromRoom":
+                case "NotaryCancelsRequest":
+                case "NotaryEndCallOfCustomer":
+                case "RemoveCustomersFromMobile":
+                    // Handle LeaveFromRoom
+                    localBroadcastManager.sendBroadcast(new Intent("com.enotaryoncall.customer.action.close"));
                     break;
             }
 
@@ -1495,6 +1518,8 @@ public class VideoCallService extends Service {
 
         if (room != null && room.getState() != Room.State.DISCONNECTED) {
             room.disconnect();
+            room = null;
+            Log.d(TAG , "ROOM_CHECK: ROOM DISCONNECTED SUCCESSFULLY!");
         }
         if(videoCallModel!=null) {
             this.videoCallModel.releaseAllTracks();

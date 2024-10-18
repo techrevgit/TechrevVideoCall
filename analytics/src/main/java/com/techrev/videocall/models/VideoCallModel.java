@@ -1,5 +1,7 @@
 package com.techrev.videocall.models;
 
+import android.util.Log;
+
 import com.techrev.videocall.ui.camera.CameraCapturerCompat;
 import com.twilio.video.CameraCapturer;
 import com.twilio.video.LocalAudioTrack;
@@ -9,6 +11,7 @@ import com.twilio.video.LocalParticipant;
 import com.twilio.video.LocalVideoTrack;
 
 public class VideoCallModel {
+    private static final String TAG = "VideoCallModel";
     private LocalAudioTrack localAudioTrack;
     private LocalVideoTrack localVideoTrack;
     private LocalDataTrack localDataTrack;
@@ -116,6 +119,7 @@ public class VideoCallModel {
             localDataTrack.release();
             localDataTrack = null;
         }
+        Log.d(TAG , "ROOM_CHECK: ALL TRACKS RELEASED SUCCESSFULLY!");
     }
 
     public CameraCapturer.CameraSource getCameraSource() {

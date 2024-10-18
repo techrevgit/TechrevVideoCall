@@ -12,6 +12,7 @@ import android.util.Log;
 
 @TargetApi(29)
 public class VideoCallManager {
+    private static final String TAG = "VideoCallManager";
     private VideoCallService mService;
     private Context mContext;
     private State currentState = State.UNBIND_SERVICE;
@@ -124,6 +125,7 @@ public class VideoCallManager {
     public void endForeground() {
         mService.endForeground();
         currentState = State.END_FOREGROUND;
+        Log.d(TAG , "ROOM_CHECK: Calling endForeground() from VideoCallManager");
     }
 
     public void unbindService() {
